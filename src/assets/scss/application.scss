@@ -1,0 +1,6 @@
+$govuk-assets-path: '/public/';
+
+@import 'govuk-frontend/dist/govuk/index';
+@import '@govuk-one-login/frontend-language-toggle/styles';
+
+@import 'components/phase-banner';

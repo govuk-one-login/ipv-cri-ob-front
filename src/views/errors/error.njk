@@ -1,0 +1,27 @@
+{% extends "layouts/base.njk" %}
+
+{% set pageTitleKey = "errors.generic.title" %}
+<!--ga4 tags-->
+{% set taxLevel2 = "error" %}
+{% set statusCode = "500" %}
+<!--ga4 tags-->
+
+{% block mainContent %}
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+      <h1 class="govuk-heading-l">{{ translate(pageTitleKey) }}</h1>
+      <p class="govuk-body">{{ error.message }}</p>
+      {% if showStack %}
+        <pre>{{ error.stack }}</pre>
+      {% endif %}
+    </div>
+  </div>
+{% endblock %}
+
+{% block scripts %}
+  <script type="text/javascript" nonce="{{cspNonce}}">
+    window.DI = window.DI || {}
+    window.DI.httpStatusCode = 500
+  </script>
+  {{ super () }}
+{% endblock %}

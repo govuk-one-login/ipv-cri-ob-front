@@ -1,0 +1,129 @@
+name: PR check
+
+on:
+  pull_request:
+    types:
+      - opened
+      - reopened
+      - ready_for_review
+      - synchronize
+
+jobs:
+  resolve-test-versions:
+    runs-on: ubuntu-latest
+    outputs:
+      playwright-version: ${{ steps['resolve-playwright-version'].outputs.version }}
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Resolve Playwright version
+        id: resolve-playwright-version
+        run: |
+          version="$(yq -r '.devDependencies["@playwright/test"] // .dependencies["@playwright/test"] // ""' package.json)"
+          test -n "$version" || { echo "No @playwright/test version found in package.json"; exit 1; }
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
+  pre-commit:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Pre-commit checks
+        uses: govuk-one-login/github-actions/code-quality/run-pre-commit@3b0015c58dd0e19e1572fda59dda4184df387d1e
+        with:
+          all-files: true
+
+  static-checks:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup Node
+        uses: ./.github/actions/node-setup
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Format
+        run: npm run format
+
+      - name: Type check
+        run: npm run type-check
+
+      - name: i18n check
+        run: npm run check-translation
+
+  unit-tests:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    needs: static-checks
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0 # required for sonar
+
+      - name: Setup Node
+        uses: ./.github/actions/node-setup
+
+      - name: Unit tests
+        run: npm run test
+
+      - name: Sonar scan # runs after unit tests in order to consume coverage report
+        uses: SonarSource/sonarqube-scan-action@v7.0.0
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
+  browser-tests:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    needs:
+      - resolve-test-versions
+      - static-checks
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup Node
+        uses: ./.github/actions/node-setup
+
+      - name: Cache Playwright
+        id: playwright-cache
+        uses: actions/cache@v5
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-browsers-${{ needs['resolve-test-versions'].outputs.playwright-version }}
+
+      - name: Setup Playwright
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
+        run: npx playwright install chromium --with-deps
+
+      - name: Setup Playwright dependencies
+        if: steps.playwright-cache.outputs.cache-hit == 'true'
+        run: npx playwright install-deps chromium
+
+      - name: Build
+        run: npm run build
+
+      - name: Browser tests
+        run: npm run test:browser
+
+  merge-status:
+    runs-on: ubuntu-latest
+    needs: [pre-commit, static-checks, unit-tests, browser-tests]
+    if: always()
+    steps:
+      - run: |
+          failed=()
+          [[ "${{ needs.pre-commit.result }}" != "success" ]] && failed+=("pre-commit")
+          [[ "${{ needs.static-checks.result }}" != "success" ]] && failed+=("static-checks")
+          [[ "${{ needs.unit-tests.result }}" != "success" ]] && failed+=("unit-tests")
+          [[ "${{ needs.browser-tests.result }}" != "success" ]] && failed+=("browser-tests")
+
+          if [[ ${#failed[@]} -gt 0 ]]; then
+            echo "The following jobs failed: ${failed[*]}"
+            exit 1
+          fi
