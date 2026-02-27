@@ -1,0 +1,16 @@
+generic:
+  title: Sorry, there is a problem with the service
+
+notFound:
+  title: Page not found
+  content:
+    - <p class="govuk-body">We cannot find the page you're looking for.</p>
+    - <h2 class="govuk-heading-m">What you can do</h2>
+    - <p class="govuk-body">If you typed the web address, check it’s correct.</p>
+    - <p class="govuk-body">If you pasted the web address, check you copied the entire address.</p>
+    - <p class="govuk-body">You can also go back to the service you were trying to use and start again. You can look for the service using your search engine or find it from the GOV.UK homepage.</p>
+  primaryButton: Go to the GOV.UK homepage
+  secondaryButton: Contact the GOV.UK One Login team (opens in a new tab)
+
+sessionEnded:
+  title: Session expired

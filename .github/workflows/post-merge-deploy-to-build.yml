@@ -1,0 +1,16 @@
+name: Docker build, ECR push, template copy to S3
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    uses: ./.github/workflows/_deploy.yml
+    secrets:
+      role_arn: ${{ secrets.BUILD_GH_ACTIONS_ROLE_ARN }}
+      artifact_bucket: ${{ secrets.BUILD_ARTIFACT_BUCKET }}
+      container_sign_kms_key: ${{ secrets.BUILD_CONTAINER_SIGN_KMS_KEY }}
+      ecr_repository: ${{ secrets.ECR_REPOSITORY }}
+      dynatrace_paas_token: ${{ secrets.DYNATRACE_PAAS_TOKEN }}

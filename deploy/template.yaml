@@ -1,0 +1,1154 @@
+AWSTemplateFormatVersion: "2010-09-09"
+
+Transform:
+  - AWS::Serverless-2016-10-31
+Description: >-
+  This creates the necessary components to deploy Open Banking CRI Frontend onto ECS
+  Fargate within an existing VPC and private subnets (imported parameters).
+  Open Banking Front can be invoked via the public API Gateway on the url in the
+  OpenBankingUrl output.
+  The ingress route in summary is: API Gateway -> VPC link -> Private ALB ->
+  Open Banking Front ECS Service
+  Open Banking Front egress to Open Banking API's API Gateway is via a NAT Gateway which
+  should have a route in the provided private subnets' route table.
+Parameters:
+  Environment:
+    Description: The name of the environment to deploy to.
+    Type: String
+    AllowedPattern: ((production)|(integration)|(staging)|(build)|(dev))
+  VpcStackName:
+    Description: >
+      The name of the stack that defines the VPC in which this container will
+      run.
+    Type: String
+  PermissionsBoundary:
+    Description: "The ARN of the permissions boundary to apply when creating IAM roles"
+    Type: String
+    Default: "none"
+  CodeSigningConfigArn:
+    Type: String
+    Description: >
+      The ARN of the Code Signing Config to use, provided by the deployment pipeline
+    Default: "none"
+  DeploymentStrategy:
+    Description: "Predefined deployment configuration for ECS application"
+    Type: String
+    Default: "None"
+  LogGroupRetentionInDays:
+    Description: "Retention for all log groups"
+    Type: Number
+    Default: "30"
+
+Conditions:
+  IsNotDevelopment: !Or
+    - !Equals [ !Ref Environment, build ]
+    - !Equals [ !Ref Environment, staging ]
+    - !Equals [ !Ref Environment, integration ]
+    - !Equals [ !Ref Environment, production ]
+  IsProduction: !Equals [ !Ref Environment, production ]
+  UsePermissionsBoundary: !Not
+    - !Equals [ !Ref PermissionsBoundary, "none" ]
+  UseCodeSigning: !Not
+    - !Equals [ !Ref CodeSigningConfigArn, "none" ]
+  UseCanaryDeployment: !Not
+    - !Equals [ !Ref DeploymentStrategy, "None" ]
+
+Mappings:
+  EnvironmentConfiguration:
+    dev:
+      logLevel: "debug"
+      dynatraceSecretArn: arn:aws:secretsmanager:eu-west-2:216552277552:secret:DynatraceNonProductionVariables
+      fargateCPUsize: "256"
+      fargateRAMsize: "512"
+      minECSCount: 1
+      maxECSCount: 4
+      nodeEnv: "development"
+    build:
+      logLevel: "info"
+      dynatraceSecretArn: arn:aws:secretsmanager:eu-west-2:216552277552:secret:DynatraceNonProductionVariables
+      fargateCPUsize: "2048"
+      fargateRAMsize: "4096"
+      minECSCount: 4
+      maxECSCount: 60
+      nodeEnv: "production"
+    staging:
+      logLevel: "warn"
+      dynatraceSecretArn: arn:aws:secretsmanager:eu-west-2:216552277552:secret:DynatraceNonProductionVariables
+      fargateCPUsize: "256"
+      fargateRAMsize: "512"
+      minECSCount: 2
+      maxECSCount: 4
+      nodeEnv: "development"
+    integration:
+      logLevel: "warn"
+      dynatraceSecretArn: arn:aws:secretsmanager:eu-west-2:216552277552:secret:DynatraceNonProductionVariables
+      fargateCPUsize: "512"
+      fargateRAMsize: "1024"
+      minECSCount: 2
+      maxECSCount: 4
+      nodeEnv: "development"
+    production:
+      logLevel: "warn"
+      dynatraceSecretArn: arn:aws:secretsmanager:eu-west-2:216552277552:secret:DynatraceProductionVariables
+      fargateCPUsize: "2048"
+      fargateRAMsize: "4096"
+      minECSCount: 4
+      maxECSCount: 60
+      nodeEnv: "production"
+
+  FeatureFlagMapping:
+    dev:
+      ga4Enabled: "true"
+      deviceIntelligenceEnabled: "true"
+    build:
+      ga4Enabled: "true"
+      deviceIntelligenceEnabled: "true"
+    staging:
+      ga4Enabled: "true"
+      deviceIntelligenceEnabled: "true"
+    integration:
+      ga4Enabled: "true"
+      deviceIntelligenceEnabled: "true"
+    production:
+      ga4Enabled: "true"
+      deviceIntelligenceEnabled: "true"
+
+  # see https://docs.aws.amazon.com/elasticloadbalancing/latest/application/load-balancer-access-logs.html
+  ElasticLoadBalancerAccountIds:
+    eu-west-2:
+      AccountId: 652711504416
+
+Resources:
+  # Security Groups for the ECS service and load balancer
+  LoadBalancerSG:
+    Type: "AWS::EC2::SecurityGroup"
+    Properties:
+      GroupDescription: >-
+        Open Banking Front LoadBalancer Security Group
+      SecurityGroupIngress:
+        - CidrIp: 0.0.0.0/0
+          Description: Allow from anyone on port 80
+          FromPort: 80
+          IpProtocol: tcp
+          ToPort: 80
+      VpcId:
+        Fn::ImportValue: !Sub "${VpcStackName}-VpcId"
+
+  LoadBalancerSGEgressToECSSecurityGroup:
+    Type: "AWS::EC2::SecurityGroupEgress"
+    Properties:
+      GroupId: !GetAtt LoadBalancerSG.GroupId
+      IpProtocol: tcp
+      Description: >-
+        Egress between the Open Banking Front load balancer and
+        the Open Banking Front ECS security group
+      DestinationSecurityGroupId: !GetAtt ECSSecurityGroup.GroupId
+      FromPort: 8080
+      ToPort: 8080
+
+  ECSSecurityGroup:
+    Type: "AWS::EC2::SecurityGroup"
+    Properties:
+      GroupDescription: >-
+        Open Banking Front ECS Security Group permitting outbound
+        to anywhere.
+      SecurityGroupEgress:
+        - CidrIp: 0.0.0.0/0
+          Description: Allow all outbound traffic by default
+          IpProtocol: "-1"
+      VpcId:
+        Fn::ImportValue: !Sub "${VpcStackName}-VpcId"
+
+  ECSSecurityGroupIngressFromLoadBalancer:
+    Type: "AWS::EC2::SecurityGroupIngress"
+    Properties:
+      IpProtocol: tcp
+      Description: >-
+        Open Banking Front ECS permits inbound from the Open Banking Front
+        load balancer.
+      FromPort: 8080
+      ToPort: 8080
+      GroupId: !GetAtt ECSSecurityGroup.GroupId
+      SourceSecurityGroupId: !GetAtt LoadBalancerSG.GroupId
+
+  AccessLogsBucket:
+    Condition: IsNotDevelopment
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub ob-cri-front-${Environment}-access-logs
+      VersioningConfiguration:
+        Status: "Enabled"
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: aws:kms
+
+  OBFrontAccessLogsBucketPolicy:
+    Condition: IsNotDevelopment
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref AccessLogsBucket
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              AWS: !Sub
+                - "arn:aws:iam::${ElbAccountId}:root"
+                - ElbAccountId:
+                    !FindInMap [
+                      ElasticLoadBalancerAccountIds,
+                      !Ref AWS::Region,
+                      AccountId
+                    ]
+            Action:
+              - s3:PutObject
+            Resource:
+              - !Sub arn:aws:s3:::${AccessLogsBucket}/ob-front-${Environment}/AWSLogs/${AWS::AccountId}/*
+          - Effect: Deny
+            Principal: "*"
+            Action:
+              - "s3:*"
+            Condition:
+              Bool:
+                "aws:SecureTransport": false
+              NumericLessThan:
+                "s3:TlsVersion": "1.2"
+            Resource:
+              - !GetAtt AccessLogsBucket.Arn
+              - !Sub "${AccessLogsBucket.Arn}/*"
+
+  # Private Application Load Balancer
+  LoadBalancer:
+    Type: "AWS::ElasticLoadBalancingV2::LoadBalancer"
+    Properties:
+      Scheme: internal
+      SecurityGroups:
+        - !GetAtt LoadBalancerSG.GroupId
+      Subnets:
+        - Fn::ImportValue: !Sub "${VpcStackName}-PrivateSubnetIdA"
+        - Fn::ImportValue: !Sub "${VpcStackName}-PrivateSubnetIdB"
+      Type: application
+      LoadBalancerAttributes:
+        - Key: routing.http.drop_invalid_header_fields.enabled
+          Value: true
+        - !If
+          - IsNotDevelopment
+          - Key: access_logs.s3.enabled
+            Value: true
+          - !Ref AWS::NoValue
+        - !If
+          - IsNotDevelopment
+          - Key: access_logs.s3.bucket
+            Value: !Ref AccessLogsBucket
+          - !Ref AWS::NoValue
+        - !If
+          - IsNotDevelopment
+          - Key: access_logs.s3.prefix
+            Value: !Sub ob-front-${Environment}
+          - !Ref AWS::NoValue
+      Tags:
+        - Key: FMSRegionalPolicy
+          Value: false
+
+  LoadBalancerListenerTargetGroupECS:
+    Type: "AWS::ElasticLoadBalancingV2::TargetGroup"
+    Properties:
+      HealthCheckEnabled: true
+      HealthCheckProtocol: HTTP
+      HealthCheckPath: /healthcheck
+      HealthCheckTimeoutSeconds: 2
+      HealthCheckIntervalSeconds: 5
+      HealthyThresholdCount: 2
+      Matcher:
+        HttpCode: 200
+      Port: 80
+      Protocol: HTTP
+      TargetType: ip
+      VpcId:
+        Fn::ImportValue: !Sub "${VpcStackName}-VpcId"
+      TargetGroupAttributes:
+        - Key: deregistration_delay.timeout_seconds
+          Value: 60
+
+  LoadBalancerListenerGreenTargetGroupECS:
+    Type: "AWS::ElasticLoadBalancingV2::TargetGroup"
+    Properties:
+      HealthCheckEnabled: true
+      HealthCheckProtocol: HTTP
+      HealthCheckPath: /healthcheck
+      Matcher:
+        HttpCode: 200
+      Port: 80
+      Protocol: HTTP
+      TargetType: ip
+      VpcId:
+        Fn::ImportValue: !Sub "${VpcStackName}-VpcId"
+      TargetGroupAttributes:
+        - Key: deregistration_delay.timeout_seconds
+          Value: 60
+
+  LoadBalancerListener:
+    Type: "AWS::ElasticLoadBalancingV2::Listener"
+    Properties:
+      DefaultActions:
+        - TargetGroupArn: !Ref LoadBalancerListenerTargetGroupECS
+          Type: forward
+      LoadBalancerArn: !Ref LoadBalancer
+      Port: 80
+      Protocol: HTTP
+
+  # CloudFront WAF to LB Association
+  CloudFrontWAFv2ACLAssociation:
+    Type: AWS::WAFv2::WebACLAssociation
+    Properties:
+      ResourceArn: !Ref LoadBalancer
+      WebACLArn: !ImportValue cfront-origin-distrib-CloakingOriginWebACLArn
+
+  # ECS cluster, service and task definition
+  OBFrontEcsCluster:
+    Type: "AWS::ECS::Cluster"
+    Properties:
+      ClusterSettings:
+        - Name: containerInsights
+          Value: enabled
+      Tags:
+        - Key: Name
+          Value: !Sub "${AWS::StackName}-ECSCluster"
+        - Key: Product
+          Value: "GOV.UK sign in"
+        - Key: System
+          Value: "Open Banking CRI"
+        - Key: Environment
+          Value: !Ref Environment
+
+  OBFrontEcsService:
+    Type: "AWS::ECS::Service"
+    Properties:
+      Cluster: !Ref OBFrontEcsCluster
+      DeploymentConfiguration: !If
+        - UseCanaryDeployment
+        - !Ref AWS::NoValue
+        - MaximumPercent: 200
+          MinimumHealthyPercent: 50
+          DeploymentCircuitBreaker:
+            Enable: true
+            Rollback: true
+      DeploymentController:
+        Type: !If
+          - UseCanaryDeployment
+          - CODE_DEPLOY
+          - ECS
+      EnableECSManagedTags: false
+      HealthCheckGracePeriodSeconds: !If
+        - UseCanaryDeployment
+        - !Ref AWS::NoValue
+        - 60
+      LaunchType: FARGATE
+      LoadBalancers: !If
+        - UseCanaryDeployment
+        - !Ref AWS::NoValue
+        - - ContainerName: app
+            ContainerPort: 8080
+            TargetGroupArn: !Ref LoadBalancerListenerTargetGroupECS
+      NetworkConfiguration: !If
+        - UseCanaryDeployment
+        - !Ref AWS::NoValue
+        - AwsvpcConfiguration:
+            AssignPublicIp: DISABLED
+            SecurityGroups:
+              - !GetAtt ECSSecurityGroup.GroupId
+            Subnets:
+              - Fn::ImportValue: !Sub "${VpcStackName}-PrivateSubnetIdA"
+              - Fn::ImportValue: !Sub "${VpcStackName}-PrivateSubnetIdB"
+      TaskDefinition: !If
+        - UseCanaryDeployment
+        - !Ref AWS::NoValue
+        - !Ref ECSServiceTaskDefinition
+      Tags:
+        - Key: Name
+          Value: !Sub "${AWS::StackName}-ECS"
+        - Key: Product
+          Value: "GOV.UK sign in"
+        - Key: System
+          Value: "Open Banking CRI"
+        - Key: Environment
+          Value: !Ref Environment
+    DependsOn:
+      - LoadBalancerListener
+
+  ECSAccessLogsGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub /aws/ecs/${AWS::StackName}-OBFront-ECS
+      RetentionInDays: !Ref LogGroupRetentionInDays
+
+  ECSAccessLogsGroupSubscriptionFilterCsls:
+    Type: AWS::Logs::SubscriptionFilter
+    Condition: IsNotDevelopment
+    Properties:
+      DestinationArn: "arn:aws:logs:eu-west-2:885513274347:destination:csls_cw_logs_destination_prodpython"
+      FilterPattern: ""
+      LogGroupName: !Ref ECSAccessLogsGroup
+
+  ECSServiceTaskDefinition:
+    Type: "AWS::ECS::TaskDefinition"
+    Properties:
+      ContainerDefinitions:
+        - Essential: true
+          Image: CONTAINER-IMAGE-PLACEHOLDER
+          Name: app
+          Environment:
+            - Name: API_BASE_URL
+              Value: !Sub
+                - "https://${APIGatewayId}.execute-api.eu-west-2.amazonaws.com/${Environment}"
+                - APIGatewayId: !ImportValue ob-cri-api-v1-PrivateOBApiGatewayId
+            - Name: EXTERNAL_WEBSITE_HOST
+              Value: !GetAtt ApiGwHttpEndpoint.ApiEndpoint
+            - Name: SESSION_TABLE_NAME
+              Value: !Sub "cri-ob-front-sessions-${Environment}"
+            - Name: GOOGLE_ANALYTICS_4_GTM_CONTAINER_ID
+              Value: !If [ IsProduction, "GTM-K4PBJH3", "GTM-KD86CMZ" ]
+            - Name: GA4_ENABLED
+              Value: !FindInMap [ FeatureFlagMapping, !Ref "Environment", ga4Enabled ]
+            - Name: FRONTEND_DOMAIN
+              Value:
+                !If [
+                  IsProduction,
+                  "account.gov.uk",
+                  !Sub "${Environment}.account.gov.uk"
+                ]
+            - Name: DEVICE_INTELLIGENCE_DOMAIN
+              Value: "account.gov.uk"
+            - Name: DEVICE_INTELLIGENCE_ENABLED
+              Value: !FindInMap [ FeatureFlagMapping, !Ref Environment, deviceIntelligenceEnabled ]
+            - Name: LOG_LEVEL
+              Value: !FindInMap [ EnvironmentConfiguration, !Ref "Environment", logLevel ]
+            - Name: NODE_ENV
+              Value:
+                !FindInMap [
+                  EnvironmentConfiguration,
+                  !Ref Environment,
+                  nodeEnv
+                ]
+          Secrets:
+            - Name: DT_TENANT
+              ValueFrom: !Join
+                - ""
+                - - !FindInMap [
+                  EnvironmentConfiguration,
+                  !Ref Environment,
+                  dynatraceSecretArn
+                ]
+                  - ":DT_TENANT::"
+            - Name: DT_TENANTTOKEN
+              ValueFrom: !Join
+                - ""
+                - - !FindInMap [
+                  EnvironmentConfiguration,
+                  !Ref Environment,
+                  dynatraceSecretArn
+                ]
+                  - ":DT_TENANTTOKEN::"
+            - Name: DT_CONNECTION_POINT
+              ValueFrom: !Join
+                - ""
+                - - !FindInMap [
+                  EnvironmentConfiguration,
+                  !Ref Environment,
+                  dynatraceSecretArn
+                ]
+                  - ":DT_CONNECTION_POINT::"
+          PortMappings:
+            - ContainerPort: 8080
+              Protocol: tcp
+          HealthCheck:
+            Command:
+              - "CMD-SHELL"
+              - "curl -f http://localhost:8080/healthcheck || exit 1"
+            Interval: 5
+            Retries: 10
+            Timeout: 2
+          LogConfiguration:
+            LogDriver: awslogs
+            Options:
+              awslogs-group: !Ref ECSAccessLogsGroup
+              awslogs-region: !Sub ${AWS::Region}
+              awslogs-stream-prefix: !Sub ob-front-${Environment}
+          ReadonlyRootFilesystem: true
+          MountPoints:
+            - SourceVolume: tmp
+              ContainerPath: /tmp
+              ReadOnly: false
+            - SourceVolume: dynatrace-log
+              ContainerPath: /var/log/dynatrace/oneagent
+              ReadOnly: false
+            - SourceVolume: dynatrace
+              ContainerPath: /var/lib/dynatrace/oneagent
+              ReadOnly: false
+      Volumes:
+        - Name: tmp
+        - Name: dynatrace-log
+        - Name: dynatrace
+      Cpu: !FindInMap [ EnvironmentConfiguration, !Ref "Environment", fargateCPUsize ]
+      ExecutionRoleArn: !GetAtt ECSTaskExecutionRole.Arn
+      Memory: !FindInMap [ EnvironmentConfiguration, !Ref "Environment", fargateRAMsize ]
+      NetworkMode: awsvpc
+      RequiresCompatibilities:
+        - FARGATE
+      TaskRoleArn: !GetAtt ECSTaskRole.Arn
+      Tags:
+        - Key: Name
+          Value: !Sub "${AWS::StackName}-TaskDefinition"
+        - Key: Product
+          Value: "GOV.UK sign in"
+        - Key: System
+          Value: "Open Banking CRI"
+        - Key: Environment
+          Value: !Ref Environment
+
+  ECSTaskExecutionRole:
+    Type: "AWS::IAM::Role"
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          - Action: "sts:AssumeRole"
+            Effect: Allow
+            Principal:
+              Service: ecs-tasks.amazonaws.com
+        Version: 2012-10-17
+      Policies:
+        - PolicyName: PullOBFrontImage
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - "ecr:BatchGetImage"
+                  - "ecr:GetDownloadUrlForLayer"
+                  - "ecr:GetAuthorizationToken"
+                Resource:
+                  - "*"
+              - Effect: Allow
+                Action:
+                  - "logs:CreateLogStream"
+                  - "logs:PutLogEvents"
+                Resource:
+                  - !GetAtt "ECSAccessLogsGroup.Arn"
+                  - !Sub "${ECSAccessLogsGroup.Arn}:*"
+        - PolicyName: GetDynatraceSecret
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action: secretsmanager:GetSecretValue
+                Resource: arn:aws:secretsmanager:eu-west-2:216552277552:secret:*
+              - Effect: Allow
+                Action: secretsmanager:ListSecrets
+                Resource: arn:aws:secretsmanager:eu-west-2:216552277552:secret:*
+              - Effect: Allow
+                Action: kms:Decrypt
+                Resource: arn:aws:kms:eu-west-2:216552277552:key/*
+      PermissionsBoundary: !If
+        - UsePermissionsBoundary
+        - !Ref PermissionsBoundary
+        - !Ref AWS::NoValue
+
+  ECSTaskRole:
+    Type: "AWS::IAM::Role"
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          - Action: "sts:AssumeRole"
+            Effect: Allow
+            Principal:
+              Service: ecs-tasks.amazonaws.com
+        Version: 2012-10-17
+      Policies:
+        - PolicyName: OBFrontDynamoDBSessionAccess
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - "dynamodb:BatchGetItem"
+                  - "dynamodb:DescribeTable"
+                  - "dynamodb:GetItem"
+                  - "dynamodb:Query"
+                  - "dynamodb:Scan"
+                  - "dynamodb:BatchWriteItem"
+                  - "dynamodb:DeleteItem"
+                  - "dynamodb:UpdateItem"
+                  - "dynamodb:PutItem"
+                Resource:
+                  - !GetAtt OBFrontSessionsTable.Arn
+        - PolicyName: GetDynatraceSecret
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action: secretsmanager:GetSecretValue
+                Resource: arn:aws:secretsmanager:eu-west-2:216552277552:secret:*
+              - Effect: Allow
+                Action: secretsmanager:ListSecrets
+                Resource: arn:aws:secretsmanager:eu-west-2:216552277552:secret:*
+              - Effect: Allow
+                Action: kms:Decrypt
+                Resource: arn:aws:kms:eu-west-2:216552277552:key/*
+      PermissionsBoundary: !If
+        - UsePermissionsBoundary
+        - !Ref PermissionsBoundary
+        - !Ref AWS::NoValue
+
+  ECSCanaryDeploymentStack:
+    Type: AWS::CloudFormation::Stack
+    Condition: UseCanaryDeployment
+    Properties:
+      StackName: !Sub "${AWS::StackName}-canary"
+      TemplateURL: https://template-storage-templatebucket-1upzyw6v9cs42.s3.eu-west-2.amazonaws.com/ecs-canary-deployment/template.yaml?versionId=5RRU1nfKQD_d08FKttr8W7pzrAsqQiUM # v2.1.1
+      Parameters:
+        CloudWatchAlarms: !Ref FrontTargetGroup5xxPercentErrors
+        CodeSigningConfigArn: !If
+          - UseCodeSigning
+          - !Ref CodeSigningConfigArn
+          - !Ref AWS::NoValue
+        ContainerName: "app"
+        ContainerPort: "8080"
+        DeploymentStrategy: !Ref DeploymentStrategy
+        ECSClusterName: !Ref OBFrontEcsCluster
+        ECSServiceName: !GetAtt OBFrontEcsService.Name
+        ECSServiceTaskDefinition: !Ref ECSServiceTaskDefinition
+        GreenTargetGroupName: !GetAtt LoadBalancerListenerGreenTargetGroupECS.TargetGroupName
+        LoadBalancerListenerARN: !Ref LoadBalancerListener
+        PermissionsBoundary: !If
+          - UsePermissionsBoundary
+          - Fn::ImportValue: !Sub "${AWS::StackName}-ECSCanaryPermissionsBoundaryArn"
+          - AWS::NoValue
+        SecurityGroups: !GetAtt ECSSecurityGroup.GroupId
+        Subnets: !Join
+          - ","
+          - - Fn::ImportValue: !Sub "${VpcStackName}-PrivateSubnetIdA"
+            - Fn::ImportValue: !Sub "${VpcStackName}-PrivateSubnetIdB"
+        TargetGroupName: !GetAtt LoadBalancerListenerTargetGroupECS.TargetGroupName
+        VpcId: !Sub ${VpcStackName}-VpcId
+
+  ApiGwHttpEndpoint:
+    Type: "AWS::ApiGatewayV2::Api"
+    Properties:
+      Name: !Sub ob-front-${Environment}
+      ProtocolType: HTTP
+
+  ApiGwHttpEndpointIntegration:
+    Type: "AWS::ApiGatewayV2::Integration"
+    Properties:
+      ApiId: !Ref ApiGwHttpEndpoint
+      IntegrationType: HTTP_PROXY
+      ConnectionId:
+        Fn::ImportValue: !Sub "${VpcStackName}-VpcLinkId"
+      ConnectionType: VPC_LINK
+      IntegrationMethod: ANY
+      IntegrationUri: !Ref LoadBalancerListener
+      PayloadFormatVersion: "1.0"
+
+  APIGWRoute:
+    Type: "AWS::ApiGatewayV2::Route"
+    Properties:
+      ApiId: !Ref ApiGwHttpEndpoint
+      RouteKey: "ANY /{proxy+}"
+      Target: !Join
+        - /
+        - - integrations
+          - !Ref ApiGwHttpEndpointIntegration
+
+  APIStageDefault:
+    Type: "AWS::ApiGatewayV2::Stage"
+    Properties:
+      ApiId: !Ref ApiGwHttpEndpoint
+      StageName: $default
+      AutoDeploy: true
+      AccessLogSettings:
+        DestinationArn: !GetAtt APIGWAccessLogsGroup.Arn
+        Format: >-
+          {
+          "requestId":"$context.requestId",
+          "ip": "$context.identity.sourceIp",
+          "requestTime":"$context.requestTime",
+          "httpMethod":"$context.httpMethod",
+          "path": "$context.path",
+          "routeKey":"$context.routeKey",
+          "status":"$context.status",
+          "protocol":"$context.protocol",
+          "responseLength":"$context.responseLength"
+          }
+  APIGWAccessLogsGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub /aws/apigateway/${AWS::StackName}-OBFront-API-GW-AccessLogs
+      RetentionInDays: !Ref LogGroupRetentionInDays
+
+  APIGWAccessLogsGroupSubscriptionFilterCsls:
+    Type: AWS::Logs::SubscriptionFilter
+    Condition: IsNotDevelopment
+    Properties:
+      DestinationArn: "arn:aws:logs:eu-west-2:885513274347:destination:csls_cw_logs_destination_prodpython"
+      FilterPattern: ""
+      LogGroupName: !Ref APIGWAccessLogsGroup
+
+  OBFrontSessionsTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      # checkov:skip=CKV_AWS_28: Point in time recovery is not necessary for this table.
+      TableName: !Sub "cri-ob-front-sessions-${Environment}"
+      BillingMode: "PAY_PER_REQUEST"
+      AttributeDefinitions:
+        - AttributeName: "id"
+          AttributeType: "S"
+      KeySchema:
+        - AttributeName: "id"
+          KeyType: "HASH"
+      TimeToLiveSpecification:
+        AttributeName: "expires"
+        Enabled: true
+      SSESpecification:
+        # checkov:skip=CKV_AWS_119: Implement Customer Managed Keys in PYIC-1391
+        SSEEnabled: true
+        SSEType: KMS
+
+  # ECS Autoscaling
+  ECSAutoScalingTarget:
+    Type: AWS::ApplicationAutoScaling::ScalableTarget
+    Properties:
+      MaxCapacity:
+        !FindInMap [ EnvironmentConfiguration, !Ref Environment, maxECSCount ]
+      MinCapacity:
+        !FindInMap [ EnvironmentConfiguration, !Ref Environment, minECSCount ]
+      ResourceId: !Sub service/${OBFrontEcsCluster}/${OBFrontEcsService.Name}
+      RoleARN: !Sub "arn:aws:iam::${AWS::AccountId}:role/aws-service-role/ecs.application-autoscaling.amazonaws.com/AWSServiceRoleForApplicationAutoScaling_ECSService"
+      ScalableDimension: ecs:service:DesiredCount
+      ServiceNamespace: ecs
+
+  ECSPredictiveScalingPolicy:
+    DependsOn: ECSAutoScalingTarget
+    Type: AWS::ApplicationAutoScaling::ScalingPolicy
+    Properties:
+      PolicyName: ECSPredictiveScalingPolicy
+      PolicyType: PredictiveScaling
+      ResourceId: !Sub service/${OBFrontEcsCluster}/${OBFrontEcsService.Name}
+      ScalableDimension: ecs:service:DesiredCount
+      ServiceNamespace: ecs
+      # noinspection YamlFormatViolation
+      PredictiveScalingPolicyConfiguration:
+        MaxCapacityBreachBehavior: HonorMaxCapacity
+        MetricSpecifications:
+          - PredefinedMetricPairSpecification:
+              PredefinedMetricType: ECSServiceCPUUtilization
+            TargetValue: 60
+        Mode: ForecastOnly
+        SchedulingBufferTime: 600
+
+  EcsStepScaleOutPolicy:
+    DependsOn: ECSAutoScalingTarget
+    Type: AWS::ApplicationAutoScaling::ScalingPolicy
+    Properties:
+      PolicyName: EcsStepScalingOutPolicy
+      PolicyType: StepScaling
+      ResourceId: !Sub service/${OBFrontEcsCluster}/${OBFrontEcsService.Name}
+      ScalableDimension: ecs:service:DesiredCount
+      ServiceNamespace: ecs
+      StepScalingPolicyConfiguration:
+        AdjustmentType: PercentChangeInCapacity
+        Cooldown:
+          180 # The policy will continue to respond to additional alarm breaches,
+        # even while a scaling activity is in progress. This means Application
+        # Auto Scaling will evaluate all alarm breaches as they occur.
+        # A cooldown period is used to protect against over-scaling due to
+        # multiple alarm breaches occurring in rapid succession.
+        MinAdjustmentMagnitude: 1
+        StepAdjustments:
+          - MetricIntervalUpperBound: 0 # 60%
+            ScalingAdjustment: 100 # Scale by 100% of containers if the metric is breached
+            # with <60% utilisation
+          - MetricIntervalLowerBound: 0 # 60%
+            MetricIntervalUpperBound: 30 # 90%
+            ScalingAdjustment: 200 # Scale by 200% of containers if the metric is breached
+            # with 80-90% utilisation
+          - MetricIntervalLowerBound: 30 # 90%
+            MetricIntervalUpperBound: 35 # 95%
+            ScalingAdjustment: 300 # Scale by 300% of containers if the metric is breached
+            # with 90-95% utilisation
+          - MetricIntervalLowerBound: 35 # 95%
+            ScalingAdjustment:
+              500 # Scale by 500% of containers if the metric is breached
+            # with >95% utilisation
+            # Note: CPU can scale greater than 100% in a burst mode
+            # on Fargate, so leave the upper bound open
+
+  EcsStepScaleInPolicy:
+    DependsOn: ECSAutoScalingTarget
+    Type: AWS::ApplicationAutoScaling::ScalingPolicy
+    Properties:
+      PolicyName: EcsStepScalingInPolicy
+      PolicyType: StepScaling
+      ResourceId: !Sub service/${OBFrontEcsCluster}/${OBFrontEcsService.Name}
+      ScalableDimension: ecs:service:DesiredCount
+      ServiceNamespace: ecs
+      StepScalingPolicyConfiguration:
+        AdjustmentType: PercentChangeInCapacity
+        Cooldown:
+          180 # The policy will continue to respond to additional alarm breaches,
+        # even while a scaling activity is in progress. This means Application
+        # Auto Scaling will evaluate all alarm breaches as they occur.
+        # A cooldown period is used to protect against under-scaling due to
+        # multiple alarm breaches occurring in rapid succession.
+        StepAdjustments:
+          - MetricIntervalUpperBound: -15 # 5%
+            ScalingAdjustment: -90 # Scale down by 90% of containers if the metric is breached
+            # with <5% utilisation
+          - MetricIntervalLowerBound: -15 # 5%
+            MetricIntervalUpperBound: 0 # 20%
+            ScalingAdjustment:
+              -50 # Scale down 50% of containers if the metric is breached
+            # with <20% utilisation
+
+  EcsStepScaleOutAlarm:
+    DependsOn: ECSAutoScalingTarget
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      ActionsEnabled: true
+      AlarmActions:
+        - !Ref EcsStepScaleOutPolicy
+      AlarmDescription: "EcsClusterOver60PercentCPU"
+      ComparisonOperator: "GreaterThanThreshold"
+      DatapointsToAlarm: "1"
+      Dimensions:
+        - Name: ClusterName
+          Value: !Ref OBFrontEcsCluster
+        - Name: ServiceName
+          Value: !GetAtt OBFrontEcsService.Name
+      Unit: "Percent"
+      EvaluationPeriods: "1"
+      MetricName: "CPUUtilization"
+      Namespace: "AWS/ECS"
+      Statistic: "Average"
+      Period: "60"
+      Threshold: "60"
+
+  EcsStepScaleInAlarm:
+    DependsOn: ECSAutoScalingTarget
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      ActionsEnabled: true
+      AlarmActions:
+        - !Ref EcsStepScaleInPolicy
+      AlarmDescription: "EcsClusterUnder60PercentCPU"
+      ComparisonOperator: "LessThanThreshold"
+      DatapointsToAlarm: "5"
+      Dimensions:
+        - Name: ClusterName
+          Value: !Ref OBFrontEcsCluster
+        - Name: ServiceName
+          Value: !GetAtt OBFrontEcsService.Name
+      Unit: "Percent"
+      EvaluationPeriods: "5"
+      MetricName: "CPUUtilization"
+      Namespace: "AWS/ECS"
+      Statistic: "Average"
+      Period: "60"
+      Threshold: "20"
+
+  ####################################################################
+  #                                                                  #
+  # Alarms                                                           #
+  #                                                                  #
+  ####################################################################
+
+  OBNoTaskCountAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmDescription: !Sub Open Banking ${Environment} frontend no ECS service tasks
+      ActionsEnabled: true
+      AlarmActions:
+        - !Ref AlarmTopicOB
+      OKActions:
+        - !Ref AlarmTopicOB
+      InsufficientDataActions: [ ]
+      MetricName: TaskCount
+      Namespace: ECS/ContainerInsights
+      Statistic: Average
+      Dimensions:
+        - Name: ClusterName
+          Value: !Ref OBFrontEcsCluster
+      Period: 60
+      EvaluationPeriods: 2
+      DatapointsToAlarm: 2
+      Threshold: 1
+      ComparisonOperator: LessThanThreshold
+      TreatMissingData: breaching
+
+  OBBelowMinTaskCountAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmDescription: !Sub Open Banking ${Environment} frontend below minimum ECS service tasks
+      ActionsEnabled: true
+      AlarmActions:
+        - !Ref AlarmTopicOB
+      OKActions:
+        - !Ref AlarmTopicOB
+      InsufficientDataActions: [ ]
+      MetricName: TaskCount
+      Namespace: ECS/ContainerInsights
+      Statistic: Average
+      Dimensions:
+        - Name: ClusterName
+          Value: !Ref OBFrontEcsCluster
+      Period: 300
+      EvaluationPeriods: 3
+      DatapointsToAlarm: 3
+      Threshold: !FindInMap [ EnvironmentConfiguration, !Ref Environment, minECSCount ]
+      ComparisonOperator: LessThanThreshold
+      TreatMissingData: breaching
+
+  OB5XXOnELB:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmDescription: !Sub Open Banking ${Environment} frontend 5XX count
+      ActionsEnabled: true
+      AlarmActions:
+        - !Ref AlarmTopicOB
+      OKActions:
+        - !Ref AlarmTopicOB
+      InsufficientDataActions: [ ]
+      MetricName: HTTPCode_Target_5XX_Count
+      Namespace: AWS/ApplicationELB
+      Statistic: Sum
+      Dimensions:
+        - Name: TargetGroup
+          Value: !Ref LoadBalancerListenerTargetGroupECS
+        - Name: LoadBalancer
+          Value: !Ref LoadBalancer
+      Period: 60
+      EvaluationPeriods: 5
+      DatapointsToAlarm: 5
+      Threshold: 1
+      ComparisonOperator: GreaterThanThreshold
+      TreatMissingData: notBreaching
+
+  FE5XXErrorCriticalAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: !Sub "${AWS::StackName}-FE5XXErrorCriticalAlarm"
+      AlarmDescription: >
+        Trigger the 5xx cricical alarm if errorThreshold exceeds 80% with 10 or more invocations
+        and a minimum of 2 errors in 5 out of the last 5 minutes
+      ActionsEnabled: true
+      OKActions:
+        - !Ref AlarmTopicOB
+      AlarmActions:
+        - !Ref AlarmTopicOB
+      EvaluationPeriods: 5
+      DatapointsToAlarm: 2
+      Threshold: 80
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      TreatMissingData: notBreaching
+      Metrics:
+        - Id: errorThreshold
+          Label: errorThreshold
+          ReturnData: true
+          Expression: IF(invocations<10,0,errorPercentage)
+        - Id: invocations
+          ReturnData: false
+          MetricStat:
+            Metric:
+              Namespace: AWS/ApplicationELB
+              MetricName: RequestCount
+              Dimensions:
+                - Name: LoadBalancer
+                  Value: !GetAtt LoadBalancer.LoadBalancerFullName
+            Period: 60
+            Stat: Sum
+        - Id: error
+          ReturnData: false
+          MetricStat:
+            Metric:
+              Namespace: AWS/ApplicationELB
+              MetricName: HTTPCode_Target_5XX_Count
+              Dimensions:
+                - Name: LoadBalancer
+                  Value: !GetAtt LoadBalancer.LoadBalancerFullName
+            Period: 60
+            Stat: Sum
+        - Id: errorPercentage
+          Label: errorPercentage
+          ReturnData: false
+          Expression: (error/invocations)*100
+
+  FrontTargetGroup5xxPercentErrors:
+    Type: AWS::CloudWatch::Alarm
+    Condition: UseCanaryDeployment
+    Properties:
+      AlarmName: FrontTargetGroup5xxPercentAlarm
+      AlarmDescription: >
+        The number of HTTP 5XX server error codes that originate from the
+        target group is greater than 5% of all traffic.
+      EvaluationPeriods: 2
+      DatapointsToAlarm: 2
+      Threshold: 5
+      ComparisonOperator: GreaterThanThreshold
+      TreatMissingData: notBreaching
+      Metrics:
+        - Id: e1
+          Label: ErrorPercent
+          ReturnData: true
+          Expression: (m1/m2)*100
+        - Id: m1
+          ReturnData: false
+          MetricStat:
+            Metric:
+              Namespace: AWS/ApplicationELB
+              MetricName: HTTPCode_Target_5XX_Count
+              Dimensions:
+                - Name: LoadBalancer
+                  Value: !GetAtt LoadBalancer.LoadBalancerFullName
+            Period: 60
+            Stat: Sum
+        - Id: m2
+          ReturnData: false
+          MetricStat:
+            Metric:
+              Namespace: AWS/ApplicationELB
+              MetricName: RequestCount
+              Dimensions:
+                - Name: LoadBalancer
+                  Value: !GetAtt LoadBalancer.LoadBalancerFullName
+            Period: 60
+            Stat: Sum
+
+
+  EventLoopDelayMetricFilter:
+    Type: AWS::Logs::MetricFilter
+    Properties:
+      LogGroupName: !Ref ECSAccessLogsGroup
+      FilterPattern: "{($.eventLoopDelay = *)}"
+      MetricTransformations:
+        - MetricValue: $.eventLoopDelay
+          MetricName: EventLoopDelay
+          MetricNamespace: !Sub ${AWS::StackName}/LogMessages
+
+  EventLoopUtilizationIdleMetricFilter:
+    Type: AWS::Logs::MetricFilter
+    Properties:
+      LogGroupName: !Ref ECSAccessLogsGroup
+      FilterPattern: "{ $.eventLoopUtilization.idle = * }"
+      MetricTransformations:
+        - MetricValue: $.eventLoopUtilization.idle
+          MetricName: EventLoopUtilizationIdle
+          MetricNamespace: !Sub ${AWS::StackName}/LogMessages
+
+  EventLoopUtilizationActiveMetricFilter:
+    Type: AWS::Logs::MetricFilter
+    Properties:
+      LogGroupName: !Ref ECSAccessLogsGroup
+      FilterPattern: "{ $.eventLoopUtilization.active = * }"
+      MetricTransformations:
+        - MetricValue: $.eventLoopUtilization.active
+          MetricName: EventLoopUtilizationActive
+          MetricNamespace: !Sub ${AWS::StackName}/LogMessages
+
+  EventLoopUtilizationUtilizationMetricFilter:
+    Type: AWS::Logs::MetricFilter
+    Properties:
+      LogGroupName: !Ref ECSAccessLogsGroup
+      FilterPattern: "{ $.eventLoopUtilization.utilization = * }"
+      MetricTransformations:
+        - MetricValue: $.eventLoopUtilization.utilization
+          MetricName: EventLoopUtilizationUtilization
+          MetricNamespace: !Sub ${AWS::StackName}/LogMessages
+
+  RequestsPerSecondMetricFilter:
+    Type: AWS::Logs::MetricFilter
+    Properties:
+      LogGroupName: !Ref ECSAccessLogsGroup
+      FilterPattern: "{ $.requestsPerSecond.dynamic = * }"
+      MetricTransformations:
+        - MetricValue: $.requestsPerSecond.dynamic
+          MetricName: RequestsPerSecond
+          MetricNamespace: !Sub ${AWS::StackName}/LogMessages
+          Unit: Count/Second
+
+  AvgResponseTimeMetricFilter:
+    Type: AWS::Logs::MetricFilter
+    Properties:
+      LogGroupName: !Ref ECSAccessLogsGroup
+      FilterPattern: "{ $.avgResponseTime.dynamic = * }"
+      MetricTransformations:
+        - MetricValue: $.avgResponseTime.dynamic
+          MetricName: AvgResponseTime
+          MetricNamespace: !Sub ${AWS::StackName}/LogMessages
+          Unit: Count/Second
+
+  MaxConcurrentConnectionsMetricFilter:
+    Type: AWS::Logs::MetricFilter
+    Properties:
+      LogGroupName: !Ref ECSAccessLogsGroup
+      FilterPattern: "{ $.maxConcurrentConnections = * }"
+      MetricTransformations:
+        - MetricValue: $.maxConcurrentConnections
+          MetricName: MaxConcurrentConnections
+          MetricNamespace: !Sub ${AWS::StackName}/LogMessages
+          Unit: Count
+
+
+  ####################################################################
+  #                                                                  #
+  # Alarm setup                                                      #
+  #                                                                  #
+  ####################################################################
+
+  AlarmTopicOB:
+    Type: AWS::SNS::Topic
+    Metadata:
+      SamResourceId: AlarmTopicOB
+  AlarmTopicSubscriptionPagerDutyOB:
+    Type: AWS::SNS::Subscription
+    Properties:
+      TopicArn: !Ref AlarmTopicOB
+      Endpoint: !Sub "{{resolve:ssm:/alerting/pagerduty-ob/url}}" ### to be determined?
+      Protocol: https
+    Metadata:
+      SamResourceId: AlarmTopicSubscriptionPagerDutyOB
+  AlarmPublishToTopicPolicyOB:
+    Type: AWS::SNS::TopicPolicy
+    Properties:
+      Topics:
+        - !Ref AlarmTopicOB
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Action: sns:Publish
+            Resource: !Ref AlarmTopicOB
+            Principal:
+              Service: cloudwatch.amazonaws.com
+            Condition:
+              ArnLike:
+                AWS:SourceArn:
+                  Fn::Sub: arn:aws:cloudwatch:${AWS::Region}:${AWS::AccountId}:alarm:*
+    Metadata:
+      SamResourceId: AlarmPublishToTopicPolicyOB
+
+# Outputs
+Outputs:
+  OBFrontUrl:
+    Description: >-
+      The API Gateway URL which Open Banking Front can be invoked on.
+    Value: !GetAtt ApiGwHttpEndpoint.ApiEndpoint
+  OBFrontGatewayId:
+    Description: Open Banking Front API Gateway ID
+    Export:
+      Name: !Sub "${AWS::StackName}-OBFrontGatewayId"
+    Value: !Ref ApiGwHttpEndpoint
