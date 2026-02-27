@@ -1,0 +1,29 @@
+{% extends "frontend-ui/build/components/bases/identity/identity-base-page.njk" %}
+
+{% block pageTitle %}
+  {{ translate(pageTitleKey, { default: pageTitleKey }) if pageTitleKey }}
+  – GOV.UK One Login
+{% endblock %}
+
+{% block head %}
+  {% if devServer %}
+    <script type="module" src="/@vite/client"></script>
+    <link rel="stylesheet" href="/src/assets/scss/application.scss" />
+  {% else %}
+    <link rel="stylesheet" href="/public/stylesheets/application.css" />
+  {% endif %}
+{% endblock %}
+
+{% block content %}
+  {% block mainContent %}
+  {% endblock %}
+{% endblock %}
+
+{% block bodyEnd %}
+  {{ super() }}
+  {% if devServer %}
+    <script type="module" src="/src/assets/js/application.ts"></script>
+  {% else %}
+    <script type="module" src="/public/javascripts/application.js"></script>
+  {% endif %}
+{% endblock %}

@@ -1,0 +1,52 @@
+name: Docker build, ECR push, template copy to S3
+
+on:
+  workflow_call:
+    secrets:
+      role_arn:
+        required: true
+      artifact_bucket:
+        required: true
+      container_sign_kms_key:
+        required: true
+      ecr_repository:
+        required: true
+      dynatrace_paas_token:
+        required: true
+
+jobs:
+  docker-build-and-push:
+    name: Docker build and push
+    runs-on: ubuntu-latest
+    env:
+      AWS_REGION: eu-west-2
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+      - name: Set up AWS credentials
+        uses: aws-actions/configure-aws-credentials@v6
+        with:
+          role-to-assume: ${{ secrets.role_arn }}
+          aws-region: eu-west-2
+      - name: Validate SAM
+        run: sam validate --region ${{ env.AWS_REGION }} -t deploy/template.yml --lint
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+      - name: Login to GDS Dev Dynatrace Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: khw46367.live.dynatrace.com
+          username: khw46367
+          password: ${{ secrets.dynatrace_paas_token }}
+      - name: Push to ECR and upload SAM template to S3
+        uses: govuk-one-login/devplatform-upload-action-ecr@v1.4.0
+        with:
+          artifact-bucket-name: ${{ secrets.artifact_bucket }}
+          container-sign-kms-key-arn: ${{ secrets.container_sign_kms_key }}
+          template-file: deploy/template.yml
+          role-to-assume-arn: ${{ secrets.role_arn }}
+          ecr-repo-name: ${{ secrets.ecr_repository }}
