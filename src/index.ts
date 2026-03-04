@@ -1,6 +1,9 @@
 import { config as loadDotenv } from 'dotenv'
 
 const { parsed } = loadDotenv({ quiet: true })
+const { arch, env, platform, version } = process
+const BIND_HOST = env.BIND_HOST || '127.0.0.1'
+const PORT = env.PORT || '3000'
 
 const banner = `
     ________ _    __  __________  ____  ____                 
@@ -14,15 +17,13 @@ const banner = `
 /_____/\\__,_/_/ /_/_/|_/_/_/ /_/\\__, /   /_/   /_____/       
                                /____/                        
 ================ START =======================
-PLATFORM: ${process.platform}/${process.arch}
-NODE_ENV: ${process.env.NODE_ENV}, ${process.version}
-HOST/PORT: ${process.env.BIND_HOST ?? '127.0.0.1'}:${process.env.PORT ?? 3000}
+PLATFORM: ${platform}/${arch}
+NODE_ENV: ${env.NODE_ENV}, ${version}
+HOST/PORT: ${BIND_HOST}:${PORT}
 .ENV: ${parsed ? `loaded (${Object.keys(parsed).length} vars)` : 'not found'}
 ==============================================`
 console.log(banner)
 const { createApp } = await import('./app-bootstrap')
 const { app } = await createApp()
 
-const host = process.env.BIND_HOST ?? '127.0.0.1'
-const port = Number(process.env.PORT) || 3000
-app.listen(port, host)
+app.listen(Number(PORT), BIND_HOST)

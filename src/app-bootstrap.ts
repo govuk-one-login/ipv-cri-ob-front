@@ -1,3 +1,4 @@
+import type { Express, Router } from 'express'
 import type { ViteDevServer } from 'vite'
 
 import {
@@ -11,7 +12,6 @@ import { forceSessionSaveBeforeRedirect } from './middleware/force-session-save.
 import { createViteServer, setupDevServer } from './utils/dev-tooling/dev-server'
 import { frontendUiMiddlewareIdentityBypass } from '@govuk-one-login/frontend-ui'
 import { frontendVitalSignsInitFromApp } from '@govuk-one-login/frontend-vital-signs'
-import { type Express, type Router } from 'express'
 
 import i18nextMiddleware from './middleware/i18next.middleware'
 import initSessionStore from './utils/session'

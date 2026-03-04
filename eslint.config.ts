@@ -22,6 +22,7 @@ export default defineConfig(
       '@typescript-eslint/consistent-type-imports': 'warn',
       '@typescript-eslint/no-explicit-any': 'warn',
       '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
+      '@typescript-eslint/prefer-nullish-coalescing': 'off',
       'padding-line-between-statements': [
         'warn',
         { blankLine: 'always', next: '*', prev: 'import' },

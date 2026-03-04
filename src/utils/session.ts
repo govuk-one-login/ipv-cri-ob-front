@@ -1,11 +1,13 @@
 import { appConfig } from '../config'
 import { checkTableExists, dynamoDevOverrides } from './dev-tooling/local-dynamodb'
+import { getLogger } from './logger'
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb'
 
 import connectDynamoDB from 'connect-dynamodb'
 import session from 'express-session'
 
 const DynamoDBStore = connectDynamoDB(session)
+const LOGGER = getLogger()
 
 const createSessionStore = async () => {
   const clientConfig = {
@@ -30,6 +32,14 @@ const createSessionStore = async () => {
 }
 
 const initSessionStore = async () => {
+  if (!appConfig.APP.SESSION.SECRET) {
+    LOGGER.warn('SESSION_SECRET is not set, using default value')
+  }
+
+  if (!appConfig.APP.SESSION.TABLE_NAME) {
+    LOGGER.warn('SESSION_TABLE_NAME is not set, using default value')
+  }
+
   return {
     cookieName: appConfig.APP.SESSION.COOKIE_NAME,
     cookieOptions: { maxAge: appConfig.APP.SESSION.TTL },

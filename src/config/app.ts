@@ -37,7 +37,7 @@ interface AppConfig {
 
 export default {
   API: {
-    BASE_URL: process.env.API_BASE_URL ?? 'http://localhost:5007/',
+    BASE_URL: process.env.API_BASE_URL || 'http://localhost:5007/',
     PACKAGE_NAME: 'ipv-cri-ob-front',
     PATHS: {
       AUTHORIZATION: 'authorization',
@@ -45,17 +45,17 @@ export default {
     }
   },
   APP: {
-    BASE_URL: process.env.EXTERNAL_WEBSITE_HOST ?? 'http://localhost:5090',
-    DEVICE_INTELLIGENCE_DOMAIN: process.env.DEVICE_INTELLIGENCE_DOMAIN ?? 'localhost',
-    DEVICE_INTELLIGENCE_ENABLED: process.env.DEVICE_INTELLIGENCE_ENABLED ?? 'false',
+    BASE_URL: process.env.EXTERNAL_WEBSITE_HOST || 'http://localhost:5090',
+    DEVICE_INTELLIGENCE_DOMAIN: process.env.DEVICE_INTELLIGENCE_DOMAIN || 'localhost',
+    DEVICE_INTELLIGENCE_ENABLED: process.env.DEVICE_INTELLIGENCE_ENABLED || 'false',
     GTM: {
-      ANALYTICS_COOKIE_DOMAIN: process.env.FRONTEND_DOMAIN ?? 'localhost',
+      ANALYTICS_COOKIE_DOMAIN: process.env.FRONTEND_DOMAIN || 'localhost',
       ANALYTICS_DATA_SENSITIVE: process.env.ANALYTICS_DATA_SENSITIVE !== 'false',
       GA4_ENABLED: process.env.GA4_ENABLED !== 'false',
       GA4_FORM_CHANGE_ENABLED: process.env.GA4_FORM_CHANGE_ENABLED === 'true',
       GA4_FORM_ERROR_ENABLED: process.env.GA4_FORM_ERROR_ENABLED !== 'false',
       GA4_FORM_RESPONSE_ENABLED: process.env.GA4_FORM_RESPONSE_ENABLED !== 'false',
-      GA4_ID: process.env.GOOGLE_ANALYTICS_4_GTM_CONTAINER_ID ?? 'GTM-XXXXXXX',
+      GA4_ID: process.env.GOOGLE_ANALYTICS_4_GTM_CONTAINER_ID || 'GTM-XXXXXXX',
       GA4_NAVIGATION_ENABLED: process.env.GA4_NAVIGATION_ENABLED === 'true',
       GA4_PAGE_VIEW_ENABLED: process.env.GA4_PAGE_VIEW_ENABLED !== 'false',
       GA4_SELECT_CONTENT_ENABLED: process.env.GA4_SELECT_CONTENT_ENABLED === 'true'
@@ -65,8 +65,8 @@ export default {
     },
     SESSION: {
       COOKIE_NAME: 'ob_session',
-      SECRET: process.env.SESSION_SECRET,
-      TABLE_NAME: process.env.SESSION_TABLE_NAME,
+      SECRET: process.env.SESSION_SECRET || undefined,
+      TABLE_NAME: process.env.SESSION_TABLE_NAME || undefined,
       TTL: Number(process.env.SESSION_TTL) || 7200000 // two hours in ms
     }
   },
