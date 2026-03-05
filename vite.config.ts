@@ -21,7 +21,16 @@ const serverBuild = (): Plugin => ({
         sourcemap: true,
         ssr: 'src/index.ts'
       },
-      configFile: false
+      configFile: false,
+      resolve: {
+        alias: {
+          '@govuk-one-login/frontend-language-toggle/styles': path.resolve(
+            __dirname,
+            'node_modules/@govuk-one-login/frontend-language-toggle/build/stylesheet/styles.css'
+          ),
+          '@src': path.resolve(__dirname, 'src')
+        }
+      }
     })
   }
 })

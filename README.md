@@ -26,7 +26,7 @@ fnm use # or nvm (ensures a project appropriate node version is active)
 npm i
 ```
 
-Vite handles all static asset bundling for you so there is no additional build step. 
+Vite handles all static asset bundling for you so there is no additional build step.
 
 Copy the `.env.example`, some env vars are pre-configured for you (`REBRAND_ENABLED`, `USE_PINO_LOGGER` and `LOCAL_DYNAMO_ENDPOINT_OVERRIDE`).
 
@@ -40,9 +40,9 @@ Start a dev server:
 npm run dev
 ```
 
-Vite will also spawn the required local dev containers defined in the project root `docker-compose.yml`. 
+Vite will also spawn the required local dev containers defined in the project root `docker-compose.yml`.
 
-> [!IMPORTANT]  
+> [!IMPORTANT]
 > A running Docker socket must be available on your system.
 
 The frontend should now be running on the `PORT` set in your env or on 3000 by default if none was set.
@@ -90,6 +90,19 @@ Browser tests use a 'built' version of the application which is a more accurate 
 > [!TIP]
 > Browser tests can be run independently of any locally running dev server. They manage their own test container lifecycle and use a different port for the running application. E.g. a local dev server won't cross-contaminate any browser testing session storage and vice versa.
 
+### Pre-Commit Checking
+
+There is a `.pre-commit-config.yaml` configuration setup in this repo, this uses [pre-commit](https://pre-commit.com/) to verify your commit before actually commiting, it runs the following checks:
+
+- Checks Json files for formatting issues
+- Fixes end of file issues (it will auto correct if it spots an issue - you will need to run the git commit again after it has fixed the issue)
+- Automatically removes trailing whitespaces (again will need to run commit again after it detects and fixes the issue)
+- Detects aws credentials or private keys accidentally added to the repo
+- Runs cloud formation linter and detects issues
+- Runs checkov and detects issues
+
+Run `pre-commit install` after cloning to enable these checks.
+
 ### Environment Variables
 
 | Environment variable                  | Description                                                                                               | Required                              |
@@ -118,4 +131,3 @@ Browser tests use a 'built' version of the application which is a more accurate 
 | `MAY_2025_REBRAND_ENABLED`            | Enable GOVUK Frontend rebrand. Default: `false`                                                           | No                                    |
 | `USE_PINO_LOGGER`                     | Use pino JSON logger instead of hmpo-logger. Default: `false`                                             | No                                    |
 | `LOGS_LEVEL`                          | Set the log level for pino                                                                                | Yes (if pino USE_PINO_LOGGER is true) |
-

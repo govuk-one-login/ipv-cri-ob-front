@@ -27,6 +27,15 @@ jobs:
           test -n "$version" || { echo "No @playwright/test version found in package.json"; exit 1; }
           echo "version=$version" >> "$GITHUB_OUTPUT"
 
+  pre-commit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+      - uses: pre-commit/action@v3.0.1
+        with:
+          extra_args: 'detect-secrets --all-files'
+
   validate:
     runs-on: ubuntu-latest
     permissions:

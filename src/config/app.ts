@@ -72,6 +72,5 @@ export default {
       TABLE_NAME: process.env.SESSION_TABLE_NAME || undefined,
       TTL: Number(process.env.SESSION_TTL) || 7200000 // two hours in ms
     }
-  },
-
+  }
 } satisfies AppConfig

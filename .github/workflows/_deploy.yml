@@ -34,7 +34,7 @@ jobs:
           aws-region: eu-west-2
 
       - name: Validate SAM
-        run: sam validate --region ${{ env.AWS_REGION }} -t deploy/template.yaml --lint
+        run: sam validate --region ${{ env.AWS_REGION }} -t deploy/template.yml --lint
 
       - name: Login to Amazon ECR
         id: login-ecr
@@ -52,6 +52,6 @@ jobs:
         with:
           artifact-bucket-name: ${{ secrets.artifact_bucket }}
           container-sign-kms-key-arn: ${{ secrets.container_sign_kms_key }}
-          template-file: deploy/template.yaml
+          template-file: deploy/template.yml
           role-to-assume-arn: ${{ secrets.role_arn }}
           ecr-repo-name: ${{ secrets.ecr_repository }}
