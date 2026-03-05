@@ -59,7 +59,7 @@ export const createApp = async (): Promise<{ app: Express; router: Router }> => 
   })
 
   app.set('view engine', 'njk')
-  app.set('API.BASE_URL', appConfig.APP.BASE_URL)
+  app.set('API.BASE_URL', appConfig.API.BASE_URL)
   app.set('API.PATHS.SESSION', appConfig.API.PATHS.SESSION)
   app.set('API.PATHS.AUTHORIZATION', appConfig.API.PATHS.AUTHORIZATION)
   app.set('APP.PATHS.ENTRYPOINT', appConfig.APP.PATHS.OPENBANKING)

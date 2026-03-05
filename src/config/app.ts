@@ -9,7 +9,6 @@ interface AppConfig {
     PATHS: { AUTHORIZATION: string; SESSION: string }
   }
   APP: {
-    BASE_URL: string
     BIND_HOST: string
     DEVICE_INTELLIGENCE_DOMAIN: string
     DEVICE_INTELLIGENCE_ENABLED: string
@@ -46,7 +45,6 @@ export default {
     }
   },
   APP: {
-    BASE_URL: process.env.EXTERNAL_WEBSITE_HOST || 'http://localhost:5090',
     BIND_HOST: process.env.BIND_HOST || '127.0.0.1',
     DEVICE_INTELLIGENCE_DOMAIN: process.env.DEVICE_INTELLIGENCE_DOMAIN || 'localhost',
     DEVICE_INTELLIGENCE_ENABLED: process.env.DEVICE_INTELLIGENCE_ENABLED || 'false',
