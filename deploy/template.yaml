@@ -33,7 +33,7 @@ Parameters:
   DeploymentStrategy:
     Description: "Predefined deployment configuration for ECS application"
     Type: String
-    Default: "None"
+    Default: "none"
   LogGroupRetentionInDays:
     Description: "Retention for all log groups"
     Type: Number
@@ -51,7 +51,7 @@ Conditions:
   UseCodeSigning: !Not
     - !Equals [ !Ref CodeSigningConfigArn, "none" ]
   UseCanaryDeployment: !Not
-    - !Equals [ !Ref DeploymentStrategy, "None" ]
+    - !Equals [ !Ref DeploymentStrategy, "none" ]
 
 Mappings:
   EnvironmentConfiguration:
@@ -62,7 +62,7 @@ Mappings:
       fargateRAMsize: "512"
       minECSCount: 1
       maxECSCount: 4
-      nodeEnv: "development"
+      nodeEnv: "production"
     build:
       logLevel: "info"
       dynatraceSecretArn: arn:aws:secretsmanager:eu-west-2:216552277552:secret:DynatraceNonProductionVariables
@@ -78,7 +78,7 @@ Mappings:
       fargateRAMsize: "512"
       minECSCount: 2
       maxECSCount: 4
-      nodeEnv: "development"
+      nodeEnv: "production"
     integration:
       logLevel: "warn"
       dynatraceSecretArn: arn:aws:secretsmanager:eu-west-2:216552277552:secret:DynatraceNonProductionVariables
@@ -86,7 +86,7 @@ Mappings:
       fargateRAMsize: "1024"
       minECSCount: 2
       maxECSCount: 4
-      nodeEnv: "development"
+      nodeEnv: "production"
     production:
       logLevel: "warn"
       dynatraceSecretArn: arn:aws:secretsmanager:eu-west-2:216552277552:secret:DynatraceProductionVariables
@@ -719,7 +719,6 @@ Resources:
         SSEEnabled: true
         SSEType: KMS
 
-  # ECS Autoscaling
   ECSAutoScalingTarget:
     Type: AWS::ApplicationAutoScaling::ScalableTarget
     Properties:
@@ -1028,7 +1027,6 @@ Resources:
             Period: 60
             Stat: Sum
 
-
   EventLoopDelayMetricFilter:
     Type: AWS::Logs::MetricFilter
     Properties:
@@ -1141,7 +1139,6 @@ Resources:
     Metadata:
       SamResourceId: AlarmPublishToTopicPolicyOB
 
-# Outputs
 Outputs:
   OBFrontUrl:
     Description: >-

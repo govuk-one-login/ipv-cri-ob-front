@@ -10,6 +10,7 @@ interface AppConfig {
   }
   APP: {
     BASE_URL: string
+    BIND_HOST: string
     DEVICE_INTELLIGENCE_DOMAIN: string
     DEVICE_INTELLIGENCE_ENABLED: string
     GTM: {
@@ -25,6 +26,7 @@ interface AppConfig {
       GA4_SELECT_CONTENT_ENABLED: boolean
     }
     PATHS: { OPENBANKING: string }
+    PORT: number
     SESSION: {
       COOKIE_NAME: string
       SECRET: string | undefined
@@ -32,7 +34,6 @@ interface AppConfig {
       TTL: number
     }
   }
-  PORT: number
 }
 
 export default {
@@ -46,6 +47,7 @@ export default {
   },
   APP: {
     BASE_URL: process.env.EXTERNAL_WEBSITE_HOST || 'http://localhost:5090',
+    BIND_HOST: process.env.BIND_HOST || '127.0.0.1',
     DEVICE_INTELLIGENCE_DOMAIN: process.env.DEVICE_INTELLIGENCE_DOMAIN || 'localhost',
     DEVICE_INTELLIGENCE_ENABLED: process.env.DEVICE_INTELLIGENCE_ENABLED || 'false',
     GTM: {
@@ -63,6 +65,7 @@ export default {
     PATHS: {
       OPENBANKING: '/'
     },
+    PORT: Number(process.env.PORT) || 5090,
     SESSION: {
       COOKIE_NAME: 'ob_session',
       SECRET: process.env.SESSION_SECRET || undefined,
@@ -70,5 +73,5 @@ export default {
       TTL: Number(process.env.SESSION_TTL) || 7200000 // two hours in ms
     }
   },
-  PORT: Number(process.env.PORT) || 5090
+
 } satisfies AppConfig

@@ -1,9 +1,10 @@
+import { appConfig } from '@src/config'
 import { config as loadDotenv } from 'dotenv'
 
 const { parsed } = loadDotenv({ quiet: true })
 const { arch, env, platform, version } = process
-const BIND_HOST = env.BIND_HOST || '127.0.0.1'
-const PORT = env.PORT || '3000'
+const BIND_HOST = appConfig.APP.BIND_HOST
+const PORT = appConfig.APP.PORT
 
 const banner = `
     ________ _    __  __________  ____  ____                 
