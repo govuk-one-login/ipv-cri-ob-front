@@ -143,8 +143,8 @@ Resources:
         Egress between the Open Banking Front load balancer and
         the Open Banking Front ECS security group
       DestinationSecurityGroupId: !GetAtt ECSSecurityGroup.GroupId
-      FromPort: 8080
-      ToPort: 8080
+      FromPort: 5090
+      ToPort: 5090
 
   ECSSecurityGroup:
     Type: "AWS::EC2::SecurityGroup"
@@ -166,8 +166,8 @@ Resources:
       Description: >-
         Open Banking Front ECS permits inbound from the Open Banking Front
         load balancer.
-      FromPort: 8080
-      ToPort: 8080
+      FromPort: 5090
+      ToPort: 5090
       GroupId: !GetAtt ECSSecurityGroup.GroupId
       SourceSecurityGroupId: !GetAtt LoadBalancerSG.GroupId
 
@@ -355,7 +355,7 @@ Resources:
         - UseCanaryDeployment
         - !Ref AWS::NoValue
         - - ContainerName: app
-            ContainerPort: 8080
+            ContainerPort: 5090
             TargetGroupArn: !Ref LoadBalancerListenerTargetGroupECS
       NetworkConfiguration: !If
         - UseCanaryDeployment
@@ -467,12 +467,12 @@ Resources:
                 ]
                   - ":DT_CONNECTION_POINT::"
           PortMappings:
-            - ContainerPort: 8080
+            - ContainerPort: 5090
               Protocol: tcp
           HealthCheck:
             Command:
               - "CMD-SHELL"
-              - "curl -f http://localhost:8080/healthcheck || exit 1"
+              - "curl -f http://localhost:5090/healthcheck || exit 1"
             Interval: 5
             Retries: 10
             Timeout: 2
@@ -619,7 +619,7 @@ Resources:
           - !Ref CodeSigningConfigArn
           - !Ref AWS::NoValue
         ContainerName: "app"
-        ContainerPort: "8080"
+        ContainerPort: "5090"
         DeploymentStrategy: !Ref DeploymentStrategy
         ECSClusterName: !Ref OBFrontEcsCluster
         ECSServiceName: !GetAtt OBFrontEcsService.Name

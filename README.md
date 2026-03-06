@@ -45,7 +45,7 @@ Vite will also spawn the required local dev containers defined in the project ro
 > [!IMPORTANT]
 > A running Docker socket must be available on your system.
 
-The frontend should now be running on the `PORT` set in your env or on 3000 by default if none was set.
+The frontend should now be running on the `PORT` set in your env or on 5090 by default if none was set.
 
 Vite will monitor the following for changes:
 

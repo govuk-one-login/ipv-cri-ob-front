@@ -11,5 +11,5 @@ COPY package*.json ./
 RUN npm ci --omit=dev
 COPY --from=build /app/dist .
 # TODO dynatrace etc
-EXPOSE 8080
+EXPOSE 5090
 CMD ["node", "index.js"]
