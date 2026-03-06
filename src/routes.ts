@@ -1,6 +1,7 @@
+import type { Router } from 'express'
+
 import { paths } from './config'
 import { indexController } from './controllers/index'
-import { type Router } from 'express'
 
 import commonExpress from '@govuk-one-login/di-ipv-cri-common-express'
 

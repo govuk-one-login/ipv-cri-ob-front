@@ -6,7 +6,7 @@ import perfectionist from 'eslint-plugin-perfectionist'
 import tseslint from 'typescript-eslint'
 
 export default defineConfig(
-  { ignores: ['dist/**', 'node_modules/**', '.features-gen', 'playwright-report'] },
+  { ignores: ['dist/**', 'node_modules/**', '.features-gen', 'playwright-report', 'coverage'] },
   eslint.configs.recommended,
   tseslint.configs.recommendedTypeChecked,
   tseslint.configs.stylisticTypeChecked,
@@ -19,10 +19,14 @@ export default defineConfig(
       }
     },
     rules: {
-      '@typescript-eslint/consistent-type-imports': 'warn',
-      '@typescript-eslint/no-explicit-any': 'warn',
+      '@typescript-eslint/consistent-type-imports': [
+        'error',
+        { fixStyle: 'separate-type-imports' }
+      ],
+      '@typescript-eslint/no-explicit-any': 'error',
       '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
       '@typescript-eslint/prefer-nullish-coalescing': 'off',
+      'no-console': 'error',
       'padding-line-between-statements': [
         'warn',
         { blankLine: 'always', next: '*', prev: 'import' },
@@ -71,6 +75,12 @@ export default defineConfig(
           type: 'natural'
         }
       ]
+    }
+  },
+  {
+    files: ['test/**/*'],
+    rules: {
+      'no-console': 'off'
     }
   }
 )

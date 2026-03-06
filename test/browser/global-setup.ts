@@ -2,7 +2,10 @@ import { spawn } from 'child_process'
 import { existsSync } from 'fs'
 import { GenericContainer } from 'testcontainers'
 
-const APP_URL = 'http://localhost:3001'
+import PinoPretty from 'pino-pretty'
+
+const APP_PORT = '5091' // don't forget to change me in playwright.config.ts
+const APP_URL = `http://localhost:${APP_PORT}`
 
 // give app 20 seconds to boot
 const waitForApp = async (exited: { value: boolean }, attempts = 40) => {
@@ -20,16 +23,16 @@ const waitForApp = async (exited: { value: boolean }, attempts = 40) => {
 }
 
 export default async function globalSetup() {
-  if (!process.env.DOCKER_HOST) {
+  if (!process.env['DOCKER_HOST']) {
     const dockerSockets = [
       '/var/run/docker.sock',
-      `${process.env.HOME}/.orbstack/run/docker.sock`,
-      `${process.env.HOME}/.docker/run/docker.sock`
+      `${process.env['HOME']}/.orbstack/run/docker.sock`,
+      `${process.env['HOME']}/.docker/run/docker.sock`
     ]
 
     for (const socket of dockerSockets) {
       if (existsSync(socket)) {
-        process.env.DOCKER_HOST = `unix://${socket}`
+        process.env['DOCKER_HOST'] = `unix://${socket}`
         console.log(`[SYSTEM] using Docker socket: ${socket}`)
         break
       }
@@ -53,17 +56,18 @@ export default async function globalSetup() {
       ...process.env,
       LOCAL_DYNAMO_ENDPOINT_OVERRIDE: dynamoEndpoint,
       NODE_ENV: 'test',
-      PORT: '3001',
+      PORT: APP_PORT,
       USE_PINO_LOGGER: 'true'
     }
   })
 
   const exited = { value: false }
-  appProcess.stdout?.on('data', (d: Buffer) => process.stdout.write(`[APP] ${d.toString()}`))
-  appProcess.stderr?.on('data', (d: Buffer) => process.stderr.write(`[APP] ${d.toString()}`))
+  const prettyStream = PinoPretty({ messageKey: 'message' })
+  appProcess.stdout?.pipe(prettyStream)
+  appProcess.stderr?.on('data', (d: Buffer) => process.stderr.write(d.toString()))
   appProcess.on('exit', (code) => {
     exited.value = true
-    if (code !== 0) console.error(`[SYSTEM] app process exited with code ${code}`)
+    if (code !== 0) console.error(`[SYSTEM] app process terminated`)
   })
 
   console.log('[SYSTEM] waiting for app to be ready...')

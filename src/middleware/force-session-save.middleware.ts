@@ -1,4 +1,4 @@
-import type express from 'express'
+import type { NextFunction, Request, Response } from 'express'
 
 import { getLogger } from '../utils/logger'
 
@@ -8,11 +8,7 @@ const LOGGER = getLogger()
  * patches a race condition in common-express where express-session with DynamoDB store
  * doesn't guarantee session persistence before redirect
  */
-const forceSessionSaveBeforeRedirect = (
-  req: express.Request,
-  res: express.Response,
-  next: express.NextFunction
-): void => {
+const forceSessionSaveBeforeRedirect = (req: Request, res: Response, next: NextFunction): void => {
   const originalRedirect = res.redirect.bind(res)
 
   res.redirect = function (statusOrUrl: number | string, url: string) {

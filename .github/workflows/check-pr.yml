@@ -87,3 +87,9 @@ jobs:
 
       - name: Browser tests
         run: npm run test:browser
+
+#      - name: Sonar scan
+#        if: ${{ github.actor != 'dependabot[bot]' }}
+#        uses: SonarSource/sonarqube-scan-action@v7.0.0
+#        env:
+#          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}

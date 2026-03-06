@@ -9,6 +9,11 @@ export default defineConfig({
     }
   },
   test: {
+    coverage: {
+      provider: 'v8',
+      reporter: ['lcov'],
+      reportsDirectory: 'coverage'
+    },
     include: ['test/unit/**/*.test.ts'],
     silent: 'passed-only'
   }

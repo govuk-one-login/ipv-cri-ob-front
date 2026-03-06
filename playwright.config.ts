@@ -9,7 +9,7 @@ const testDir = defineBddConfig({
 export default defineConfig({
   globalSetup: 'test/browser/global-setup.ts',
   projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
-  reporter: 'html',
+  reporter: [['list'], ['html', { open: 'never' }]],
   testDir,
-  use: { baseURL: 'http://localhost:3001' }
+  use: { baseURL: 'http://localhost:5091' } // don't forget to change me in global-setup.ts
 })

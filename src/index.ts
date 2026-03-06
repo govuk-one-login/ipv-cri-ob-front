@@ -19,10 +19,11 @@ const banner = `
                                /____/
 ================ START =======================
 PLATFORM: ${platform}/${arch}
-NODE_ENV: ${env.NODE_ENV}, ${version}
+NODE_ENV: ${env['NODE_ENV']}, ${version}
 HOST/PORT: ${BIND_HOST}:${PORT}
 .ENV: ${parsed ? `loaded (${Object.keys(parsed).length} vars)` : 'not found'}
 ==============================================`
+// eslint-disable-next-line no-console
 console.log(banner)
 const { createApp } = await import('./app-bootstrap')
 const { app } = await createApp()

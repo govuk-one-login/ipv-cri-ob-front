@@ -1,7 +1,11 @@
 import type { Express } from 'express'
 import type { ViteDevServer } from 'vite'
 
+import { getLogger } from '@src/utils/logger'
+
 import i18next from 'i18next'
+
+const LOGGER = getLogger()
 
 const createViteServer = async (): Promise<ViteDevServer> => {
   const { createServer } = await import('vite')
@@ -14,12 +18,12 @@ const createViteServer = async (): Promise<ViteDevServer> => {
 const setupDevServer = (app: Express, vite: ViteDevServer): void => {
   const sessionId = crypto.randomUUID()
 
-  app.locals.devServer = true
+  app.locals['devServer'] = true
 
-  app.get('/.well-known/appspecific/com.chrome.devtools.json', (req, res) => {
+  app.get('/.well-known/appspecific/com.chrome.devtools.json', (_req, res) => {
     res.json({
       workspace: {
-        root: process.env.PROJECT_DIR,
+        root: process.env['PROJECT_DIR'],
         uuid: sessionId
       }
     })
@@ -34,7 +38,7 @@ const setupDevServer = (app: Express, vite: ViteDevServer): void => {
       await i18next.reloadResources()
     }
     if (file.endsWith('.njk') || file.endsWith('.yml') || file.endsWith('.json')) {
-      console.log(`reloading: ${file}`)
+      LOGGER.debug(`[vite] reloading: ${file}`)
       vite.hot.send({ path: '*', type: 'full-reload' })
     }
   })

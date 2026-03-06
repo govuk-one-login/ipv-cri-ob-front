@@ -17,11 +17,10 @@ const createSessionStore = async () => {
   const dynamodbClient = new DynamoDBClient(clientConfig)
   const table = appConfig.APP.SESSION.TABLE_NAME ?? 'ob-sessions-local'
   if ('endpoint' in clientConfig) {
-    console.log(
-      `\x1b[97;101m[local DynamoDB] ENDPOINT OVERRIDE IS SET: ${dynamoDevOverrides.endpoint}\x1b[0m`
-    )
+    LOGGER.warn(`[local DynamoDB] endpoint override is set: ${dynamoDevOverrides.endpoint}`)
+
     await checkTableExists(dynamodbClient, table).catch((error) => {
-      console.error('[local DynamoDB] problem creating table:', error)
+      LOGGER.error('[local DynamoDB] problem creating table:', error)
     })
   }
 

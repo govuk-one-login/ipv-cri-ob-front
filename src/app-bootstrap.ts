@@ -12,6 +12,7 @@ import { forceSessionSaveBeforeRedirect } from './middleware/force-session-save.
 import { createViteServer, setupDevServer } from './utils/dev-tooling/dev-server'
 import { frontendUiMiddlewareIdentityBypass } from '@govuk-one-login/frontend-ui'
 import { frontendVitalSignsInitFromApp } from '@govuk-one-login/frontend-vital-signs'
+import { getLogger } from '@src/utils/logger'
 
 import i18nextMiddleware from './middleware/i18next.middleware'
 import initSessionStore from './utils/session'
@@ -23,8 +24,16 @@ import * as routes from './routes'
 const APP_ROOT = process.cwd()
 const { NODE_ENV } = process.env
 
+const LOGGER = getLogger()
+
 export const createApp = async (): Promise<{ app: Express; router: Router }> => {
   const vite: null | ViteDevServer = NODE_ENV === 'development' ? await createViteServer() : null
+
+  if (process.env['NODE_ENV'] !== 'production') {
+    LOGGER.warn(
+      '\x1b[97;101mINSECURE DEVELOPER OVERRIDES ARE PRESENT IN THE CONTENT SECURITY POLICY\x1b[0m'
+    )
+  }
 
   const { app, router } = commonExpress.bootstrap.setup({
     config: { APP_ROOT },

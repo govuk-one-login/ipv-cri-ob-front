@@ -1,10 +1,10 @@
-import type express from 'express'
+import type { NextFunction, Request, Response } from 'express'
 
 import { getLogger } from '../utils/logger'
 
 const LOGGER = getLogger()
 
-const get = (req: express.Request, res: express.Response, _next: express.NextFunction) => {
+const get = (req: Request, res: Response, _next: NextFunction) => {
   LOGGER.info('hello from the logger')
   let message = 'hello from the controller'
   if (req.language === 'cy') {

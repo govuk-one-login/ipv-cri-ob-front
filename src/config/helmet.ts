@@ -3,7 +3,7 @@ import type { CommonExpressHelmetConfig } from '@govuk-one-login/di-ipv-cri-comm
 import helmetConfig from '@govuk-one-login/di-ipv-cri-common-express/src/lib/helmet'
 
 const viteDevOverrides =
-  process.env.NODE_ENV !== 'production'
+  process.env['NODE_ENV'] !== 'production'
     ? ({
         contentSecurityPolicy: {
           directives: {
