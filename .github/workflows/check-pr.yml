@@ -1,0 +1,95 @@
+name: PR check
+
+on:
+  pull_request:
+    types:
+      - opened
+      - reopened
+      - ready_for_review
+      - synchronize
+  push:
+    branches:
+      - main
+
+jobs:
+  resolve-test-versions:
+    runs-on: ubuntu-latest
+    outputs:
+      playwright-version: ${{ steps['resolve-playwright-version'].outputs.version }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Resolve Playwright version
+        id: resolve-playwright-version
+        run: |
+          version="$(yq -r '.devDependencies["@playwright/test"] // .dependencies["@playwright/test"] // ""' package.json)"
+          test -n "$version" || { echo "No @playwright/test version found in package.json"; exit 1; }
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
+  pre-commit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+      - uses: pre-commit/action@v3.0.1
+        with:
+          extra_args: 'detect-secrets --all-files'
+
+  validate:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    needs: resolve-test-versions
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Node setup
+        uses: actions/setup-node@v6
+        with:
+          node-version-file: '.nvmrc'
+          cache: 'npm'
+          package-manager-cache: true
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Cache Playwright
+        id: playwright-cache
+        uses: actions/cache@v5
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-browsers-${{ needs['resolve-test-versions'].outputs.playwright-version }}
+
+      - name: Setup Playwright
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
+        run: npx playwright install chromium --with-deps
+
+      - name: Setup Playwright dependencies
+        if: steps.playwright-cache.outputs.cache-hit == 'true'
+        run: npx playwright install-deps chromium
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Format
+        run: npm run format
+
+      - name: Type check
+        run: npm run type-check
+
+      - name: Unit tests
+        run: npm run test
+
+      - name: Build
+        run: npm run build
+
+      - name: Browser tests
+        run: npm run test:browser
+
+#      - name: Sonar scan
+#        if: ${{ github.actor != 'dependabot[bot]' }}
+#        uses: SonarSource/sonarqube-scan-action@v7.0.0
+#        env:
+#          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
