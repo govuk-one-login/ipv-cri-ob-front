@@ -1,0 +1,23 @@
+{% extends "layouts/base.njk" %}
+
+{% set pageTitleKey = "errors.sessionEnded.title" %}
+<!--ga4 tags-->
+{% set taxLevel2 = "session-expired" %}
+{% set statusCode = "401" %}
+<!--ga4 tags-->
+
+{% block mainContent %}
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+      <h1 class="govuk-heading-l">{{ translate(pageTitleKey) }}</h1>
+    </div>
+  </div>
+{% endblock %}
+
+{% block scripts %}
+  <script type="text/javascript" nonce="{{cspNonce}}">
+    window.DI = window.DI || {}
+    window.DI.httpStatusCode = 401
+  </script>
+  {{ super () }}
+{% endblock %}
