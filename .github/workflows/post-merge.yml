@@ -18,7 +18,7 @@ jobs:
       - name: Setup Node
         uses: ./.github/actions/node-setup
       - name: Unit tests
-        run: npm run test:coverage
+        run: npm run test
       - name: Sonar scan
         uses: SonarSource/sonarqube-scan-action@v7.0.0
         env:
