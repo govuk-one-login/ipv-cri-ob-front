@@ -25,7 +25,7 @@ First, ensure that all project dependencies are loaded:
 
 ```shell
 fnm use # or nvm (ensures a project appropriate node version is active)
-npm i
+npm ci
 ```
 
 Vite handles all static asset bundling for you so there is no additional build step.
