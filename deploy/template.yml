@@ -2,8 +2,15 @@ AWSTemplateFormatVersion: "2010-09-09"
 
 Transform:
   - AWS::Serverless-2016-10-31
+
+Metadata:
+  cfn-lint:
+    config:
+      ignore_checks:
+        - W8003 # FIXME: UseCanaryDeployment hardcoded to false for first deployment
+
 Description: >-
-  This creates the necessary components to deploy Open Banking CRI Frontend onto ECS
+  This creates the necessary components to deploy the Open Banking CRI Frontend onto ECS
   Fargate within an existing VPC and private subnets (imported parameters).
   Open Banking Front can be invoked via the public API Gateway on the url in the
   OpenBankingUrl output.
@@ -40,24 +47,23 @@ Parameters:
     Default: "30"
 
 Conditions:
-  IsNotDevelopment: !Or
-    - !Equals [ !Ref Environment, build ]
-    - !Equals [ !Ref Environment, staging ]
-    - !Equals [ !Ref Environment, integration ]
-    - !Equals [ !Ref Environment, production ]
+  IsNotDevelopment: !Not
+    - !Equals [ !Ref Environment, dev ]
   IsProduction: !Equals [ !Ref Environment, production ]
   UsePermissionsBoundary: !Not
     - !Equals [ !Ref PermissionsBoundary, "none" ]
   UseCodeSigning: !Not
     - !Equals [ !Ref CodeSigningConfigArn, "none" ]
-  UseCanaryDeployment: !Not
-    - !Equals [ !Ref DeploymentStrategy, "none" ]
+  UseCanaryDeployment: !Equals [ "true", "false" ] # FIXME: force false for first deployment
+#  UseCanaryDeployment: !Not
+#    - !Equals [ !Ref DeploymentStrategy, "none" ]
 
 Mappings:
   EnvironmentConfiguration:
     dev:
       logsLevel: "debug"
       dynatraceSecretArn: arn:aws:secretsmanager:eu-west-2:216552277552:secret:DynatraceNonProductionVariables
+      sessionStoreSecretArn: arn:aws:secretsmanager:eu-west-2:807508353778:secret:ob-fe/session-store-secret-NOhsbW # pragma: allowlist secret
       fargateCPUsize: "256"
       fargateRAMsize: "512"
       minECSCount: 1
@@ -66,6 +72,7 @@ Mappings:
     build:
       logsLevel: "info"
       dynatraceSecretArn: arn:aws:secretsmanager:eu-west-2:216552277552:secret:DynatraceNonProductionVariables
+      sessionStoreSecretArn: arn:aws:secretsmanager:eu-west-2:146103651914:secret:ob-fe/session-store-secret-5utJQb # pragma: allowlist secret
       fargateCPUsize: "2048"
       fargateRAMsize: "4096"
       minECSCount: 4
@@ -74,6 +81,7 @@ Mappings:
     staging:
       logsLevel: "warn"
       dynatraceSecretArn: arn:aws:secretsmanager:eu-west-2:216552277552:secret:DynatraceNonProductionVariables
+      sessionStoreSecretArn: arn:aws:secretsmanager:eu-west-2:490364002485:secret:ob-fe/session-store-secret-HAlBvE # pragma: allowlist secret
       fargateCPUsize: "256"
       fargateRAMsize: "512"
       minECSCount: 2
@@ -82,6 +90,7 @@ Mappings:
     integration:
       logsLevel: "warn"
       dynatraceSecretArn: arn:aws:secretsmanager:eu-west-2:216552277552:secret:DynatraceNonProductionVariables
+      sessionStoreSecretArn: arn:aws:secretsmanager:eu-west-2:196177110550:secret:ob-fe/session-store-secret-R8ZhBa # pragma: allowlist secret
       fargateCPUsize: "512"
       fargateRAMsize: "1024"
       minECSCount: 2
@@ -90,6 +99,7 @@ Mappings:
     production:
       logsLevel: "warn"
       dynatraceSecretArn: arn:aws:secretsmanager:eu-west-2:216552277552:secret:DynatraceProductionVariables
+      sessionStoreSecretArn: arn:aws:secretsmanager:eu-west-2:327860191376:secret:ob-fe/session-store-secret-Au0Mov # pragma: allowlist secret
       fargateCPUsize: "2048"
       fargateRAMsize: "4096"
       minECSCount: 4
@@ -310,6 +320,9 @@ Resources:
       HealthCheckEnabled: true
       HealthCheckProtocol: HTTP
       HealthCheckPath: /healthcheck
+      HealthCheckTimeoutSeconds: 2
+      HealthCheckIntervalSeconds: 5
+      HealthyThresholdCount: 2
       Matcher:
         HttpCode: 200
       Port: 80
@@ -466,6 +479,8 @@ Resources:
                   nodeEnv
                 ]
           Secrets:
+            - Name: SESSION_SECRET
+              ValueFrom: !FindInMap [ EnvironmentConfiguration, !Ref Environment, sessionStoreSecretArn ]
             - Name: DT_TENANT
               ValueFrom: !Join
                 - ""
@@ -570,6 +585,13 @@ Resources:
                 Resource:
                   - !GetAtt "ECSAccessLogsGroup.Arn"
                   - !Sub "${ECSAccessLogsGroup.Arn}:*"
+        - PolicyName: GetSessionStoreSecret
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action: secretsmanager:GetSecretValue
+                Resource: !Sub "arn:aws:secretsmanager:eu-west-2:${AWS::AccountId}:secret:ob-fe/session-store-secret-*" # pragma: allowlist secret
         - PolicyName: GetDynatraceSecret
           PolicyDocument:
             Version: 2012-10-17
@@ -616,19 +638,6 @@ Resources:
                   - "dynamodb:PutItem"
                 Resource:
                   - !GetAtt OBFrontSessionsTable.Arn
-        - PolicyName: GetDynatraceSecret
-          PolicyDocument:
-            Version: 2012-10-17
-            Statement:
-              - Effect: Allow
-                Action: secretsmanager:GetSecretValue
-                Resource: arn:aws:secretsmanager:eu-west-2:216552277552:secret:*
-              - Effect: Allow
-                Action: secretsmanager:ListSecrets
-                Resource: arn:aws:secretsmanager:eu-west-2:216552277552:secret:*
-              - Effect: Allow
-                Action: kms:Decrypt
-                Resource: arn:aws:kms:eu-west-2:216552277552:key/*
       PermissionsBoundary: !If
         - UsePermissionsBoundary
         - !Ref PermissionsBoundary
@@ -640,7 +649,7 @@ Resources:
     Properties:
       TemplateURL: https://template-storage-templatebucket-1upzyw6v9cs42.s3.eu-west-2.amazonaws.com/ecs-canary-deployment/template.yaml?versionId=5RRU1nfKQD_d08FKttr8W7pzrAsqQiUM # v2.1.1
       Parameters:
-        CloudWatchAlarms: !Ref FrontTargetGroup5xxPercentErrors
+        CloudWatchAlarms: !Ref Alb5xxRateCanaryErrorAlarm
         CodeSigningConfigArn: !If
           - UseCodeSigning
           - !Ref CodeSigningConfigArn
@@ -844,14 +853,21 @@ Resources:
               -50 # Scale down 50% of containers if the metric is breached
             # with <20% utilisation
 
-  EcsStepScaleOutAlarm:
+  ####################################################################
+  #                                                                  #
+  # Alarms                                                           #
+  #                                                                  #
+  ####################################################################
+
+  EcsCpuOver60ScaleOutAlarm:
     DependsOn: ECSAutoScalingTarget
     Type: AWS::CloudWatch::Alarm
     Properties:
+      AlarmName: !Sub "${AWS::StackName}-EcsCpuOver60ScaleOutAlarm"
       ActionsEnabled: true
       AlarmActions:
         - !Ref EcsStepScaleOutPolicy
-      AlarmDescription: "EcsClusterOver60PercentCPU"
+      AlarmDescription: !Sub "Open Banking ${Environment} ECS service average CPU utilization has exceeded 60% for 1 consecutive minute. Triggers step scale-out policy."
       ComparisonOperator: "GreaterThanThreshold"
       DatapointsToAlarm: "1"
       Dimensions:
@@ -867,14 +883,15 @@ Resources:
       Period: "60"
       Threshold: "60"
 
-  EcsStepScaleInAlarm:
+  EcsCpuUnder20ScaleInAlarm:
     DependsOn: ECSAutoScalingTarget
     Type: AWS::CloudWatch::Alarm
     Properties:
+      AlarmName: !Sub "${AWS::StackName}-EcsCpuUnder20ScaleInAlarm"
       ActionsEnabled: true
       AlarmActions:
         - !Ref EcsStepScaleInPolicy
-      AlarmDescription: "EcsClusterUnder60PercentCPU"
+      AlarmDescription: !Sub "Open Banking ${Environment} ECS service average CPU utilization has remained below 20% for 5 consecutive minutes. Triggers step scale-in policy."
       ComparisonOperator: "LessThanThreshold"
       DatapointsToAlarm: "5"
       Dimensions:
@@ -890,21 +907,16 @@ Resources:
       Period: "60"
       Threshold: "20"
 
-  ####################################################################
-  #                                                                  #
-  # Alarms                                                           #
-  #                                                                  #
-  ####################################################################
-
-  OBNoTaskCountAlarm:
+  EcsTaskCountErrorCriticalAlarm:
     Type: AWS::CloudWatch::Alarm
     Properties:
-      AlarmDescription: !Sub Open Banking ${Environment} frontend no ECS service tasks
+      AlarmName: !Sub "${AWS::StackName}-EcsTaskCountErrorCriticalAlarm"
+      AlarmDescription: !Sub "Open Banking ${Environment} frontend has zero running ECS tasks for 2 consecutive minutes."
       ActionsEnabled: true
       AlarmActions:
-        - !Ref AlarmTopicOB
+        - !If [ IsProduction, !ImportValue build-notifications-PagerDutySNSTopicArn, !ImportValue build-notifications-CriticalAlertsTopicArn ]
       OKActions:
-        - !Ref AlarmTopicOB
+        - !If [ IsProduction, !ImportValue build-notifications-PagerDutySNSTopicArn, !ImportValue build-notifications-CriticalAlertsTopicArn ]
       InsufficientDataActions: [ ]
       MetricName: TaskCount
       Namespace: ECS/ContainerInsights
@@ -919,15 +931,16 @@ Resources:
       ComparisonOperator: LessThanThreshold
       TreatMissingData: breaching
 
-  OBBelowMinTaskCountAlarm:
+  EcsTaskCountErrorWarningAlarm:
     Type: AWS::CloudWatch::Alarm
     Properties:
-      AlarmDescription: !Sub Open Banking ${Environment} frontend below minimum ECS service tasks
+      AlarmName: !Sub "${AWS::StackName}-EcsTaskCountErrorWarningAlarm"
+      AlarmDescription: !Sub "Open Banking ${Environment} frontend ECS task count has been below the environment minimum for 15 consecutive minutes."
       ActionsEnabled: true
       AlarmActions:
-        - !Ref AlarmTopicOB
+        - !ImportValue build-notifications-WarningAlertsTopicArn
       OKActions:
-        - !Ref AlarmTopicOB
+        - !ImportValue build-notifications-WarningAlertsTopicArn
       InsufficientDataActions: [ ]
       MetricName: TaskCount
       Namespace: ECS/ContainerInsights
@@ -942,15 +955,16 @@ Resources:
       ComparisonOperator: LessThanThreshold
       TreatMissingData: breaching
 
-  OB5XXOnELB:
+  Alb5xxCountErrorWarningAlarm:
     Type: AWS::CloudWatch::Alarm
     Properties:
-      AlarmDescription: !Sub Open Banking ${Environment} frontend 5XX count
+      AlarmName: !Sub "${AWS::StackName}-Alb5xxCountErrorWarningAlarm"
+      AlarmDescription: !Sub "Open Banking ${Environment} frontend ALB target group has recorded more than 1 HTTP 5XX response per minute for 5 consecutive minutes."
       ActionsEnabled: true
       AlarmActions:
-        - !Ref AlarmTopicOB
+        - !ImportValue build-notifications-WarningAlertsTopicArn
       OKActions:
-        - !Ref AlarmTopicOB
+        - !ImportValue build-notifications-WarningAlertsTopicArn
       InsufficientDataActions: [ ]
       MetricName: HTTPCode_Target_5XX_Count
       Namespace: AWS/ApplicationELB
@@ -967,29 +981,32 @@ Resources:
       ComparisonOperator: GreaterThanThreshold
       TreatMissingData: notBreaching
 
-  FE5XXErrorCriticalAlarm:
+  Alb5xxRateErrorCriticalAlarm:
     Type: AWS::CloudWatch::Alarm
     Properties:
-      AlarmName: !Sub "${AWS::StackName}-FE5XXErrorCriticalAlarm"
-      AlarmDescription: >
-        Trigger the 5xx critical alarm if errorThreshold exceeds 80% with 10 or more invocations
-        and a minimum of 2 errors in 5 out of the last 5 minutes
+      AlarmName: !Sub "${AWS::StackName}-Alb5xxRateErrorCriticalAlarm"
+      AlarmDescription: !Sub "Open Banking ${Environment} frontend ALB 5XX error rate has exceeded 80% of requests (minimum 10 requests required) in at least 2 of the last 5 minutes."
       ActionsEnabled: true
-      OKActions:
-        - !Ref AlarmTopicOB
       AlarmActions:
-        - !Ref AlarmTopicOB
+        - !If [ IsProduction, !ImportValue build-notifications-PagerDutySNSTopicArn, !ImportValue build-notifications-CriticalAlertsTopicArn ]
+      OKActions:
+        - !If [ IsProduction, !ImportValue build-notifications-PagerDutySNSTopicArn, !ImportValue build-notifications-CriticalAlertsTopicArn ]
       EvaluationPeriods: 5
       DatapointsToAlarm: 2
       Threshold: 80
       ComparisonOperator: GreaterThanOrEqualToThreshold
       TreatMissingData: notBreaching
       Metrics:
-        - Id: errorThreshold
-          Label: errorThreshold
+        - Id: e2
+          Label: 5XX Error Rate - Low Traffic Guarded (%)
           ReturnData: true
-          Expression: IF(invocations<10,0,errorPercentage)
-        - Id: invocations
+          Expression: IF(m1<10,0,e1) # returns 0 when total requests < 10 to suppress noise during low traffic, otherwise returns e1
+        - Id: e1
+          Label: 5XX Error Rate (%)
+          ReturnData: false
+          Expression: (m2/m1)*100 # 5XX error count as a percentage of total requests
+        - Id: m1
+          Label: Total Request Count
           ReturnData: false
           MetricStat:
             Metric:
@@ -1000,7 +1017,8 @@ Resources:
                   Value: !GetAtt LoadBalancer.LoadBalancerFullName
             Period: 60
             Stat: Sum
-        - Id: error
+        - Id: m2
+          Label: 5XX Error Count
           ReturnData: false
           MetricStat:
             Metric:
@@ -1011,19 +1029,13 @@ Resources:
                   Value: !GetAtt LoadBalancer.LoadBalancerFullName
             Period: 60
             Stat: Sum
-        - Id: errorPercentage
-          Label: errorPercentage
-          ReturnData: false
-          Expression: (error/invocations)*100
 
-  FrontTargetGroup5xxPercentErrors:
+  Alb5xxRateCanaryErrorAlarm:
     Type: AWS::CloudWatch::Alarm
     Condition: UseCanaryDeployment
     Properties:
-      AlarmName: FrontTargetGroup5xxPercentAlarm
-      AlarmDescription: >
-        The number of HTTP 5XX server error codes that originate from the
-        target group is greater than 5% of all traffic.
+      AlarmName: !Sub "${AWS::StackName}-Alb5xxRateCanaryErrorAlarm"
+      AlarmDescription: !Sub "Open Banking ${Environment} frontend ALB 5XX error rate has exceeded 5% of all requests for 2 consecutive minutes. Canary deployment rollback signal."
       EvaluationPeriods: 2
       DatapointsToAlarm: 2
       Threshold: 5
@@ -1031,26 +1043,28 @@ Resources:
       TreatMissingData: notBreaching
       Metrics:
         - Id: e1
-          Label: ErrorPercent
+          Label: 5XX Error Rate (%)
           ReturnData: true
-          Expression: (m1/m2)*100
+          Expression: (m2/m1)*100 # 5XX error count as a percentage of total requests
         - Id: m1
+          Label: Total Request Count
           ReturnData: false
           MetricStat:
             Metric:
               Namespace: AWS/ApplicationELB
-              MetricName: HTTPCode_Target_5XX_Count
+              MetricName: RequestCount
               Dimensions:
                 - Name: LoadBalancer
                   Value: !GetAtt LoadBalancer.LoadBalancerFullName
             Period: 60
             Stat: Sum
         - Id: m2
+          Label: 5XX Error Count
           ReturnData: false
           MetricStat:
             Metric:
               Namespace: AWS/ApplicationELB
-              MetricName: RequestCount
+              MetricName: HTTPCode_Target_5XX_Count
               Dimensions:
                 - Name: LoadBalancer
                   Value: !GetAtt LoadBalancer.LoadBalancerFullName
@@ -1117,7 +1131,7 @@ Resources:
         - MetricValue: $.avgResponseTime.dynamic
           MetricName: AvgResponseTime
           MetricNamespace: !Sub ${AWS::StackName}/LogMessages
-          Unit: Count/Second
+          Unit: Milliseconds
 
   MaxConcurrentConnectionsMetricFilter:
     Type: AWS::Logs::MetricFilter
@@ -1129,76 +1143,6 @@ Resources:
           MetricName: MaxConcurrentConnections
           MetricNamespace: !Sub ${AWS::StackName}/LogMessages
           Unit: Count
-
-
-  ####################################################################
-  #                                                                  #
-  # Alarm setup                                                      #
-  #                                                                  #
-  ####################################################################
-
-  AlarmSNSTopicKey:
-    Type: AWS::KMS::Key
-    Properties:
-      EnableKeyRotation: true
-      KeyPolicy:
-        Version: "2012-10-17"
-        Statement:
-          - Sid: "Allow Cloudwatch to enqueue encrypted messages"
-            Effect: Allow
-            Resource: "*"
-            Action:
-              - "kms:Decrypt"
-              - "kms:GenerateDataKey"
-            Principal:
-              Service:
-                - "cloudwatch.amazonaws.com"
-                - "sns.amazonaws.com"
-            Condition:
-              StringEquals:
-                aws:SourceAccount: !Ref "AWS::AccountId"
-          - Sid: "Allow the account to manage the key"
-            Effect: Allow
-            Principal:
-              AWS: !Sub "arn:aws:iam::${AWS::AccountId}:root"
-            Action: "kms:*"
-            Resource: "*"
-
-  AlarmTopicOB:
-    Type: AWS::SNS::Topic
-    Properties:
-      KmsMasterKeyId: !Ref AlarmSNSTopicKey
-    Metadata:
-      SamResourceId: AlarmTopicOB
-
-  AlarmTopicSubscriptionPagerDutyOB:
-    Type: AWS::SNS::Subscription
-    Properties:
-      TopicArn: !Ref AlarmTopicOB
-      Endpoint: !Sub "{{resolve:ssm:/alerting/pagerduty-ob/url}}" ### to be determined?
-      Protocol: https
-    Metadata:
-      SamResourceId: AlarmTopicSubscriptionPagerDutyOB
-
-  AlarmPublishToTopicPolicyOB:
-    Type: AWS::SNS::TopicPolicy
-    Properties:
-      Topics:
-        - !Ref AlarmTopicOB
-      PolicyDocument:
-        Version: "2012-10-17"
-        Statement:
-          - Effect: Allow
-            Action: sns:Publish
-            Resource: !Ref AlarmTopicOB
-            Principal:
-              Service: cloudwatch.amazonaws.com
-            Condition:
-              ArnLike:
-                AWS:SourceArn: !Sub "arn:aws:cloudwatch:${AWS::Region}:${AWS::AccountId}:alarm:*"
-
-    Metadata:
-      SamResourceId: AlarmPublishToTopicPolicyOB
 
 Outputs:
   OBFrontUrl:

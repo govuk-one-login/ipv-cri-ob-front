@@ -5,3 +5,4 @@ Feature: Cookie banner
     Then I should see the cookie banner
     When I accept additional cookies
     Then the cookie preference should be saved
+    Then the "You've accepted additional cookies" banner is visible

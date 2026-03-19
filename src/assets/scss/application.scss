@@ -1,6 +1,8 @@
 $govuk-assets-path: '/public/';
+// hmpo-components(8.0.6) uses the deprecated govuk-typography-responsive mixin
+$govuk-suppressed-warnings: ('govuk-typography-responsive');
 
-@import 'govuk-frontend/dist/govuk/index';
-@import '@govuk-one-login/frontend-language-toggle/styles';
-
-@import 'components/phase-banner';
+@import 'govuk-frontend/dist/govuk';
+@import 'hmpo-components/all';
+@import '@govuk-one-login/frontend-language-toggle';
+@import '@govuk-one-login/frontend-ui';

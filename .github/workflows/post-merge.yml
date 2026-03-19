@@ -24,20 +24,20 @@ jobs:
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
-#  deploy-dev:
-#    uses: ./.github/workflows/_deploy.yml
-#    secrets:
-#      role_arn: ${{ secrets.DEV_GH_ACTIONS_ROLE_ARN }}
-#      artifact_bucket: ${{ secrets.DEV_ARTIFACT_BUCKET }}
-#      container_sign_kms_key: ${{ secrets.DEV_CONTAINER_SIGN_KMS_KEY }}
-#      ecr_repository: ${{ secrets.DEV_ECR_REPOSITORY }}
-#      dynatrace_paas_token: ${{ secrets.DYNATRACE_PAAS_TOKEN }}
-#
-#  deploy-build:
-#    uses: ./.github/workflows/_deploy.yml
-#    secrets:
-#      role_arn: ${{ secrets.BUILD_GH_ACTIONS_ROLE_ARN }}
-#      artifact_bucket: ${{ secrets.BUILD_ARTIFACT_BUCKET }}
-#      container_sign_kms_key: ${{ secrets.BUILD_CONTAINER_SIGN_KMS_KEY }}
-#      ecr_repository: ${{ secrets.ECR_REPOSITORY }}
-#      dynatrace_paas_token: ${{ secrets.DYNATRACE_PAAS_TOKEN }}
+  deploy-dev:
+    uses: ./.github/workflows/_deploy.yml
+    secrets:
+      role_arn: ${{ secrets.DEV_GH_ACTIONS_ROLE_ARN }}
+      artifact_bucket: ${{ secrets.DEV_ARTIFACT_BUCKET }}
+      container_sign_kms_key: ${{ secrets.DEV_CONTAINER_SIGN_KMS_KEY }}
+      ecr_repository: ${{ secrets.DEV_ECR_REPOSITORY }}
+      dynatrace_paas_token: ${{ secrets.DYNATRACE_PAAS_TOKEN }}
+
+  deploy-build:
+    uses: ./.github/workflows/_deploy.yml
+    secrets:
+      role_arn: ${{ secrets.BUILD_GH_ACTIONS_ROLE_ARN }}
+      artifact_bucket: ${{ secrets.BUILD_ARTIFACT_BUCKET }}
+      container_sign_kms_key: ${{ secrets.BUILD_CONTAINER_SIGN_KMS_KEY }}
+      ecr_repository: ${{ secrets.BUILD_ECR_REPOSITORY }}
+      dynatrace_paas_token: ${{ secrets.DYNATRACE_PAAS_TOKEN }}
