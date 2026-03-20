@@ -859,11 +859,11 @@ Resources:
   #                                                                  #
   ####################################################################
 
-  EcsCpuOver60ScaleOutAlarm:
+  EcsScaleOutAlarm:
     DependsOn: ECSAutoScalingTarget
     Type: AWS::CloudWatch::Alarm
     Properties:
-      AlarmName: !Sub "${AWS::StackName}-EcsCpuOver60ScaleOutAlarm"
+      AlarmName: !Sub "${AWS::StackName}-EcsScaleOutAlarm"
       ActionsEnabled: true
       AlarmActions:
         - !Ref EcsStepScaleOutPolicy
@@ -883,11 +883,11 @@ Resources:
       Period: "60"
       Threshold: "60"
 
-  EcsCpuUnder20ScaleInAlarm:
+  EcsScaleInAlarm:
     DependsOn: ECSAutoScalingTarget
     Type: AWS::CloudWatch::Alarm
     Properties:
-      AlarmName: !Sub "${AWS::StackName}-EcsCpuUnder20ScaleInAlarm"
+      AlarmName: !Sub "${AWS::StackName}-EcsScaleInAlarm"
       ActionsEnabled: true
       AlarmActions:
         - !Ref EcsStepScaleInPolicy
@@ -907,11 +907,11 @@ Resources:
       Period: "60"
       Threshold: "20"
 
-  EcsTaskCountErrorCriticalAlarm:
+  EcsNoTaskCountErrorCriticalAlarm:
     Type: AWS::CloudWatch::Alarm
     Properties:
-      AlarmName: !Sub "${AWS::StackName}-EcsTaskCountErrorCriticalAlarm"
-      AlarmDescription: !Sub "Open Banking ${Environment} frontend has zero running ECS tasks for 2 consecutive minutes."
+      AlarmName: !Sub "${AWS::StackName}-EcsNoTaskCountErrorCriticalAlarm"
+      AlarmDescription: !Sub "Open Banking ${Environment} frontend has no running ECS tasks for 2 consecutive minutes."
       ActionsEnabled: true
       AlarmActions:
         - !If [ IsProduction, !ImportValue build-notifications-PagerDutySNSTopicArn, !ImportValue build-notifications-CriticalAlertsTopicArn ]
@@ -931,10 +931,10 @@ Resources:
       ComparisonOperator: LessThanThreshold
       TreatMissingData: breaching
 
-  EcsTaskCountErrorWarningAlarm:
+  EcsMinTaskCountErrorWarningAlarm:
     Type: AWS::CloudWatch::Alarm
     Properties:
-      AlarmName: !Sub "${AWS::StackName}-EcsTaskCountErrorWarningAlarm"
+      AlarmName: !Sub "${AWS::StackName}-EcsMinTaskCountErrorWarningAlarm"
       AlarmDescription: !Sub "Open Banking ${Environment} frontend ECS task count has been below the environment minimum for 15 consecutive minutes."
       ActionsEnabled: true
       AlarmActions:
