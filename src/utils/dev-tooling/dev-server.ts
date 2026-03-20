@@ -11,7 +11,10 @@ const createViteServer = async (): Promise<ViteDevServer> => {
   const { createServer } = await import('vite')
   return createServer({
     appType: 'custom',
-    server: { middlewareMode: true }
+    server: {
+      middlewareMode: true,
+      watch: { ignored: ['**/.github/**', '**/deploy/**'] }
+    }
   })
 }
 
@@ -35,7 +38,7 @@ const setupDevServer = (app: Express, vite: ViteDevServer): void => {
   vite.watcher.add('src/**/*.{njk,yml,json}')
   // eslint-disable-next-line @typescript-eslint/no-misused-promises
   vite.watcher.on('change', async (file) => {
-    if (file.endsWith('.yml')) {
+    if (file.endsWith('.yml') && i18next.isInitialized) {
       await i18next.reloadResources()
     }
     if (file.endsWith('.njk') || file.endsWith('.yml') || file.endsWith('.json')) {

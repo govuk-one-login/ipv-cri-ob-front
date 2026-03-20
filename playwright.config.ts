@@ -11,5 +11,5 @@ export default defineConfig({
   projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
   reporter: [['list'], ['html', { open: 'never' }]],
   testDir,
-  use: { baseURL: 'http://localhost:5091' } // don't forget to change me in global-setup.ts
+  use: { baseURL: 'http://localhost:5091', screenshot: 'on' } // don't forget to change me in global-setup.ts
 })

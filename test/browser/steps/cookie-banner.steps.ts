@@ -21,3 +21,10 @@ Then('the cookie preference should be saved', async ({ page }) => {
   expect(pref).toBeDefined()
   expect(JSON.parse(decodeURIComponent(pref!.value))).toMatchObject({ analytics: true })
 })
+
+Then('the "You\'ve accepted additional cookies" banner is visible', async ({ page }) => {
+  await expect(page.locator('#cookies-accepted')).toBeVisible()
+  await expect(page.locator('#cookies-accepted')).toContainText(
+    "You've accepted additional cookies."
+  )
+})
