@@ -26,6 +26,9 @@ jobs:
 
   deploy-dev:
     uses: ./.github/workflows/_deploy.yml
+    permissions:
+      id-token: write
+      contents: read
     secrets:
       role_arn: ${{ secrets.DEV_GH_ACTIONS_ROLE_ARN }}
       artifact_bucket: ${{ secrets.DEV_ARTIFACT_BUCKET }}
@@ -35,6 +38,9 @@ jobs:
 
   deploy-build:
     uses: ./.github/workflows/_deploy.yml
+    permissions:
+      id-token: write
+      contents: read
     secrets:
       role_arn: ${{ secrets.BUILD_GH_ACTIONS_ROLE_ARN }}
       artifact_bucket: ${{ secrets.BUILD_ARTIFACT_BUCKET }}
