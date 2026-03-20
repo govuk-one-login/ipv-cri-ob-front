@@ -1,4 +1,4 @@
-name: Docker build, ECR push, template copy to S3
+name: Build and deploy
 
 on:
   workflow_call:
