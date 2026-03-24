@@ -451,7 +451,7 @@ Resources:
             - Name: API_BASE_URL
               Value: !Sub
                 - "https://${APIGatewayId}.execute-api.eu-west-2.amazonaws.com/${Environment}"
-                - APIGatewayId: !ImportValue ob-cri-api-v1-PrivateOBApiGatewayId
+                - APIGatewayId: !ImportValue ipv-cri-ob-api-PrivateAPIGatewayID
             - Name: SESSION_TABLE_NAME
               Value: !Sub "cri-ob-front-sessions-${Environment}"
             - Name: GOOGLE_ANALYTICS_4_GTM_CONTAINER_ID

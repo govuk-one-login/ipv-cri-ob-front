@@ -1,3 +1,4 @@
+import type { Express } from 'express'
 import type { Mock } from 'vitest'
 
 import { afterEach, describe, expect, it, vi } from 'vitest'
@@ -11,7 +12,13 @@ vi.mock('@govuk-one-login/di-ipv-cri-common-express', () => ({
     bootstrap: {
       setup: vi
         .fn()
-        .mockReturnValue({ app: { set: vi.fn(), use: vi.fn() }, router: { use: vi.fn() } })
+        .mockImplementation(
+          ({ middlewareSetupFn }: { middlewareSetupFn: (app: Express) => void }) => {
+            const app = { set: vi.fn(), use: vi.fn() } as unknown as Express
+            middlewareSetupFn(app)
+            return { app, router: { use: vi.fn() } }
+          }
+        )
     },
     lib: {
       axios: vi.fn(),
@@ -40,6 +47,7 @@ vi.mock('@src/utils/dev-tooling/dev-server', () => ({
 }))
 
 afterEach(() => {
+  vi.clearAllMocks()
   vi.unstubAllEnvs()
   vi.resetModules()
 })
@@ -77,5 +85,37 @@ describe('createApp', () => {
     expect(router.use).toHaveBeenCalledWith(
       commonExpress.lib.errorHandling.redirectAsErrorToCallback
     )
+  })
+
+  it('enables request logging in production', async () => {
+    vi.stubEnv('NODE_ENV', 'production')
+    const commonExpress = (await import('@govuk-one-login/di-ipv-cri-common-express')).default
+    const { createApp } = await import('@src/app-bootstrap')
+    await createApp()
+
+    expect(commonExpress.bootstrap.setup).toHaveBeenCalledWith(
+      expect.objectContaining({ requestLogging: true })
+    )
+  })
+
+  it('sets i18n and applies middleware in the correct order', async () => {
+    vi.stubEnv('NODE_ENV', 'development')
+    const { frontendUiMiddlewareIdentityBypass } = await import('@govuk-one-login/frontend-ui')
+    const { forceSessionSaveBeforeRedirect } =
+      await import('@src/middleware/force-session-save.middleware')
+    const { default: commonExpress } = await import('@govuk-one-login/di-ipv-cri-common-express')
+    const { createApp } = await import('@src/app-bootstrap')
+    const { app } = await createApp()
+
+    expect(commonExpress.lib.i18n.setI18n).toHaveBeenCalledWith(
+      expect.objectContaining({ router: app })
+    )
+    expect(app.use).toHaveBeenNthCalledWith(1, frontendUiMiddlewareIdentityBypass)
+    expect(app.use).toHaveBeenNthCalledWith(2, forceSessionSaveBeforeRedirect)
+    expect(app.use).toHaveBeenNthCalledWith(3, commonExpress.lib.locals.getGTM)
+    expect(app.use).toHaveBeenNthCalledWith(4, commonExpress.lib.locals.getLanguageToggle)
+    expect(app.use).toHaveBeenNthCalledWith(5, commonExpress.lib.locals.getDeviceIntelligence)
+    expect(app.use).toHaveBeenNthCalledWith(6, commonExpress.lib.headers)
+    expect(app.use).toHaveBeenNthCalledWith(7, commonExpress.lib.axios)
   })
 })

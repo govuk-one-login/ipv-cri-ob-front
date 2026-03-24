@@ -1,6 +1,6 @@
 {% extends "layouts/base.njk" %}
 
-{% set pageTitleKey = "errors.notFound.title" %}
+{% set pageTitleKey = "notFound.title" %}
 <!--ga4 tags-->
 {% set taxLevel2 = "page-not-found" %}
 {% set statusCode = "404" %}
@@ -11,19 +11,19 @@
     <div class="govuk-grid-column-two-thirds">
       <h1 class="govuk-heading-l">{{ translate(pageTitleKey) }}</h1>
 
-      {% for item in translate("errors.notFound.content") %}
+      {% for item in translate("notFound.content") %}
         {{ item | safe }}
       {% endfor %}
 
       <div class="govuk-button-group">
         <a href="https://www.gov.uk/" class="govuk-button" data-module="govuk-button"
-          >{{ translate("errors.notFound.primaryButton") }}</a
+          >{{ translate("notFound.primaryButton") }}</a
         >
         <a
           href="https://home.account.gov.uk/contact-gov-uk-one-login"
           class="govuk-link govuk-link--no-visited-state"
           target="_blank"
-          >{{ translate("errors.notFound.secondaryButton") }}</a
+          >{{ translate("notFound.secondaryButton") }}</a
         >
       </div>
     </div>
