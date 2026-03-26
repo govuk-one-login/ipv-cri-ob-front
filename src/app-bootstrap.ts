@@ -31,7 +31,12 @@ export const createApp = async (): Promise<{ app: Express; router: Router }> => 
     logs: loggingConfig, // hmpo logger only
     middlewareSetupFn: (app: Express) => {
       if (vite) setupDevServer(app, vite)
-      commonExpress.lib.i18n.setI18n({ config: {}, router: app })
+      commonExpress.lib.i18n.setI18n({
+        config: {
+          cookieDomain: appConfig.APP.GTM.ANALYTICS_COOKIE_DOMAIN
+        },
+        router: app
+      })
       app.use(frontendUiMiddlewareIdentityBypass)
       app.use(forceSessionSaveBeforeRedirect)
       app.use(commonExpress.lib.locals.getGTM)

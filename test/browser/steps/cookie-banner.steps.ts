@@ -1,7 +1,8 @@
+import { noConsoleErrors } from '../fixtures'
 import { expect } from '@playwright/test'
 import { createBdd } from 'playwright-bdd'
 
-const { Given, Then, When } = createBdd()
+const { Given, Then, When } = createBdd(noConsoleErrors)
 
 Given('I navigate to the app', async ({ page }) => {
   await page.goto('/')

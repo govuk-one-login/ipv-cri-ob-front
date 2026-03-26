@@ -88,27 +88,32 @@ export default defineConfig({
       targets: [
         {
           dest: 'public',
+          rename: { stripBase: 5 },
           src: 'node_modules/govuk-frontend/dist/govuk/assets/{fonts,images,rebrand}'
         },
         {
           dest: 'views',
-          src: 'src/views/*'
+          rename: { stripBase: 2 },
+          src: 'src/views'
         },
         {
-          dest: 'src',
+          dest: 'src', // needs to be src as hardcoded upstream
+          rename: { stripBase: 1 },
           src: 'src/locales'
         },
         {
           dest: 'public/javascripts',
+          rename: { stripBase: true },
           src: 'node_modules/@govuk-one-login/frontend-analytics/lib/analytics.js'
         },
         {
           dest: 'public/javascripts',
+          rename: { stripBase: true },
           src: 'node_modules/hmpo-components/all.js'
         },
         {
           dest: 'public/javascripts',
-          rename: 'deviceIntelligence.js',
+          rename: (_name, ext, _fullPath) => `../../../../../deviceIntelligence.${ext}`,
           src: 'node_modules/@govuk-one-login/frontend-device-intelligence/build/esm/index.js'
         }
       ]
