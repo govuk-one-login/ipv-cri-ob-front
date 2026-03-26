@@ -11,7 +11,7 @@ on:
     branches:
       - main
   schedule:
-    - cron: '00 08 * * 0'
+    - cron: '00 07 * * 0'
 
 jobs:
   codeql:
@@ -21,4 +21,5 @@ jobs:
       actions: read
       contents: read
     steps:
-      - uses: govuk-one-login/github-actions/code-quality/codeql@edec20ab5dbe73a66670e3444b1c34ea8eb8a8e7
+      - name: Run CodeQL scan
+        uses: govuk-one-login/github-actions/code-quality/codeql@edec20ab5dbe73a66670e3444b1c34ea8eb8a8e7

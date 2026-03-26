@@ -1,0 +1,32 @@
+name: Sonar scan
+description: Run SonarCloud analysis
+
+inputs:
+  github-token:
+    description: GitHub auth token
+    required: true
+  sonar-token:
+    description: SonarCloud auth token
+    required: true
+  pull-repository:
+    description: Whether to checkout the repository
+    required: false
+    default: 'true'
+  coverage-artifact:
+    description: Artifact name containing the coverage report
+    required: false
+  coverage-run-id:
+    description: Workflow run ID that produced the coverage artifact
+    required: false
+
+runs:
+  using: composite
+  steps:
+    - name: Run SonarCloud scan
+      uses: govuk-one-login/github-actions/code-quality/sonarcloud@9d6ee027d0b9167dfc25e67124951956278bb585
+      with:
+        pull-repository: ${{ inputs.pull-repository }}
+        github-token: ${{ inputs.github-token }}
+        sonar-token: ${{ inputs.sonar-token }}
+        coverage-artifact: ${{ inputs.coverage-artifact }}
+        coverage-run-id: ${{ inputs.coverage-run-id }}

@@ -1,5 +1,5 @@
 name: Node project setup
-description: Checkout and install dependencies
+description: Setup Node and install dependencies
 
 runs:
   using: composite
