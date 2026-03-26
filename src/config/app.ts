@@ -47,8 +47,8 @@ export default AppConfigSchema.parse({
   API: {
     BASE_URL: process.env['API_BASE_URL']!,
     PATHS: {
-      AUTHORIZATION: '/authorization',
-      SESSION: '/session'
+      AUTHORIZATION: 'authorization',
+      SESSION: 'session'
     }
   },
   APP: {

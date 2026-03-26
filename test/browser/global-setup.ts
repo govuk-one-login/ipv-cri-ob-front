@@ -79,7 +79,7 @@ export default async function globalSetup() {
   const appProcess = spawn('node', ['dist/index.js'], {
     env: {
       ...process.env,
-      API_BASE_URL: wiremockEndpoint,
+      API_BASE_URL: `${wiremockEndpoint}/`,
       LOCAL_DYNAMO_ENDPOINT_OVERRIDE: dynamoEndpoint,
       NODE_ENV: 'test',
       PORT: APP_PORT,
