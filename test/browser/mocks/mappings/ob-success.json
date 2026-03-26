@@ -1,0 +1,89 @@
+{
+  "mappings": [
+    {
+      "name": "reset ob-success scenario",
+      "scenarioName": "ob-success",
+      "newScenarioState": "Started",
+      "request": {
+        "method": "GET",
+        "url": "/__reset/ob-success"
+      },
+      "response": {
+        "status": 200
+      }
+    },
+    {
+      "name": "create session",
+      "scenarioName": "ob-success",
+      "requiredScenarioState": "Started",
+      "newScenarioState": "SessionCreated",
+      "request": {
+        "method": "POST",
+        "url": "/session"
+      },
+      "response": {
+        "status": 201,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "session_id": "CAFEBABE",
+          "state": "sT@t3",
+          "redirect_uri": "{{request.baseUrl}}/callback"
+        },
+        "transformers": ["response-template"]
+      }
+    },
+    {
+      "name": "get authorization code",
+      "scenarioName": "ob-success",
+      "requiredScenarioState": "SessionCreated",
+      "newScenarioState": "AuthCode",
+      "request": {
+        "method": "GET",
+        "urlPath": "/authorization",
+        "headers": {
+          "session_id": {
+            "equalTo": "CAFEBABE"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "authorizationCode": {
+            "value": "DEADBEEF"
+          },
+          "redirect_uri": "{{request.baseUrl}}/callback",
+          "state": "sT@t3"
+        },
+        "transformers": ["response-template"]
+      }
+    },
+    {
+      "name": "oauth callback",
+      "request": {
+        "method": "GET",
+        "urlPath": "/callback",
+        "queryParameters": {
+          "code": {
+            "equalTo": "DEADBEEF"
+          },
+          "state": {
+            "equalTo": "sT@t3"
+          },
+          "client_id": {
+            "equalTo": "test-client"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "body": "OAuth callback received successfully"
+      }
+    }
+  ]
+}

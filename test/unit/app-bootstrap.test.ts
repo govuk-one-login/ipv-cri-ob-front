@@ -1,3 +1,5 @@
+import type { Mock } from 'vitest'
+
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
 vi.mock('@src/utils/logger', () => ({
@@ -7,10 +9,13 @@ vi.mock('@src/utils/logger', () => ({
 vi.mock('@govuk-one-login/di-ipv-cri-common-express', () => ({
   default: {
     bootstrap: {
-      setup: vi.fn().mockReturnValue({ app: { set: vi.fn(), use: vi.fn() }, router: vi.fn() })
+      setup: vi
+        .fn()
+        .mockReturnValue({ app: { set: vi.fn(), use: vi.fn() }, router: { use: vi.fn() } })
     },
     lib: {
       axios: vi.fn(),
+      errorHandling: { redirectAsErrorToCallback: vi.fn() },
       headers: vi.fn(),
       i18n: { setI18n: vi.fn() },
       locals: { getDeviceIntelligence: vi.fn(), getGTM: vi.fn(), getLanguageToggle: vi.fn() },
@@ -56,5 +61,21 @@ describe('createApp', () => {
     await createApp()
 
     expect(createViteServer).toHaveBeenCalled()
+  })
+
+  it('registers redirectAsErrorToCallback on the router after routes are configured', async () => {
+    const { configure } = await import('@src/config/routes')
+    const { default: commonExpress } = await import('@govuk-one-login/di-ipv-cri-common-express')
+    const { createApp } = await import('@src/app-bootstrap')
+    await createApp()
+
+    const { router } = vi.mocked(commonExpress.bootstrap.setup).mock.results[0]!.value as {
+      router: { use: Mock }
+    }
+
+    expect(configure).toHaveBeenCalledBefore(router.use)
+    expect(router.use).toHaveBeenCalledWith(
+      commonExpress.lib.errorHandling.redirectAsErrorToCallback
+    )
   })
 })

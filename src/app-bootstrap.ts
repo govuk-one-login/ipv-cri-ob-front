@@ -84,5 +84,8 @@ export const createApp = async (): Promise<{ app: Express; router: Router }> => 
   })
 
   routes.configure(router)
+  // error handling must be last
+  router.use(commonExpress.lib.errorHandling.redirectAsErrorToCallback)
+
   return { app, router }
 }

@@ -2,7 +2,7 @@ declare module '@govuk-one-login/di-ipv-cri-common-express' {
   import type { OverloadProtectionConfig } from '@src/config/overload-protection'
   import type { DynamoDBStore } from 'connect-dynamodb'
   import type { Request, Response } from 'express'
-  import type { Express, RequestHandler, Router } from 'express'
+  import type { ErrorRequestHandler, Express, RequestHandler, Router } from 'express'
 
   export interface AppLogger {
     debug(message: string, ...args: unknown[]): void
@@ -165,6 +165,9 @@ declare module '@govuk-one-login/di-ipv-cri-common-express' {
     }
     lib: {
       axios: RequestHandler // attaches a configured axios instance to req.axios, using API.BASE_URL from app settings
+      errorHandling: {
+        redirectAsErrorToCallback: ErrorRequestHandler
+      }
       headers: RequestHandler // security headers middleware
       helmet: CommonExpressHelmetConfig
       i18n: {

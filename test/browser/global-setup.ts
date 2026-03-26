@@ -1,14 +1,15 @@
 import { spawn } from 'child_process'
-import { existsSync } from 'fs'
-import { GenericContainer } from 'testcontainers'
+import { existsSync } from 'node:fs'
+import { GenericContainer, Wait } from 'testcontainers'
 
+import path from 'node:path'
 import PinoPretty from 'pino-pretty'
 
 const APP_PORT = '5091' // don't forget to change me in playwright.config.ts
 const APP_URL = `http://localhost:${APP_PORT}`
 
 // give app 20 seconds to boot
-const waitForApp = async (exited: { value: boolean }, attempts = 40) => {
+const appReady = async (exited: { value: boolean }, attempts = 40) => {
   for (let i = 0; i < attempts; i++) {
     if (exited.value) throw new Error('App process exited before becoming ready')
     if (
@@ -20,6 +21,36 @@ const waitForApp = async (exited: { value: boolean }, attempts = 40) => {
     await new Promise((resolve) => setTimeout(resolve, 500))
   }
   throw new Error('App failed to start')
+}
+
+const initWiremockContainer = async () => {
+  console.log('[SYSTEM] starting Wiremock container...')
+  const wiremockContainer = await new GenericContainer('wiremock/wiremock:3.13.1')
+    .withCommand(['--local-response-templating'])
+    .withExposedPorts(8080)
+    .withWaitStrategy(Wait.forHttp('/__admin/mappings', 8080))
+    .withCopyDirectoriesToContainer([
+      {
+        source: path.resolve(import.meta.dirname, 'mocks/mappings'),
+        target: '/home/wiremock/mappings'
+      }
+    ])
+    .start()
+  const wiremockEndpoint = `http://localhost:${wiremockContainer.getMappedPort(8080)}`
+  console.log(`[SYSTEM] Wiremock ready at ${wiremockEndpoint}`)
+  return { wiremockContainer, wiremockEndpoint }
+}
+
+const initDynamoContainer = async () => {
+  console.log('[SYSTEM] starting DynamoDB container...')
+  const dynamoContainer = await new GenericContainer('amazon/dynamodb-local')
+    .withCommand(['-jar', 'DynamoDBLocal.jar', '-sharedDb', '-inMemory'])
+    .withExposedPorts(8000)
+    .start()
+
+  const dynamoEndpoint = `http://localhost:${dynamoContainer.getMappedPort(8000)}`
+  console.log(`[SYSTEM] DynamoDB ready at ${dynamoEndpoint}`)
+  return { dynamoContainer, dynamoEndpoint }
 }
 
 export default async function globalSetup() {
@@ -39,26 +70,20 @@ export default async function globalSetup() {
     }
   }
 
-  console.log('[SYSTEM] starting DynamoDB container...')
-  const dynamoContainer = await new GenericContainer('amazon/dynamodb-local')
-    .withCommand(['-jar', 'DynamoDBLocal.jar', '-sharedDb', '-inMemory'])
-    .withExposedPorts(8000)
-    .start()
+  const { dynamoContainer, dynamoEndpoint } = await initDynamoContainer()
+  const { wiremockContainer, wiremockEndpoint } = await initWiremockContainer()
 
-  const dynamoEndpoint = `http://localhost:${dynamoContainer.getMappedPort(8000)}`
-  console.log(`[SYSTEM] DynamoDB ready at ${dynamoEndpoint}`)
-
-  // TODO wiremock init
+  process.env['WIREMOCK_URL'] = wiremockEndpoint // used by browser tests, not app
 
   console.log('[SYSTEM] starting app...')
   const appProcess = spawn('node', ['dist/index.js'], {
     env: {
       ...process.env,
-      API_BASE_URL: 'http://localhost:9999', // TODO actually will be wiremock
+      API_BASE_URL: `${wiremockEndpoint}/`,
       LOCAL_DYNAMO_ENDPOINT_OVERRIDE: dynamoEndpoint,
       NODE_ENV: 'test',
       PORT: APP_PORT,
-      SESSION_SECRET: 'not-a-real-secret', // pragma: allowlist secret
+      SESSION_SECRET: 'hunter2', // pragma: allowlist secret
       USE_PINO_LOGGER: 'true'
     }
   })
@@ -73,11 +98,11 @@ export default async function globalSetup() {
   })
 
   console.log('[SYSTEM] waiting for app to be ready...')
-  await waitForApp(exited)
+  await appReady(exited)
   console.log('[SYSTEM] app ready')
 
   return async () => {
     appProcess.kill('SIGTERM')
-    await dynamoContainer.stop()
+    await Promise.all([dynamoContainer.stop(), wiremockContainer.stop()])
   }
 }

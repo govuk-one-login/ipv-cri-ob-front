@@ -1,0 +1,82 @@
+{
+  "mappings": [
+    {
+      "name": "reset ob-error scenario",
+      "scenarioName": "ob-error",
+      "newScenarioState": "Started",
+      "request": {
+        "method": "GET",
+        "url": "/__reset/ob-error"
+      },
+      "response": {
+        "status": 200
+      }
+    },
+    {
+      "name": "create session (error path)",
+      "scenarioName": "ob-error",
+      "requiredScenarioState": "Started",
+      "newScenarioState": "SessionCreated",
+      "request": {
+        "method": "POST",
+        "url": "/session"
+      },
+      "response": {
+        "status": 201,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "session_id": "8BADF00D",
+          "state": "sT@t3",
+          "redirect_uri": "{{request.baseUrl}}/callback"
+        },
+        "transformers": ["response-template"]
+      }
+    },
+    {
+      "name": "authorization error",
+      "scenarioName": "ob-error",
+      "requiredScenarioState": "SessionCreated",
+      "request": {
+        "method": "GET",
+        "urlPath": "/authorization",
+        "headers": {
+          "session_id": {
+            "equalTo": "8BADF00D"
+          }
+        }
+      },
+      "response": {
+        "status": 403,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "message": "Authorization permission denied",
+          "code": "access_denied",
+          "errorSummary": "access_denied: Authorization permission denied"
+        }
+      }
+    },
+    {
+      "name": "oauth error callback",
+      "request": {
+        "method": "GET",
+        "urlPath": "/callback",
+        "queryParameters": {
+          "error": {
+            "equalTo": "access_denied"
+          },
+          "error_description": {
+            "equalTo": "Authorization permission denied"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "body": "OAuth error callback received"
+      }
+    }
+  ]
+}
