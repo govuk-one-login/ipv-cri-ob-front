@@ -1,7 +1,7 @@
-generic:
+genericError:
   title: "Mae rhywbeth wedi mynd o'i le!"
 
-notFound:
+notFoundError:
   title: Tudalen heb ei darganfod
   content:
     - <p class="govuk-body">Ni allwn ddod o hyd i'r dudalen rydych chi'n chwilio amdani.</p>
@@ -12,5 +12,5 @@ notFound:
   primaryButton: Ewch i hafan GOV.UK
   secondaryButton: Cysylltwch â'r tîm GOV.UK One Login (agor mewn tab newydd)
 
-sessionEnded:
+sessionExpiredError:
   title: 'Sesiwn wedi dod i ben'

@@ -1,7 +1,7 @@
-generic:
+genericError:
   title: Sorry, there is a problem with the service
 
-notFound:
+notFoundError:
   title: Page not found
   content:
     - <p class="govuk-body">We cannot find the page you're looking for.</p>
@@ -12,5 +12,5 @@ notFound:
   primaryButton: Go to the GOV.UK homepage
   secondaryButton: Contact the GOV.UK One Login team (opens in a new tab)
 
-sessionEnded:
+sessionExpiredError:
   title: Session expired
