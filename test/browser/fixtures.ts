@@ -1,18 +1,47 @@
-import { expect } from '@playwright/test'
-import { createBdd, test as base } from 'playwright-bdd'
+import { test as base, expect } from '@playwright/test'
 
-export const noConsoleErrors = base.extend<{ noConsoleErrors: void }>({
+import AxeBuilder from '@axe-core/playwright'
+
+interface Fixtures {
+  axeCheck: void
+  noConsoleErrors: void
+  skipAxe: boolean
+  skipConsoleErrors: boolean
+}
+
+export const test = base.extend<Fixtures>({
+  axeCheck: [
+    async ({ page, skipAxe }, use) => {
+      await use()
+      if (skipAxe) return
+      const { violations } = await new AxeBuilder({ page })
+        .withTags(['wcag2a', 'wcag2aa', 'wcag22aa'])
+        .analyze()
+      const summary = violations.map((v) => ({
+        help: v.helpUrl,
+        id: v.id,
+        impact: v.impact,
+        targets: v.nodes.map((n) => n.target.join(', '))
+      }))
+      expect(summary, 'Accessibility violations found').toEqual([])
+    },
+    { auto: true }
+  ],
   noConsoleErrors: [
-    async ({ page }, use) => {
+    async ({ page, skipConsoleErrors }, use) => {
       const errors: string[] = []
       page.on('console', (msg) => {
-        if (msg.type() === 'error') errors.push(msg.text())
+        if (msg.type() === 'error' && !msg.text().startsWith('Failed to load resource'))
+          errors.push(msg.text())
       })
       await use()
+      if (skipConsoleErrors) return
       expect(errors, 'Unexpected browser console errors').toEqual([])
     },
-    { auto: false }
-  ]
+    { auto: true }
+  ],
+  skipAxe: [false, { option: true }],
+  skipConsoleErrors: [false, { option: true }]
 })
 
-export const { Before, Given, Then, When } = createBdd(noConsoleErrors)
+export { expect } from '@playwright/test'

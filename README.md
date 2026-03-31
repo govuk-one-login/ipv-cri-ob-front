@@ -10,7 +10,7 @@ Frontend code for the Open Banking CRI
 - Express
 - DynamoDB
 - Vite/Vitest
-- Playwright/Playwright BDD
+- Playwright
 - Prettier/Eslint
 
 This project uses `perfectionist` and makes a number of opinionated choices on how code should be formatted and organised. See the `eslint.config.ts` for more details.
@@ -62,7 +62,7 @@ Locales (YML), JSON and Nunjucks files are also monitored and will trigger an au
 There are two types of tests in the project:
 
 - unit tests (using the Vitest runner)
-- browser tests (using Playwright and Playwright BDD)
+- browser tests (using Playwright)
 
 Tests are organised in the `test` directory and further categorised as follows:
 
@@ -74,9 +74,7 @@ Tests are organised in the `test` directory and further categorised as follows:
 
 #### Browser tests
 
-Browser tests are organised by feature and use Playwright BDD Given, When, Then `.feature` files to describe a test. These live in `test/browser/features`
-
-Steps are written in TypeScript and live in `test/browser/steps`
+Browser tests are plain Playwright specs organised by feature in `test/browser/specs`. Shared helpers live in `test/browser/helpers` and WireMock stub mappings live in `test/browser/mocks/mappings`.
 
 The following commands will start a browser test run:
 
