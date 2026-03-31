@@ -48,14 +48,14 @@
     "sass-embedded": "1.98.0",
     "testcontainers": "11.13.0",
     "tsx": "4.21.0",
-    "typescript": "5.9.3",
-    "typescript-eslint": "8.57.1",
-    "vite": "8.0.1",
+    "typescript": "6.0.2",
+    "typescript-eslint": "8.58.0",
+    "vite": "8.0.3",
     "vite-plugin-static-copy": "4.0.0",
     "vitest": "4.1.2"
   },
   "dependencies": {
-    "@aws-sdk/client-dynamodb": "3.1014.0",
+    "@aws-sdk/client-dynamodb": "3.1020.0",
     "@govuk-one-login/di-ipv-cri-common-express": "13.1.0",
     "@govuk-one-login/frontend-analytics": "4.0.7",
     "@govuk-one-login/frontend-device-intelligence": "1.2.0",
@@ -72,8 +72,6 @@
     "zod": "4.3.6"
   },
   "overrides": {
-    "fast-xml-parser": "5.5.7",
-    "minimatch": "10.2.4",
     "hmpo-logger": "8.0.3",
     "hmpo-components": "8.0.6",
     "@govuk-one-login/frontend-language-toggle": "$@govuk-one-login/frontend-language-toggle",

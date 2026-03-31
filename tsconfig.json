@@ -20,7 +20,6 @@
     "moduleDetection": "force",
     "resolveJsonModule": true,
     "skipLibCheck": true,
-    "baseUrl": ".",
     "paths": {
       "@src/*": ["./src/*"]
     }
