@@ -1,28 +1,17 @@
 import { expect } from '@playwright/test'
-import { createBdd } from 'playwright-bdd'
+import { Before, Then, When } from '../fixtures'
+import { wiremock } from '../wiremock'
 
-const { Before, Then, When } = createBdd()
-
-Before(async ({ $tags }) => {
-  const wireMockUrl = process.env['WIREMOCK_URL']
-  const isErrorPath = $tags.includes('@error-path')
-
-  await Promise.all([
-    fetch(`${wireMockUrl}/__reset/ob-success`),
-    fetch(`${wireMockUrl}/__reset/ob-error`)
-  ])
-
-  const scenarioToDeactivate = isErrorPath ? 'ob-success' : 'ob-error'
-  const res = await fetch(`${wireMockUrl}/__admin/scenarios/${scenarioToDeactivate}/state`, {
-    body: JSON.stringify({ state: 'SessionCreated' }),
-    headers: { 'Content-Type': 'application/json' },
-    method: 'PUT'
-  })
-  if (!res.ok) throw new Error(`Failed to set scenario state: ${res.status} ${await res.text()}`)
+Before(async () => {
+  await wiremock.resetScenarios()
 })
 
 When('I start the Open Banking journey', async ({ page }) => {
-  await page.goto('/oauth2/authorize?client_id=test-client&request=test-jwt')
+  await page.goto('/oauth2/authorize?client_id=test-client&request=test-jwt-success')
+})
+
+When('I start the Open Banking journey with an error', async ({ page }) => {
+  await page.goto('/oauth2/authorize?client_id=test-client&request=test-jwt-error')
 })
 
 When('I return to the app after completing the bank interaction', async ({ page }) => {

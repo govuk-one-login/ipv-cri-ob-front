@@ -1,5 +1,5 @@
 import { expect } from '@playwright/test'
-import { test as base } from 'playwright-bdd'
+import { createBdd, test as base } from 'playwright-bdd'
 
 export const noConsoleErrors = base.extend<{ noConsoleErrors: void }>({
   noConsoleErrors: [
@@ -14,3 +14,5 @@ export const noConsoleErrors = base.extend<{ noConsoleErrors: void }>({
     { auto: false }
   ]
 })
+
+export const { Before, Given, Then, When } = createBdd(noConsoleErrors)

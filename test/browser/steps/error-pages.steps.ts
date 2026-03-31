@@ -1,7 +1,5 @@
 import { expect } from '@playwright/test'
-import { createBdd } from 'playwright-bdd'
-
-const { Then, When } = createBdd()
+import { Then, When } from '../fixtures'
 
 When('I navigate to a page that does not exist', async ({ page }) => {
   await page.goto('/this-page-does-not-exist')
