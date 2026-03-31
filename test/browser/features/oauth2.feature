@@ -8,6 +8,6 @@ Feature: OAuth2 flow
 
   @error-path
   Scenario: Access denied error is returned to the client when no authorization code is present
-    When I start the Open Banking journey
+    When I start the Open Banking journey with an error
     And I return to the app after an unsuccessful bank interaction
     Then I should be redirected with an access denied error

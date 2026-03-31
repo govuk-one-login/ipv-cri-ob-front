@@ -4,8 +4,8 @@ import { GenericContainer, Wait } from 'testcontainers'
 
 import path from 'node:path'
 import PinoPretty from 'pino-pretty'
+import { APP_PORT } from './config'
 
-const APP_PORT = '5091' // don't forget to change me in playwright.config.ts
 const APP_URL = `http://localhost:${APP_PORT}`
 
 // give app 20 seconds to boot

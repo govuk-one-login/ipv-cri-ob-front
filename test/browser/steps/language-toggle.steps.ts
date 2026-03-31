@@ -1,8 +1,5 @@
-import { noConsoleErrors } from '../fixtures'
 import { expect } from '@playwright/test'
-import { createBdd } from 'playwright-bdd'
-
-const { Then, When } = createBdd(noConsoleErrors)
+import { Then, When } from '../fixtures'
 
 When('I select Welsh', async ({ page }) => {
   await page.getByRole('link', { name: 'Cymraeg' }).click()

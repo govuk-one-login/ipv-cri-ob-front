@@ -1,5 +1,6 @@
 import { defineConfig, devices } from '@playwright/test'
 import { defineBddConfig } from 'playwright-bdd'
+import { APP_PORT } from './test/browser/config'
 
 const testDir = defineBddConfig({
   features: 'test/browser/features/**/*.feature',
@@ -11,5 +12,5 @@ export default defineConfig({
   projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
   reporter: [['list'], ['html', { open: 'never' }]],
   testDir,
-  use: { baseURL: 'http://localhost:5091', screenshot: 'on' } // don't forget to change me in global-setup.ts
+  use: { baseURL: `http://localhost:${APP_PORT}`, screenshot: 'on' }
 })
