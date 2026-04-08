@@ -212,7 +212,7 @@ Resources:
     Condition: IsNotDevelopment
     Type: AWS::S3::Bucket
     Properties:
-      BucketName: !Sub ob-cri-front-${Environment}-access-logs
+      BucketName: !Sub ${AWS::StackName}-${Environment}-access-logs
       VersioningConfiguration:
         Status: "Enabled"
       PublicAccessBlockConfiguration:
@@ -225,7 +225,7 @@ Resources:
           - ServerSideEncryptionByDefault:
               SSEAlgorithm: aws:kms
 
-  OBFrontAccessLogsBucketPolicy:
+  AccessLogsBucketPolicy:
     Condition: IsNotDevelopment
     Type: AWS::S3::BucketPolicy
     Properties:
@@ -246,7 +246,7 @@ Resources:
             Action:
               - s3:PutObject
             Resource:
-              - !Sub arn:aws:s3:::${AccessLogsBucket}/ob-front-${Environment}/AWSLogs/${AWS::AccountId}/*
+              - !Sub arn:aws:s3:::${AccessLogsBucket}/${AWS::StackName}/AWSLogs/${AWS::AccountId}/*
           - Effect: Deny
             Principal: "*"
             Action:
@@ -288,7 +288,7 @@ Resources:
         - !If
           - IsNotDevelopment
           - Key: access_logs.s3.prefix
-            Value: !Sub ob-front-${Environment}
+            Value: !Sub ${AWS::StackName}
           - !Ref AWS::NoValue
       Tags:
         - Key: FMSRegionalPolicy
@@ -352,7 +352,7 @@ Resources:
       WebACLArn: !ImportValue cfront-origin-distrib-CloakingOriginWebACLArn
 
   # ECS cluster, service and task definition
-  OBFrontEcsCluster:
+  EcsCluster:
     Type: "AWS::ECS::Cluster"
     Properties:
       ClusterSettings:
@@ -368,10 +368,10 @@ Resources:
         - Key: Environment
           Value: !Ref Environment
 
-  OBFrontEcsService:
+  EcsService:
     Type: "AWS::ECS::Service"
     Properties:
-      Cluster: !Ref OBFrontEcsCluster
+      Cluster: !Ref EcsCluster
       DeploymentConfiguration: !If
         - UseCanaryDeployment
         - !Ref AWS::NoValue
@@ -427,7 +427,7 @@ Resources:
   ECSAccessLogsGroup:
     Type: AWS::Logs::LogGroup
     Properties:
-      LogGroupName: !Sub /aws/ecs/${AWS::StackName}-OBFront-ECS
+      LogGroupName: !Sub /aws/ecs/${AWS::StackName}
       RetentionInDays: !Ref LogGroupRetentionInDays
       KmsKeyId: !GetAtt LoggingKmsKey.Arn
 
@@ -453,7 +453,7 @@ Resources:
                 - "https://${APIGatewayId}.execute-api.eu-west-2.amazonaws.com/${Environment}"
                 - APIGatewayId: !ImportValue ipv-cri-ob-api-PrivateAPIGatewayID
             - Name: SESSION_TABLE_NAME
-              Value: !Sub "cri-ob-front-sessions-${Environment}"
+              Value: !Sub "${AWS::StackName}-sessions"
             - Name: GOOGLE_ANALYTICS_4_GTM_CONTAINER_ID
               Value: !If [ IsProduction, "GTM-K4PBJH3", "GTM-KD86CMZ" ]
             - Name: GA4_ENABLED
@@ -478,6 +478,12 @@ Resources:
                   !Ref Environment,
                   nodeEnv
                 ]
+            - Name: MAY_2025_REBRAND_ENABLED
+              Value: "true"
+            - Name: USE_PINO_LOGGER
+              Value: "true"
+            - Name: BIND_HOST
+              Value: "0.0.0.0"
           Secrets:
             - Name: SESSION_SECRET
               ValueFrom: !FindInMap [ EnvironmentConfiguration, !Ref Environment, sessionStoreSecretArn ]
@@ -523,7 +529,7 @@ Resources:
             Options:
               awslogs-group: !Ref ECSAccessLogsGroup
               awslogs-region: !Sub ${AWS::Region}
-              awslogs-stream-prefix: !Sub ob-front-${Environment}
+              awslogs-stream-prefix: !Sub ${AWS::StackName}
           ReadonlyRootFilesystem: true
           MountPoints:
             - SourceVolume: tmp
@@ -567,7 +573,7 @@ Resources:
               Service: ecs-tasks.amazonaws.com
         Version: 2012-10-17
       Policies:
-        - PolicyName: PullOBFrontImage
+        - PolicyName: PullImage
           PolicyDocument:
             Version: "2012-10-17"
             Statement:
@@ -591,7 +597,7 @@ Resources:
             Statement:
               - Effect: Allow
                 Action: secretsmanager:GetSecretValue
-                Resource: !Sub "arn:aws:secretsmanager:eu-west-2:${AWS::AccountId}:secret:ob-fe/session-store-secret-*" # pragma: allowlist secret
+                Resource: !FindInMap [ EnvironmentConfiguration, !Ref Environment, sessionStoreSecretArn ]
         - PolicyName: GetDynatraceSecret
           PolicyDocument:
             Version: 2012-10-17
@@ -621,7 +627,7 @@ Resources:
               Service: ecs-tasks.amazonaws.com
         Version: 2012-10-17
       Policies:
-        - PolicyName: OBFrontDynamoDBSessionAccess
+        - PolicyName: DynamoDBSessionAccess
           PolicyDocument:
             Version: "2012-10-17"
             Statement:
@@ -637,7 +643,7 @@ Resources:
                   - "dynamodb:UpdateItem"
                   - "dynamodb:PutItem"
                 Resource:
-                  - !GetAtt OBFrontSessionsTable.Arn
+                  - !GetAtt SessionsTable.Arn
       PermissionsBoundary: !If
         - UsePermissionsBoundary
         - !Ref PermissionsBoundary
@@ -657,8 +663,8 @@ Resources:
         ContainerName: "app"
         ContainerPort: "5090"
         DeploymentStrategy: !Ref DeploymentStrategy
-        ECSClusterName: !Ref OBFrontEcsCluster
-        ECSServiceName: !GetAtt OBFrontEcsService.Name
+        ECSClusterName: !Ref EcsCluster
+        ECSServiceName: !GetAtt EcsService.Name
         ECSServiceTaskDefinition: !Ref ECSServiceTaskDefinition
         GreenTargetGroupName: !GetAtt LoadBalancerListenerGreenTargetGroupECS.TargetGroupName
         LoadBalancerListenerARN: !Ref LoadBalancerListener
@@ -675,16 +681,16 @@ Resources:
         TargetGroupName: !GetAtt LoadBalancerListenerTargetGroupECS.TargetGroupName
         VpcId: !Sub ${VpcStackName}-VpcId
 
-  ApiGwHttpEndpoint:
+  APIGatewayHTTPEndpoint:
     Type: "AWS::ApiGatewayV2::Api"
     Properties:
-      Name: !Sub ob-front-${Environment}
+      Name: !Sub ${AWS::StackName}
       ProtocolType: HTTP
 
-  ApiGwHttpEndpointIntegration:
+  APIGatewayHTTPEndpointIntegration:
     Type: "AWS::ApiGatewayV2::Integration"
     Properties:
-      ApiId: !Ref ApiGwHttpEndpoint
+      ApiId: !Ref APIGatewayHTTPEndpoint
       IntegrationType: HTTP_PROXY
       ConnectionId:
         Fn::ImportValue: !Sub "${VpcStackName}-VpcLinkId"
@@ -693,24 +699,31 @@ Resources:
       IntegrationUri: !Ref LoadBalancerListener
       PayloadFormatVersion: "1.0"
 
-  APIGWRoute:
+  APIGatewayRoute:
     Type: "AWS::ApiGatewayV2::Route"
     Properties:
-      ApiId: !Ref ApiGwHttpEndpoint
+      ApiId: !Ref APIGatewayHTTPEndpoint
       RouteKey: "ANY /{proxy+}"
       Target: !Join
         - /
         - - integrations
-          - !Ref ApiGwHttpEndpointIntegration
+          - !Ref APIGatewayHTTPEndpointIntegration
 
-  APIStageDefault:
+  APIGatewayAccessLogsGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      KmsKeyId: !GetAtt LoggingKmsKey.Arn
+      LogGroupName: !Sub /aws/apigateway/${AWS::StackName}-AccessLogs
+      RetentionInDays: !Ref LogGroupRetentionInDays
+
+  APIGatewayStageDefault:
     Type: "AWS::ApiGatewayV2::Stage"
     Properties:
-      ApiId: !Ref ApiGwHttpEndpoint
+      ApiId: !Ref APIGatewayHTTPEndpoint
       StageName: $default
       AutoDeploy: true
       AccessLogSettings:
-        DestinationArn: !GetAtt APIGWAccessLogsGroup.Arn
+        DestinationArn: !GetAtt APIGatewayAccessLogsGroup.Arn
         Format: >-
           {
           "requestId":"$context.requestId",
@@ -724,12 +737,6 @@ Resources:
           "responseLength":"$context.responseLength",
           "responseLatency":"$context.responseLatency"
           }
-  APIGWAccessLogsGroup:
-    Type: AWS::Logs::LogGroup
-    Properties:
-      KmsKeyId: !GetAtt LoggingKmsKey.Arn
-      LogGroupName: !Sub /aws/apigateway/${AWS::StackName}-OBFront-API-GW-AccessLogs
-      RetentionInDays: !Ref LogGroupRetentionInDays
 
 #  TODO re-enable these when we know what destination we're sending to
 #  APIGWAccessLogsGroupSubscriptionFilterCsls:
@@ -740,11 +747,11 @@ Resources:
 #      FilterPattern: ""
 #      LogGroupName: !Ref APIGWAccessLogsGroup
 
-  OBFrontSessionsTable:
+  SessionsTable:
     Type: AWS::DynamoDB::Table
     Properties:
       # checkov:skip=CKV_AWS_28: Point in time recovery is not necessary for this table.
-      TableName: !Sub "cri-ob-front-sessions-${Environment}"
+      TableName: !Sub "${AWS::StackName}-sessions"
       BillingMode: "PAY_PER_REQUEST"
       AttributeDefinitions:
         - AttributeName: "id"
@@ -766,7 +773,7 @@ Resources:
         !FindInMap [ EnvironmentConfiguration, !Ref Environment, maxECSCount ]
       MinCapacity:
         !FindInMap [ EnvironmentConfiguration, !Ref Environment, minECSCount ]
-      ResourceId: !Sub service/${OBFrontEcsCluster}/${OBFrontEcsService.Name}
+      ResourceId: !Sub service/${EcsCluster}/${EcsService.Name}
       RoleARN: !Sub "arn:aws:iam::${AWS::AccountId}:role/aws-service-role/ecs.application-autoscaling.amazonaws.com/AWSServiceRoleForApplicationAutoScaling_ECSService"
       ScalableDimension: ecs:service:DesiredCount
       ServiceNamespace: ecs
@@ -777,7 +784,7 @@ Resources:
     Properties:
       PolicyName: ECSPredictiveScalingPolicy
       PolicyType: PredictiveScaling
-      ResourceId: !Sub service/${OBFrontEcsCluster}/${OBFrontEcsService.Name}
+      ResourceId: !Sub service/${EcsCluster}/${EcsService.Name}
       ScalableDimension: ecs:service:DesiredCount
       ServiceNamespace: ecs
       PredictiveScalingPolicyConfiguration:
@@ -795,7 +802,7 @@ Resources:
     Properties:
       PolicyName: EcsStepScalingOutPolicy
       PolicyType: StepScaling
-      ResourceId: !Sub service/${OBFrontEcsCluster}/${OBFrontEcsService.Name}
+      ResourceId: !Sub service/${EcsCluster}/${EcsService.Name}
       ScalableDimension: ecs:service:DesiredCount
       ServiceNamespace: ecs
       StepScalingPolicyConfiguration:
@@ -832,7 +839,7 @@ Resources:
     Properties:
       PolicyName: EcsStepScalingInPolicy
       PolicyType: StepScaling
-      ResourceId: !Sub service/${OBFrontEcsCluster}/${OBFrontEcsService.Name}
+      ResourceId: !Sub service/${EcsCluster}/${EcsService.Name}
       ScalableDimension: ecs:service:DesiredCount
       ServiceNamespace: ecs
       StepScalingPolicyConfiguration:
@@ -872,9 +879,9 @@ Resources:
       DatapointsToAlarm: "1"
       Dimensions:
         - Name: ClusterName
-          Value: !Ref OBFrontEcsCluster
+          Value: !Ref EcsCluster
         - Name: ServiceName
-          Value: !GetAtt OBFrontEcsService.Name
+          Value: !GetAtt EcsService.Name
       Unit: "Percent"
       EvaluationPeriods: "1"
       MetricName: "CPUUtilization"
@@ -896,9 +903,9 @@ Resources:
       DatapointsToAlarm: "5"
       Dimensions:
         - Name: ClusterName
-          Value: !Ref OBFrontEcsCluster
+          Value: !Ref EcsCluster
         - Name: ServiceName
-          Value: !GetAtt OBFrontEcsService.Name
+          Value: !GetAtt EcsService.Name
       Unit: "Percent"
       EvaluationPeriods: "5"
       MetricName: "CPUUtilization"
@@ -923,7 +930,7 @@ Resources:
       Statistic: Average
       Dimensions:
         - Name: ClusterName
-          Value: !Ref OBFrontEcsCluster
+          Value: !Ref EcsCluster
       Period: 60
       EvaluationPeriods: 2
       DatapointsToAlarm: 2
@@ -947,7 +954,7 @@ Resources:
       Statistic: Average
       Dimensions:
         - Name: ClusterName
-          Value: !Ref OBFrontEcsCluster
+          Value: !Ref EcsCluster
       Period: 300
       EvaluationPeriods: 3
       DatapointsToAlarm: 3
@@ -1145,12 +1152,14 @@ Resources:
           Unit: Count
 
 Outputs:
-  OBFrontUrl:
+  URL:
     Description: >-
       The API Gateway URL which Open Banking Front can be invoked on.
-    Value: !GetAtt ApiGwHttpEndpoint.ApiEndpoint
-  OBFrontGatewayId:
+    Export:
+      Name: !Sub "${AWS::StackName}-URL"
+    Value: !GetAtt APIGatewayHTTPEndpoint.ApiEndpoint
+  APIGatewayID:
     Description: Open Banking Front API Gateway ID
     Export:
-      Name: !Sub "${AWS::StackName}-OBFrontGatewayId"
-    Value: !Ref ApiGwHttpEndpoint
+      Name: !Sub "${AWS::StackName}-APIGatewayID"
+    Value: !Ref APIGatewayHTTPEndpoint
