@@ -43,7 +43,7 @@ jobs:
           username: khw46367
           password: ${{ secrets.dynatrace_paas_token }}
       - name: Push to ECR and upload SAM template to S3
-        uses: govuk-one-login/devplatform-upload-action-ecr@v1.4.0
+        uses: govuk-one-login/devplatform-upload-action-ecr@v1.5.0
         with:
           artifact-bucket-name: ${{ secrets.artifact_bucket }}
           container-sign-kms-key-arn: ${{ secrets.container_sign_kms_key }}
