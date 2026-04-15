@@ -1,3 +1,4 @@
+import { APP_PORT } from './config'
 import { spawn } from 'child_process'
 import { existsSync } from 'node:fs'
 import { GenericContainer, Wait } from 'testcontainers'
@@ -5,7 +6,6 @@ import { GenericContainer, Wait } from 'testcontainers'
 import path from 'node:path'
 import PinoPretty from 'pino-pretty'
 
-const APP_PORT = '5091' // don't forget to change me in playwright.config.ts
 const APP_URL = `http://localhost:${APP_PORT}`
 
 // give app 20 seconds to boot
@@ -70,8 +70,8 @@ export default async function globalSetup() {
     }
   }
 
-  const { dynamoContainer, dynamoEndpoint } = await initDynamoContainer()
-  const { wiremockContainer, wiremockEndpoint } = await initWiremockContainer()
+  const [{ dynamoContainer, dynamoEndpoint }, { wiremockContainer, wiremockEndpoint }] =
+    await Promise.all([initDynamoContainer(), initWiremockContainer()])
 
   process.env['WIREMOCK_URL'] = wiremockEndpoint // used by browser tests, not app
 

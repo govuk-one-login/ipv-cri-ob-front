@@ -1,25 +1,11 @@
 {
   "mappings": [
     {
-      "name": "reset ob-success scenario",
-      "scenarioName": "ob-success",
-      "newScenarioState": "Started",
-      "request": {
-        "method": "GET",
-        "url": "/__reset/ob-success"
-      },
-      "response": {
-        "status": 200
-      }
-    },
-    {
       "name": "create session",
-      "scenarioName": "ob-success",
-      "requiredScenarioState": "Started",
-      "newScenarioState": "SessionCreated",
       "request": {
         "method": "POST",
-        "url": "/session"
+        "url": "/session",
+        "bodyPatterns": [{ "matchesJsonPath": "$[?(@.request == 'test-jwt-success')]" }]
       },
       "response": {
         "status": 201,
@@ -36,9 +22,6 @@
     },
     {
       "name": "get authorization code",
-      "scenarioName": "ob-success",
-      "requiredScenarioState": "SessionCreated",
-      "newScenarioState": "AuthCode",
       "request": {
         "method": "GET",
         "urlPath": "/authorization",

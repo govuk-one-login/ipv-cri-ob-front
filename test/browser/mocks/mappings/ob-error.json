@@ -1,25 +1,11 @@
 {
   "mappings": [
     {
-      "name": "reset ob-error scenario",
-      "scenarioName": "ob-error",
-      "newScenarioState": "Started",
-      "request": {
-        "method": "GET",
-        "url": "/__reset/ob-error"
-      },
-      "response": {
-        "status": 200
-      }
-    },
-    {
       "name": "create session (error path)",
-      "scenarioName": "ob-error",
-      "requiredScenarioState": "Started",
-      "newScenarioState": "SessionCreated",
       "request": {
         "method": "POST",
-        "url": "/session"
+        "url": "/session",
+        "bodyPatterns": [{ "matchesJsonPath": "$[?(@.request == 'test-jwt-error')]" }]
       },
       "response": {
         "status": 201,
@@ -36,8 +22,6 @@
     },
     {
       "name": "authorization error",
-      "scenarioName": "ob-error",
-      "requiredScenarioState": "SessionCreated",
       "request": {
         "method": "GET",
         "urlPath": "/authorization",
