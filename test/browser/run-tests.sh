@@ -2,6 +2,8 @@
 
 set -euo pipefail
 
+cd /app
+
 STACK_NAME="${CFN_StackName:-${SAM_STACK_NAME:-local}}"
 ENVIRONMENT="${ENVIRONMENT:-${TEST_ENVIRONMENT:-build}}"
 

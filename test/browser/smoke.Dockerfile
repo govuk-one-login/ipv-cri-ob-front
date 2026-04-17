@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/playwright:v1.59.0-noble
+FROM mcr.microsoft.com/playwright:v1.59.1-noble@sha256:b0ab6f3cb99aa7803adbc14d9027ec1785fc6e433b97e134e0f8fe61683b6b53
 
 RUN curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o awscliv2.zip \
   && curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip.sig" -o awscliv2.sig \
@@ -7,6 +7,7 @@ RUN curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o awscliv2.
   && python3 -m zipfile -e awscliv2.zip . \
   && chmod +x ./aws/install \
   && ./aws/install \
+  && chmod +x /usr/local/bin/aws \
   && rm -rf awscliv2.zip awscliv2.sig aws
 
 WORKDIR /app
@@ -16,6 +17,7 @@ RUN npm ci
 
 COPY test/browser .
 
-RUN chmod +x run-smoke-tests.sh
+RUN chmod +x run-tests.sh \
+  && ln -s /app/run-tests.sh /run-tests.sh
 
-ENTRYPOINT ["./run-smoke-tests.sh"]
+ENTRYPOINT ["/run-tests.sh"]

@@ -21,22 +21,6 @@ permissions:
   contents: read
 
 jobs:
-  app-image-build-and-push:
-    name: Build and push app image
-    runs-on: ubuntu-latest
-    steps:
-      - name: Push to ECR and upload SAM template to S3
-        uses: govuk-one-login/devplatform-upload-action-ecr@v1.5.0
-        with:
-          private-docker-registry: khw46367.live.dynatrace.com
-          private-docker-login-username: khw46367
-          private-docker-login-password: ${{ secrets.dynatrace_paas_token }}
-          artifact-bucket-name: ${{ secrets.artifact_bucket }}
-          container-sign-kms-key-arn: ${{ secrets.container_sign_kms_key }}
-          template-file: deploy/template.yml
-          role-to-assume-arn: ${{ secrets.role_arn }}
-          ecr-repo-name: ${{ secrets.ecr_repository }}
-
   test-image-build-and-push:
     name: Build and push test image
     runs-on: ubuntu-latest
@@ -50,3 +34,20 @@ jobs:
           dockerfile: test/browser/smoke.Dockerfile
           push-latest-tag: true
           container-sign-kms-key-arn: ${{ secrets.container_sign_kms_key }}
+
+  app-image-build-and-push:
+    name: Build and push app image
+    needs: test-image-build-and-push
+    runs-on: ubuntu-latest
+    steps:
+      - name: Push to ECR and upload SAM template to S3
+        uses: govuk-one-login/devplatform-upload-action-ecr@v1.5.0
+        with:
+          private-docker-registry: khw46367.live.dynatrace.com
+          private-docker-login-username: khw46367
+          private-docker-login-password: ${{ secrets.dynatrace_paas_token }}
+          artifact-bucket-name: ${{ secrets.artifact_bucket }}
+          container-sign-kms-key-arn: ${{ secrets.container_sign_kms_key }}
+          template-file: deploy/template.yml
+          role-to-assume-arn: ${{ secrets.role_arn }}
+          ecr-repo-name: ${{ secrets.ecr_repository }}
