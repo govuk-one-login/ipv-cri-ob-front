@@ -37,7 +37,7 @@ declare module '@govuk-one-login/di-ipv-cri-common-express' {
     host?: false
     /** locale directories relative to APP_ROOT. defaults to '.'. */
     locales?: string | string[]
-    /** hmpo-logger config - only used when USE_PINO_LOGGER is not 'true', pino reads LOGS_LEVEL from env */
+    /** hmpo-logger config - only used when USE_PINO_LOGGER is not 'true', pino reads LOG_LEVEL from env */
     logs?:
       | false
       | {

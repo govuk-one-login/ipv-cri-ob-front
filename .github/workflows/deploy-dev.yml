@@ -14,4 +14,5 @@ jobs:
       artifact_bucket: ${{ secrets.DEV_ARTIFACT_BUCKET }}
       container_sign_kms_key: ${{ secrets.DEV_CONTAINER_SIGN_KMS_KEY }}
       ecr_repository: ${{ secrets.DEV_ECR_REPOSITORY }}
+      ecr_repository_tests: ${{ secrets.DEV_ECR_TESTS_REPOSITORY }}
       dynatrace_paas_token: ${{ secrets.DYNATRACE_PAAS_TOKEN }}

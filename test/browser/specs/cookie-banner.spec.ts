@@ -1,9 +1,9 @@
 import { expect, test } from '../fixtures'
-import { navigateToApp } from '../helpers/navigation'
+import { navigateToRoot } from '../helpers/navigation'
 
 test.describe('Cookie banner', () => {
   test('accepting cookies sets the user preference cookie', async ({ page }) => {
-    await navigateToApp(page)
+    await navigateToRoot(page)
 
     await expect(page.locator('#cookies-banner-main')).toBeVisible()
 

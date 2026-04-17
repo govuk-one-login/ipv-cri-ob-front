@@ -1,16 +1,14 @@
-import { expect, test } from '../fixtures'
-import { useJourneySetup } from '../helpers/journey-setup'
-import { AuthorisePage } from '../pages/authorise.page'
-import { CallbackPage } from '../pages/callback.page'
-import { wiremock } from '../wiremock'
+import { expect, mockTest as test } from '../../fixtures'
+import { AuthorisePage } from '../../pages/authorise.page'
+import { CallbackPage } from '../../pages/callback.page'
 
+test.describe.configure({ mode: 'serial' })
 test.use({ skipAxe: true })
 
-useJourneySetup()
-
-test.describe('Journey: failed Open Banking authorisation', () => {
+test.describe('Journey: failed Open Banking authorisation', { tag: '@mock' }, () => {
   test('user is returned an access denied error when authorisation is rejected', async ({
-    page
+    page,
+    wiremock
   }) => {
     const authorise = new AuthorisePage(page)
     const callback = new CallbackPage(page)

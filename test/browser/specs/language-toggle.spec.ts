@@ -1,9 +1,9 @@
 import { expect, test } from '../fixtures'
-import { navigateToApp, selectWelsh } from '../helpers/navigation'
+import { navigateToRoot, selectWelsh } from '../helpers/navigation'
 
 test.describe('Language toggle', () => {
   test('selecting Welsh changes the page language', async ({ page }) => {
-    await navigateToApp(page)
+    await navigateToRoot(page)
     await selectWelsh(page)
 
     await expect(page.locator('html')).toHaveAttribute('lang', 'cy')

@@ -74,21 +74,7 @@ Tests are organised in the `test` directory and further categorised as follows:
 
 #### Browser tests
 
-Browser tests are plain Playwright specs organised by feature in `test/browser/specs`. Shared helpers live in `test/browser/helpers` and WireMock stub mappings live in `test/browser/mocks/mappings`.
-
-The following commands will start a browser test run:
-
-```shell
-npm run build # must be re-run if changing the application `src` code, otherwise only needs to be run once
-npm run test:browser
-```
-
-For help debugging you can also run the browser tests in UI mode (which will spawn a Playwright Chrome for Testing process) by running `npm run test:browser:ui`
-
-Browser tests use a 'built' version of the application which is a more accurate representation of the production image. In addition, the browser test setup will spawn any required [TestContainers](https://node.testcontainers.org/) and ensure they are cleaned up after the test run.
-
-> [!TIP]
-> Browser tests can be run independently of any locally running dev server. They manage their own test container lifecycle and use a different port for the running application. E.g. a local dev server won't cross-contaminate any browser testing session storage and vice versa.
+See [test/browser/README.md](test/browser/README.md) for full details on browser test modes and how to add new tests.
 
 ### Pre-Commit Checking
 
@@ -105,28 +91,28 @@ Run `pre-commit install` after cloning to enable these checks.
 
 ### Environment Variables
 
-| Environment variable                  | Description                                                                                               | Required                              |
-|---------------------------------------|-----------------------------------------------------------------------------------------------------------|---------------------------------------|
-| `PORT`                                | Port the app listens on. Default: `5090`                                                                  | No                                    |
-| `BIND_HOST`                           | Network interface to bind to. Default: `127.0.0.1`                                                        | No                                    |
-| `NODE_ENV`                            | Runtime environment (`development`, `production`, `test`). Affects Helmet CSP and other security settings | Yes                                   |
-| `API_BASE_URL`                        | Base URL of the Open Banking API.                                                                         | Yes                                   |
-| `SESSION_SECRET`                      | Secret used to sign session cookies.                                                                      | Yes                                   |
-| `SESSION_TABLE_NAME`                  | DynamoDB table name for session storage. Default: `ob-front-sessions`                                     | No                                    |
-| `SESSION_TTL`                         | Session lifetime in milliseconds. Default: `7200000` (2 hours)                                            | No                                    |
-| `LOCAL_DYNAMO_ENDPOINT_OVERRIDE`      | Override the DynamoDB endpoint (e.g. `http://localhost:8000`). Used for local dev and browser tests       | Yes (local development only)          |
-| `FRONTEND_DOMAIN`                     | Cookie domain for analytics cookies. Default: `localhost`                                                 | No                                    |
-| `DEVICE_INTELLIGENCE_DOMAIN`          | Domain used for device intelligence requests. Default: `localhost`                                        | No                                    |
-| `DEVICE_INTELLIGENCE_ENABLED`         | Enable device intelligence (`true`/`false`). Default: `false`                                             | No                                    |
-| `GOOGLE_ANALYTICS_4_GTM_CONTAINER_ID` | GTM container ID for GA4. Default: `GTM-XXXXXXX`                                                          | No                                    |
-| `GA4_ENABLED`                         | Enable GA4 analytics (`true`/`false`). Default: `true`                                                    | No                                    |
-| `ANALYTICS_DATA_SENSITIVE`            | Mark analytics data as sensitive (`true`/`false`). Default: `true`                                        | No                                    |
-| `GA4_PAGE_VIEW_ENABLED`               | Enable GA4 page view events. Default: `true`                                                              | No                                    |
-| `GA4_FORM_RESPONSE_ENABLED`           | Enable GA4 form response events. Default: `true`                                                          | No                                    |
-| `GA4_FORM_ERROR_ENABLED`              | Enable GA4 form error events. Default: `true`                                                             | No                                    |
-| `GA4_FORM_CHANGE_ENABLED`             | Enable GA4 form change events. Default: `false`                                                           | No                                    |
-| `GA4_NAVIGATION_ENABLED`              | Enable GA4 navigation events. Default: `false`                                                            | No                                    |
-| `GA4_SELECT_CONTENT_ENABLED`          | Enable GA4 select content events. Default: `false`                                                        | No                                    |
-| `MAY_2025_REBRAND_ENABLED`            | Enable GOVUK Frontend rebrand. Default: `false`                                                           | No                                    |
-| `USE_PINO_LOGGER`                     | Use pino JSON logger instead of hmpo-logger. Default: `false`                                             | No                                    |
-| `LOGS_LEVEL`                          | Set the log level for pino                                                                                | Yes (if pino USE_PINO_LOGGER is true) |
+| Environment variable                  | Description                                                                                               | Required                     |
+|---------------------------------------|-----------------------------------------------------------------------------------------------------------|------------------------------|
+| `PORT`                                | Port the app listens on. Default: `5090`                                                                  | No                           |
+| `BIND_HOST`                           | Network interface to bind to. Default: `127.0.0.1`                                                        | No                           |
+| `NODE_ENV`                            | Runtime environment (`development`, `production`, `test`). Affects Helmet CSP and other security settings | Yes                          |
+| `API_BASE_URL`                        | Base URL of the Open Banking API.                                                                         | Yes                          |
+| `SESSION_SECRET`                      | Secret used to sign session cookies.                                                                      | Yes                          |
+| `SESSION_TABLE_NAME`                  | DynamoDB table name for session storage. Default: `ob-front-sessions`                                     | No                           |
+| `SESSION_TTL`                         | Session lifetime in milliseconds. Default: `7200000` (2 hours)                                            | No                           |
+| `LOCAL_DYNAMO_ENDPOINT_OVERRIDE`      | Override the DynamoDB endpoint (e.g. `http://localhost:8000`). Used for local dev and browser tests       | Yes (local development only) |
+| `FRONTEND_DOMAIN`                     | Cookie domain for analytics cookies. Default: `localhost`                                                 | No                           |
+| `DEVICE_INTELLIGENCE_DOMAIN`          | Domain used for device intelligence requests. Default: `localhost`                                        | No                           |
+| `DEVICE_INTELLIGENCE_ENABLED`         | Enable device intelligence (`true`/`false`). Default: `false`                                             | No                           |
+| `GOOGLE_ANALYTICS_4_GTM_CONTAINER_ID` | GTM container ID for GA4. Default: `GTM-XXXXXXX`                                                          | No                           |
+| `GA4_ENABLED`                         | Enable GA4 analytics (`true`/`false`). Default: `true`                                                    | No                           |
+| `ANALYTICS_DATA_SENSITIVE`            | Mark analytics data as sensitive (`true`/`false`). Default: `true`                                        | No                           |
+| `GA4_PAGE_VIEW_ENABLED`               | Enable GA4 page view events. Default: `true`                                                              | No                           |
+| `GA4_FORM_RESPONSE_ENABLED`           | Enable GA4 form response events. Default: `true`                                                          | No                           |
+| `GA4_FORM_ERROR_ENABLED`              | Enable GA4 form error events. Default: `true`                                                             | No                           |
+| `GA4_FORM_CHANGE_ENABLED`             | Enable GA4 form change events. Default: `false`                                                           | No                           |
+| `GA4_NAVIGATION_ENABLED`              | Enable GA4 navigation events. Default: `false`                                                            | No                           |
+| `GA4_SELECT_CONTENT_ENABLED`          | Enable GA4 select content events. Default: `false`                                                        | No                           |
+| `MAY_2025_REBRAND_ENABLED`            | Enable GOVUK Frontend rebrand. Default: `false`                                                           | No                           |
+| `USE_PINO_LOGGER`                     | Use pino JSON logger instead of hmpo-logger.                                                              | Yes (must be true)           |
+| `LOG_LEVEL`                           | Set the log level for pino                                                                                | No                           |

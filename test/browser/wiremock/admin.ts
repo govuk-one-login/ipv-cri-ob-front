@@ -1,4 +1,4 @@
-interface WireMockMapping {
+interface WiremockMapping {
   request: {
     bodyPatterns?: Record<string, unknown>[]
     headers?: Record<string, Record<string, unknown>>
@@ -15,7 +15,7 @@ interface WireMockMapping {
   }
 }
 
-interface WireMockRequest {
+interface WiremockRequest {
   body: string
   headers: Record<string, string>
   method: string
@@ -28,48 +28,46 @@ const getWiremockUrl = (): string => {
   return wiremockUrl
 }
 
-const BASE_URL = getWiremockUrl()
-
 export const wiremock = {
-  addMapping: async (mapping: WireMockMapping) => {
-    const res = await fetch(`${BASE_URL}/__admin/mappings`, {
+  addMapping: async (mapping: WiremockMapping) => {
+    const res = await fetch(`${getWiremockUrl()}/__admin/mappings`, {
       body: JSON.stringify(mapping),
       headers: { 'Content-Type': 'application/json' },
       method: 'POST'
     })
     if (!res.ok) throw new Error(`Failed to add mapping: ${res.status}`)
   },
-  getRequest: async (urlPath: string, method = 'GET'): Promise<WireMockRequest> => {
+  getRequest: async (urlPath: string, method = 'GET'): Promise<WiremockRequest> => {
     const requests = await wiremock.getRequests(urlPath, method)
     const request = requests[0]
     if (!request) throw new Error(`Expected a ${method} request to ${urlPath}, but none were found`)
     return request
   },
-  getRequests: async (urlPath: string, method = 'GET'): Promise<WireMockRequest[]> => {
-    const res = await fetch(`${BASE_URL}/__admin/requests/find`, {
+  getRequests: async (urlPath: string, method = 'GET'): Promise<WiremockRequest[]> => {
+    const res = await fetch(`${getWiremockUrl()}/__admin/requests/find`, {
       body: JSON.stringify({ method, urlPath }),
       headers: { 'Content-Type': 'application/json' },
       method: 'POST'
     })
     if (!res.ok) throw new Error(`Failed to find requests: ${res.status}`)
-    const data = (await res.json()) as { requests: WireMockRequest[] }
+    const data = (await res.json()) as { requests: WiremockRequest[] }
     return data.requests
   },
   // Not currently used, if addMapping is used in any test, this will need to be added to the beforeEach for that test
   reset: async () => {
-    const res = await fetch(`${BASE_URL}/__admin/mappings/reset`, { method: 'POST' })
+    const res = await fetch(`${getWiremockUrl()}/__admin/mappings/reset`, { method: 'POST' })
     if (!res.ok) throw new Error(`Failed to reset mappings: ${res.status}`)
   },
   resetRequests: async () => {
-    const res = await fetch(`${BASE_URL}/__admin/requests`, { method: 'DELETE' })
+    const res = await fetch(`${getWiremockUrl()}/__admin/requests`, { method: 'DELETE' })
     if (!res.ok) throw new Error(`Failed to reset requests: ${res.status}`)
   },
   resetScenarios: async () => {
-    const res = await fetch(`${BASE_URL}/__admin/scenarios/reset`, { method: 'POST' })
+    const res = await fetch(`${getWiremockUrl()}/__admin/scenarios/reset`, { method: 'POST' })
     if (!res.ok) throw new Error(`Failed to reset scenarios: ${res.status}`)
   },
   verify: async (urlPath: string, method = 'GET', expectedCount = 1) => {
-    const res = await fetch(`${BASE_URL}/__admin/requests/count`, {
+    const res = await fetch(`${getWiremockUrl()}/__admin/requests/count`, {
       body: JSON.stringify({ method, urlPath }),
       headers: { 'Content-Type': 'application/json' },
       method: 'POST'

@@ -28,11 +28,12 @@ repos:
     hooks:
       - id: eslint
         name: ESLint
-        entry: npm run lint
+        entry: npx eslint
         language: system
-        pass_filenames: false
+        pass_filenames: true
+        types_or: [javascript, ts]
       - id: prettier
         name: Prettier
-        entry: npm run format
+        entry: npx prettier --check --ignore-unknown
         language: system
-        pass_filenames: false
+        pass_filenames: true

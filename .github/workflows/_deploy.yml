@@ -11,42 +11,42 @@ on:
         required: true
       ecr_repository:
         required: true
+      ecr_repository_tests:
+        required: true
       dynatrace_paas_token:
         required: true
 
+permissions:
+  id-token: write
+  contents: read
+
 jobs:
-  image-build-and-push:
-    name: Image build and push
+  app-image-build-and-push:
+    name: Build and push app image
     runs-on: ubuntu-latest
-    env:
-      AWS_REGION: eu-west-2
-    permissions:
-      id-token: write
-      contents: read
     steps:
-      - name: Checkout
-        uses: actions/checkout@v6
-      - name: Set up AWS credentials
-        uses: aws-actions/configure-aws-credentials@v6
-        with:
-          role-to-assume: ${{ secrets.role_arn }}
-          aws-region: eu-west-2
-      - name: SAM validate
-        run: sam validate --region ${{ env.AWS_REGION }} -t deploy/template.yml --lint
-      - name: Login to ECR
-        id: login-ecr
-        uses: aws-actions/amazon-ecr-login@v2
-      - name: Login to Dynatrace Container Registry
-        uses: docker/login-action@v4
-        with:
-          registry: khw46367.live.dynatrace.com
-          username: khw46367
-          password: ${{ secrets.dynatrace_paas_token }}
       - name: Push to ECR and upload SAM template to S3
-        uses: govuk-one-login/devplatform-upload-action-ecr@v1.4.0
+        uses: govuk-one-login/devplatform-upload-action-ecr@v1.5.0
         with:
+          private-docker-registry: khw46367.live.dynatrace.com
+          private-docker-login-username: khw46367
+          private-docker-login-password: ${{ secrets.dynatrace_paas_token }}
           artifact-bucket-name: ${{ secrets.artifact_bucket }}
           container-sign-kms-key-arn: ${{ secrets.container_sign_kms_key }}
           template-file: deploy/template.yml
           role-to-assume-arn: ${{ secrets.role_arn }}
           ecr-repo-name: ${{ secrets.ecr_repository }}
+
+  test-image-build-and-push:
+    name: Build and push test image
+    runs-on: ubuntu-latest
+    steps:
+      - uses: govuk-one-login/devplatform-upload-action-ecr@v1.5.0
+        with:
+          role-to-assume-arn: ${{ secrets.role_arn }}
+          build-and-push-image-only: true
+          artifact-bucket-name: ''
+          ecr-repo-name: ${{ secrets.ecr_repository_tests }}
+          dockerfile: test/browser/smoke.Dockerfile
+          push-latest-tag: true
+          container-sign-kms-key-arn: ${{ secrets.container_sign_kms_key }}

@@ -15,7 +15,6 @@ jobs:
       playwright-version: ${{ steps['resolve-playwright-version'].outputs.version }}
     steps:
       - uses: actions/checkout@v6
-
       - name: Resolve Playwright version
         id: resolve-playwright-version
         run: |
@@ -40,24 +39,26 @@ jobs:
     permissions:
       contents: read
     steps:
-      - name: Checkout
-        uses: actions/checkout@v6
       - name: Setup Node
-        uses: ./.github/actions/node-setup
+        uses: govuk-one-login/github-actions/node/install-dependencies@4c76410195b5fcb1804fc7c183ed20704252830f
+        with:
+          node-version-file: '.nvmrc'
       - name: Type check
         run: npm run type-check
       - name: i18n check
         run: npm run check-translation
+      - name: SAM lint
+        run: sam validate --region eu-west-2 -t deploy/template.yml --lint
 
   infra-tests:
     runs-on: ubuntu-latest
     permissions:
       contents: read
     steps:
-      - name: Checkout
-        uses: actions/checkout@v6
       - name: Setup Node
-        uses: ./.github/actions/node-setup
+        uses: govuk-one-login/github-actions/node/install-dependencies@4c76410195b5fcb1804fc7c183ed20704252830f
+        with:
+          node-version-file: '.nvmrc'
       - name: Infra tests
         run: npm run test:infra
 
@@ -67,10 +68,10 @@ jobs:
       contents: read
     needs: static-checks
     steps:
-      - name: Checkout
-        uses: actions/checkout@v6
       - name: Setup Node
-        uses: ./.github/actions/node-setup
+        uses: govuk-one-login/github-actions/node/install-dependencies@4c76410195b5fcb1804fc7c183ed20704252830f
+        with:
+          node-version-file: '.nvmrc'
       - name: Unit tests
         run: npm run test
       - name: Upload coverage report
@@ -88,10 +89,10 @@ jobs:
       - resolve-test-versions
       - static-checks
     steps:
-      - name: Checkout
-        uses: actions/checkout@v6
       - name: Setup Node
-        uses: ./.github/actions/node-setup
+        uses: govuk-one-login/github-actions/node/install-dependencies@4c76410195b5fcb1804fc7c183ed20704252830f
+        with:
+          node-version-file: '.nvmrc'
       - name: Cache Playwright
         id: playwright-cache
         uses: actions/cache@v5
@@ -101,9 +102,6 @@ jobs:
       - name: Setup Playwright
         if: steps.playwright-cache.outputs.cache-hit != 'true'
         run: npx playwright install chromium --with-deps
-      - name: Setup Playwright dependencies
-        if: steps.playwright-cache.outputs.cache-hit == 'true'
-        run: npx playwright install-deps chromium
       - name: Build
         run: npm run build
       - name: Browser tests
@@ -123,14 +121,13 @@ jobs:
     permissions:
       contents: read
     steps:
-      - name: Checkout
-        uses: actions/checkout@v6
-      - uses: ./.github/actions/sonar-scan
+      - name: Run SonarCloud scan
+        uses: govuk-one-login/github-actions/code-quality/sonarcloud@9d6ee027d0b9167dfc25e67124951956278bb585
         with:
-          coverage-artifact: coverage
-          coverage-run-id: ${{ github.run_id }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
           sonar-token: ${{ secrets.SONAR_TOKEN }}
+          coverage-artifact: coverage
+          coverage-run-id: ${{ github.run_id }}
 
   merge-status:
     runs-on: ubuntu-latest
