@@ -9,7 +9,7 @@ import PinoPretty from 'pino-pretty'
 // give app 20 seconds to boot
 const appReady = async (exited: { value: boolean }, attempts = 40) => {
   for (let i = 0; i < attempts; i++) {
-    if (exited.value) throw new Error('App process exited before becoming ready')
+    if (exited.value) throw new Error('app process exited before becoming ready')
     if (
       await fetch(APP_URL.origin)
         .then(() => true)
@@ -18,7 +18,7 @@ const appReady = async (exited: { value: boolean }, attempts = 40) => {
       return
     await new Promise((resolve) => setTimeout(resolve, 500))
   }
-  throw new Error('App failed to start')
+  throw new Error('app failed to start')
 }
 
 const initWiremockContainer = async () => {
@@ -51,22 +51,24 @@ const initDynamoContainer = async () => {
   return { dynamoContainer, dynamoEndpoint }
 }
 
-export default async function mockSetup() {
+const findAvailableDockerSockets = () => {
   if (!process.env['DOCKER_HOST']) {
     const dockerSockets = [
       '/var/run/docker.sock',
       `${process.env['HOME']}/.orbstack/run/docker.sock`,
+      `${process.env['HOME']}/.colima/default/docker.sock`,
       `${process.env['HOME']}/.docker/run/docker.sock`
     ]
 
-    for (const socket of dockerSockets) {
-      if (existsSync(socket)) {
-        process.env['DOCKER_HOST'] = `unix://${socket}`
-        console.log(`[SYSTEM] using Docker socket: ${socket}`)
-        break
-      }
-    }
+    const socket = dockerSockets.find(existsSync)
+    if (!socket) throw new Error('no socket found, is Docker running on your system?')
+    process.env['DOCKER_HOST'] = `unix://${socket}`
+    console.log(`[SYSTEM] using Docker socket: ${socket}`)
   }
+}
+
+export default async function mockSetup() {
+  findAvailableDockerSockets()
 
   const [{ dynamoContainer, dynamoEndpoint }, { wiremockContainer, wiremockEndpoint }] =
     await Promise.all([initDynamoContainer(), initWiremockContainer()])

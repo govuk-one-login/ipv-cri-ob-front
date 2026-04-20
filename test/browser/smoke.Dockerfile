@@ -10,14 +10,12 @@ RUN curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o awscliv2.
   && chmod +x /usr/local/bin/aws \
   && rm -rf awscliv2.zip awscliv2.sig aws
 
-WORKDIR /app
+WORKDIR /tests
 
 COPY package.json package-lock.json ./
 RUN npm ci
 
+COPY --chmod=+x test/browser/run-tests.sh /run-tests.sh
 COPY test/browser .
-
-RUN chmod +x run-tests.sh \
-  && ln -s /app/run-tests.sh /run-tests.sh
 
 ENTRYPOINT ["/run-tests.sh"]

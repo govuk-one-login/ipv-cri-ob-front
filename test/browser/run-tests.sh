@@ -2,8 +2,6 @@
 
 set -euo pipefail
 
-cd /app
-
 STACK_NAME="${CFN_StackName:-${SAM_STACK_NAME:-local}}"
 ENVIRONMENT="${ENVIRONMENT:-${TEST_ENVIRONMENT:-build}}"
 
@@ -22,4 +20,4 @@ if [[ "${STACK_NAME}" != "local" ]]; then
   export APP_URL
 fi
 
-npx playwright test --config playwright.smoke.config.ts
+npx playwright test --config /tests/playwright.smoke.config.ts
