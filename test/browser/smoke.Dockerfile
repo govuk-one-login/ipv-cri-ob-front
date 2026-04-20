@@ -15,6 +15,7 @@ WORKDIR /tests
 COPY package.json package-lock.json ./
 RUN npm ci
 
+# run-tests.sh must be in the container root and made executable
 COPY --chmod=+x test/browser/run-tests.sh /run-tests.sh
 COPY test/browser .
 

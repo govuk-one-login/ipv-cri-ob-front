@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+# this script runs in the smoke tests container
+
 set -euo pipefail
 
 STACK_NAME="${CFN_StackName:-${SAM_STACK_NAME:-local}}"
@@ -20,4 +22,5 @@ if [[ "${STACK_NAME}" != "local" ]]; then
   export APP_URL
 fi
 
-npx playwright test --config /tests/playwright.smoke.config.ts
+cd /tests
+npx playwright test --config playwright.smoke.config.ts
