@@ -52,8 +52,8 @@
     "tsx": "4.21.0",
     "typescript": "6.0.2",
     "typescript-eslint": "8.58.0",
-    "vite": "8.0.5",
-    "vite-plugin-static-copy": "4.0.1",
+    "vite": "8.0.10",
+    "vite-plugin-static-copy": "4.1.0",
     "vitest": "4.1.3"
   },
   "dependencies": {
