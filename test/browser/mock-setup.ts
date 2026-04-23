@@ -1,4 +1,4 @@
-import { APP_PORT } from './config'
+import { APP_URL } from './playwright.mock.config'
 import { spawn } from 'child_process'
 import { existsSync } from 'node:fs'
 import { GenericContainer, Wait } from 'testcontainers'
@@ -6,21 +6,19 @@ import { GenericContainer, Wait } from 'testcontainers'
 import path from 'node:path'
 import PinoPretty from 'pino-pretty'
 
-const APP_URL = `http://localhost:${APP_PORT}`
-
 // give app 20 seconds to boot
 const appReady = async (exited: { value: boolean }, attempts = 40) => {
   for (let i = 0; i < attempts; i++) {
-    if (exited.value) throw new Error('App process exited before becoming ready')
+    if (exited.value) throw new Error('app process exited before becoming ready')
     if (
-      await fetch(APP_URL)
+      await fetch(APP_URL.origin)
         .then(() => true)
         .catch(() => false)
     )
       return
     await new Promise((resolve) => setTimeout(resolve, 500))
   }
-  throw new Error('App failed to start')
+  throw new Error('app failed to start')
 }
 
 const initWiremockContainer = async () => {
@@ -31,7 +29,7 @@ const initWiremockContainer = async () => {
     .withWaitStrategy(Wait.forHttp('/__admin/mappings', 8080))
     .withCopyDirectoriesToContainer([
       {
-        source: path.resolve(import.meta.dirname, 'mocks/mappings'),
+        source: path.resolve(import.meta.dirname, 'wiremock/mappings'),
         target: '/home/wiremock/mappings'
       }
     ])
@@ -53,22 +51,24 @@ const initDynamoContainer = async () => {
   return { dynamoContainer, dynamoEndpoint }
 }
 
-export default async function globalSetup() {
+const findAvailableDockerSockets = () => {
   if (!process.env['DOCKER_HOST']) {
     const dockerSockets = [
       '/var/run/docker.sock',
       `${process.env['HOME']}/.orbstack/run/docker.sock`,
+      `${process.env['HOME']}/.colima/default/docker.sock`,
       `${process.env['HOME']}/.docker/run/docker.sock`
     ]
 
-    for (const socket of dockerSockets) {
-      if (existsSync(socket)) {
-        process.env['DOCKER_HOST'] = `unix://${socket}`
-        console.log(`[SYSTEM] using Docker socket: ${socket}`)
-        break
-      }
-    }
+    const socket = dockerSockets.find(existsSync)
+    if (!socket) throw new Error('no socket found, is Docker running on your system?')
+    process.env['DOCKER_HOST'] = `unix://${socket}`
+    console.log(`[SYSTEM] using Docker socket: ${socket}`)
   }
+}
+
+export default async function mockSetup() {
+  findAvailableDockerSockets()
 
   const [{ dynamoContainer, dynamoEndpoint }, { wiremockContainer, wiremockEndpoint }] =
     await Promise.all([initDynamoContainer(), initWiremockContainer()])
@@ -81,8 +81,9 @@ export default async function globalSetup() {
       ...process.env,
       API_BASE_URL: `${wiremockEndpoint}/`,
       LOCAL_DYNAMO_ENDPOINT_OVERRIDE: dynamoEndpoint,
+      LOG_LEVEL: 'debug',
       NODE_ENV: 'test',
-      PORT: APP_PORT,
+      PORT: APP_URL.port,
       SESSION_SECRET: 'hunter2', // pragma: allowlist secret
       USE_PINO_LOGGER: 'true'
     }
@@ -100,6 +101,8 @@ export default async function globalSetup() {
   console.log('[SYSTEM] waiting for app to be ready...')
   await appReady(exited)
   console.log('[SYSTEM] app ready')
+
+  process.on('exit', () => appProcess.kill('SIGTERM'))
 
   return async () => {
     appProcess.kill('SIGTERM')

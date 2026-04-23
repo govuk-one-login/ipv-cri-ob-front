@@ -3,7 +3,8 @@ updates:
   - package-ecosystem: 'npm'
     directory: '/'
     schedule:
-      interval: daily
+      interval: weekly
+      day: monday
       time: '03:00'
     target-branch: main
     labels:
@@ -42,9 +43,12 @@ updates:
     commit-message:
       prefix: BAU
   - package-ecosystem: docker
-    directory: '/'
+    directories:
+      - '/'
+      - 'test/browser'
     schedule:
-      interval: daily
+      interval: weekly
+      day: monday
       time: '03:00'
     target-branch: main
     labels:
@@ -55,6 +59,8 @@ updates:
     directory: '/'
     schedule:
       interval: 'weekly'
+      day: monday
+      time: '03:00'
     target-branch: main
     labels:
       - dependabot

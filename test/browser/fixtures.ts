@@ -1,3 +1,4 @@
+import { wiremock as wiremockAdmin } from './wiremock/admin'
 import { test as base, expect } from '@playwright/test'
 
 import AxeBuilder from '@axe-core/playwright'
@@ -44,4 +45,15 @@ export const test = base.extend<Fixtures>({
   skipConsoleErrors: [false, { option: true }]
 })
 
+const smokeTest = test.extend({})
+
+const mockTest = test.extend<{ wiremock: typeof wiremockAdmin }>({
+  wiremock: async ({}, use) => {
+    await wiremockAdmin.resetScenarios()
+    await wiremockAdmin.resetRequests()
+    await use(wiremockAdmin)
+  }
+})
+
 export { expect } from '@playwright/test'
+export { mockTest, smokeTest }

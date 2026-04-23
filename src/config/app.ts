@@ -37,7 +37,8 @@ const AppConfigSchema = z.object({
       SECRET: z.string().nonempty(),
       TABLE_NAME: z.string().nonempty(),
       TTL: z.number().int().positive()
-    })
+    }),
+    USE_PINO_LOGGER: z.literal(true)
   })
 })
 
@@ -77,6 +78,7 @@ export default AppConfigSchema.parse({
       SECRET: process.env['SESSION_SECRET']!,
       TABLE_NAME: process.env['SESSION_TABLE_NAME'] || 'ob-front-sessions',
       TTL: Number(process.env['SESSION_TTL']) || 7200000 // two hours in ms
-    }
+    },
+    USE_PINO_LOGGER: process.env['USE_PINO_LOGGER'] === 'true'
   }
-} satisfies AppConfig)
+})

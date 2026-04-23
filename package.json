@@ -24,14 +24,14 @@
     "test": "vitest run --project unit --coverage",
     "test:infra": "vitest run --project infra",
     "test:watch": "vitest",
-    "test:browser": "playwright test",
-    "test:browser:ui": "playwright test --ui",
+    "test:browser": "playwright test --config test/browser/playwright.mock.config.ts",
+    "test:browser:ui": "playwright test --config test/browser/playwright.mock.config.ts --ui",
     "type-check": "tsc --noEmit"
   },
   "devDependencies": {
-    "@axe-core/playwright": "4.11.1",
+    "@axe-core/playwright": "4.11.2",
     "@eslint/js": "10.0.1",
-    "@playwright/test": "1.59.0",
+    "@playwright/test": "1.59.1",
     "@types/express": "4.17.21",
     "@types/express-session": "1.18.2",
     "@types/govuk-frontend": "5.11.0",
@@ -58,7 +58,7 @@
   },
   "dependencies": {
     "@aws-sdk/client-dynamodb": "3.1020.0",
-    "@govuk-one-login/di-ipv-cri-common-express": "13.1.0",
+    "@govuk-one-login/di-ipv-cri-common-express": "13.2.0",
     "@govuk-one-login/frontend-analytics": "4.0.7",
     "@govuk-one-login/frontend-device-intelligence": "1.2.0",
     "@govuk-one-login/frontend-language-toggle": "2.2.2",
@@ -74,7 +74,6 @@
     "zod": "4.3.6"
   },
   "overrides": {
-    "hmpo-logger": "8.0.3",
     "hmpo-components": "8.0.6",
     "@govuk-one-login/frontend-language-toggle": "$@govuk-one-login/frontend-language-toggle",
     "@govuk-one-login/frontend-ui": "$@govuk-one-login/frontend-ui"

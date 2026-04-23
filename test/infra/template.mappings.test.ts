@@ -17,7 +17,7 @@ describe('deploy/template.yml — mappings', () => {
 
   it.each(ENVIRONMENTS)('EnvironmentConfiguration[%s] has required keys', (env) => {
     const config = mappings.EnvironmentConfiguration[env]
-    expect(config).toHaveProperty('logsLevel')
+    expect(config).toHaveProperty('logLevel')
     expect(config).toHaveProperty('dynatraceSecretArn')
     expect(config).toHaveProperty('sessionStoreSecretArn')
     expect(config).toHaveProperty('fargateCPUsize')

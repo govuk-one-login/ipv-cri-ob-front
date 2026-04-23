@@ -1,5 +1,5 @@
 import { expect, test } from '../fixtures'
-import { navigateToApp, selectWelsh } from '../helpers/navigation'
+import { navigateToRoot, selectWelsh } from '../helpers/navigation'
 
 test.describe('Error pages', () => {
   test.use({ skipConsoleErrors: true })
@@ -18,7 +18,7 @@ test.describe('Error pages', () => {
   })
 
   test('404 page is displayed in Welsh when Welsh is selected', async ({ page }) => {
-    await navigateToApp(page)
+    await navigateToRoot(page)
     await selectWelsh(page)
     await page.goto('/this-page-does-not-exist')
 

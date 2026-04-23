@@ -4,7 +4,6 @@ import type { ViteDevServer } from 'vite'
 import {
   appConfig,
   helmetConfig,
-  loggingConfig,
   overloadProtectionConfig,
   routes,
   vitalSignsConfig
@@ -28,7 +27,7 @@ export const createApp = async (): Promise<{ app: Express; router: Router }> => 
     config: { APP_ROOT },
     env: appConfig.APP.NODE_ENV,
     helmet: helmetConfig,
-    logs: loggingConfig, // hmpo logger only
+    logs: false, // pino logger is enabled so hmpo logger is false
     middlewareSetupFn: (app: Express) => {
       if (vite) setupDevServer(app, vite)
       commonExpress.lib.i18n.setI18n({

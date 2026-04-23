@@ -11,10 +11,10 @@ jobs:
     permissions:
       contents: read
     steps:
-      - name: Checkout
-        uses: actions/checkout@v6
       - name: Setup Node
-        uses: ./.github/actions/node-setup
+        uses: govuk-one-login/github-actions/node/install-dependencies@4c76410195b5fcb1804fc7c183ed20704252830f
+        with:
+          node-version-file: '.nvmrc'
       - name: Unit tests
         run: npm run test
       - name: Upload coverage report
@@ -30,14 +30,13 @@ jobs:
     permissions:
       contents: read
     steps:
-      - name: Checkout
-        uses: actions/checkout@v6
-      - uses: ./.github/actions/sonar-scan
+      - name: Run SonarCloud scan
+        uses: govuk-one-login/github-actions/code-quality/sonarcloud@9d6ee027d0b9167dfc25e67124951956278bb585
         with:
-          coverage-artifact: coverage
-          coverage-run-id: ${{ github.run_id }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
           sonar-token: ${{ secrets.SONAR_TOKEN }}
+          coverage-artifact: coverage
+          coverage-run-id: ${{ github.run_id }}
 
   deploy-dev:
     uses: ./.github/workflows/_deploy.yml
@@ -49,6 +48,7 @@ jobs:
       artifact_bucket: ${{ secrets.DEV_ARTIFACT_BUCKET }}
       container_sign_kms_key: ${{ secrets.DEV_CONTAINER_SIGN_KMS_KEY }}
       ecr_repository: ${{ secrets.DEV_ECR_REPOSITORY }}
+      ecr_repository_tests: ${{ secrets.DEV_ECR_TESTS_REPOSITORY }}
       dynatrace_paas_token: ${{ secrets.DYNATRACE_PAAS_TOKEN }}
 
   deploy-build:
@@ -61,4 +61,5 @@ jobs:
       artifact_bucket: ${{ secrets.BUILD_ARTIFACT_BUCKET }}
       container_sign_kms_key: ${{ secrets.BUILD_CONTAINER_SIGN_KMS_KEY }}
       ecr_repository: ${{ secrets.BUILD_ECR_REPOSITORY }}
+      ecr_repository_tests: ${{ secrets.BUILD_ECR_TESTS_REPOSITORY }}
       dynatrace_paas_token: ${{ secrets.DYNATRACE_PAAS_TOKEN }}

@@ -80,7 +80,8 @@ export default defineConfig(
   {
     files: ['test/**/*'],
     rules: {
-      'no-console': 'off'
+      'no-console': 'off',
+      'no-empty-pattern': 'off'
     }
   }
 )

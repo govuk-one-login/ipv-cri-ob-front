@@ -61,7 +61,7 @@ Conditions:
 Mappings:
   EnvironmentConfiguration:
     dev:
-      logsLevel: "debug"
+      logLevel: "debug"
       dynatraceSecretArn: arn:aws:secretsmanager:eu-west-2:216552277552:secret:DynatraceNonProductionVariables
       sessionStoreSecretArn: arn:aws:secretsmanager:eu-west-2:807508353778:secret:ob-fe/session-store-secret-NOhsbW # pragma: allowlist secret
       fargateCPUsize: "256"
@@ -70,7 +70,7 @@ Mappings:
       maxECSCount: 4
       nodeEnv: "production"
     build:
-      logsLevel: "info"
+      logLevel: "info"
       dynatraceSecretArn: arn:aws:secretsmanager:eu-west-2:216552277552:secret:DynatraceNonProductionVariables
       sessionStoreSecretArn: arn:aws:secretsmanager:eu-west-2:146103651914:secret:ob-fe/session-store-secret-5utJQb # pragma: allowlist secret
       fargateCPUsize: "2048"
@@ -79,7 +79,7 @@ Mappings:
       maxECSCount: 60
       nodeEnv: "production"
     staging:
-      logsLevel: "warn"
+      logLevel: "warn"
       dynatraceSecretArn: arn:aws:secretsmanager:eu-west-2:216552277552:secret:DynatraceNonProductionVariables
       sessionStoreSecretArn: arn:aws:secretsmanager:eu-west-2:490364002485:secret:ob-fe/session-store-secret-HAlBvE # pragma: allowlist secret
       fargateCPUsize: "256"
@@ -88,7 +88,7 @@ Mappings:
       maxECSCount: 4
       nodeEnv: "production"
     integration:
-      logsLevel: "warn"
+      logLevel: "warn"
       dynatraceSecretArn: arn:aws:secretsmanager:eu-west-2:216552277552:secret:DynatraceNonProductionVariables
       sessionStoreSecretArn: arn:aws:secretsmanager:eu-west-2:196177110550:secret:ob-fe/session-store-secret-R8ZhBa # pragma: allowlist secret
       fargateCPUsize: "512"
@@ -97,7 +97,7 @@ Mappings:
       maxECSCount: 4
       nodeEnv: "production"
     production:
-      logsLevel: "warn"
+      logLevel: "warn"
       dynatraceSecretArn: arn:aws:secretsmanager:eu-west-2:216552277552:secret:DynatraceProductionVariables
       sessionStoreSecretArn: arn:aws:secretsmanager:eu-west-2:327860191376:secret:ob-fe/session-store-secret-Au0Mov # pragma: allowlist secret
       fargateCPUsize: "2048"
@@ -469,8 +469,8 @@ Resources:
               Value: "account.gov.uk"
             - Name: DEVICE_INTELLIGENCE_ENABLED
               Value: !FindInMap [ FeatureFlagMapping, !Ref Environment, deviceIntelligenceEnabled ]
-            - Name: LOGS_LEVEL
-              Value: !FindInMap [ EnvironmentConfiguration, !Ref "Environment", logsLevel ]
+            - Name: LOG_LEVEL
+              Value: !FindInMap [ EnvironmentConfiguration, !Ref "Environment", logLevel ]
             - Name: NODE_ENV
               Value:
                 !FindInMap [
