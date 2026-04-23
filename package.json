@@ -38,7 +38,7 @@
     "@types/js-yaml": "4.0.9",
     "@types/node": "25.5.0",
     "@types/nunjucks": "3.2.6",
-    "@vitest/coverage-v8": "4.1.3",
+    "@vitest/coverage-v8": "4.1.5",
     "eslint": "10.1.0",
     "eslint-config-prettier": "10.1.8",
     "eslint-plugin-perfectionist": "5.7.0",
@@ -54,7 +54,7 @@
     "typescript-eslint": "8.58.0",
     "vite": "8.0.5",
     "vite-plugin-static-copy": "4.0.1",
-    "vitest": "4.1.3"
+    "vitest": "4.1.5"
   },
   "dependencies": {
     "@aws-sdk/client-dynamodb": "3.1020.0",
