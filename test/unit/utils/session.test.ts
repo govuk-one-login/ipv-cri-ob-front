@@ -50,7 +50,7 @@ describe('session', () => {
     const { default: initSessionStore } = await import('@src/utils/session')
     await initSessionStore()
 
-    expect(DynamoDBClient).toBeCalledWith({
+    expect(DynamoDBClient).toHaveBeenCalledWith({
       credentials: { accessKeyId: 'local', secretAccessKey: 'local' }, // pragma: allowlist secret
       endpoint: 'http://localdynamo:9999',
       region: 'eu-west-2'
@@ -77,7 +77,7 @@ describe('session', () => {
     const { default: initSessionStore } = await import('@src/utils/session')
     await initSessionStore()
 
-    expect(DynamoDBClient).toBeCalledWith({ region: 'eu-west-2' })
+    expect(DynamoDBClient).toHaveBeenCalledWith({ region: 'eu-west-2' })
     expect(checkTableExists).not.toHaveBeenCalled()
   })
 })

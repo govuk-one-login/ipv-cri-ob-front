@@ -1,0 +1,47 @@
+{% extends "layouts/stubs.njk" %}
+{% from "govuk/components/back-link/macro.njk" import govukBackLink %}
+{% from "govuk/components/select/macro.njk" import govukSelect %}
+{% from "govuk/components/button/macro.njk" import govukButton %}
+{% from "govuk/components/summary-list/macro.njk" import govukSummaryList %}
+
+{% block mainContent %}
+  {{ govukBackLink({ text: "Back", href: "/" }) }}
+  <h1>stubby</h1>
+
+  {{
+    govukSummaryList({
+      rows: [{ key: { text: "Consent ID" }, value: { html: "<code>" + consentID + "</code>" } }]
+    })
+  }}
+
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-one-third">
+      <form method="post">
+        {{
+          govukSelect({
+            id: "consent",
+            name: "consent",
+            label: { text: "Consent outcome" },
+            items: consentOutcomeOptions
+          })
+        }}
+        {{ govukButton({ text: "Send webhook", classes: "govuk-button--secondary" }) }}
+      </form>
+    </div>
+    <div class="govuk-grid-column-one-third">
+      <form method="post">
+        {{
+          govukSelect({
+            id: "account-assessment",
+            name: "accountAssessment",
+            label: { text: "Account assessment outcome" },
+            items: accountAssessmentOutcomeOptions
+          })
+        }}
+        {{ govukButton({ text: "Send webhook", classes: "govuk-button--secondary" }) }}
+      </form>
+    </div>
+  </div>
+
+  <form method="post">{{ govukButton({ text: "Continue" }) }}</form>
+{% endblock %}

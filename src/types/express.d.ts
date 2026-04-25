@@ -3,6 +3,18 @@ import type { TOptions } from 'i18next'
 
 export {}
 
+declare module 'express-session' {
+  interface SessionData {
+    flash?: {
+      message: {
+        content?: string
+        header: string
+      }
+      type: 'info' | 'success'
+    }[]
+  }
+}
+
 declare global {
   namespace Express {
     interface Locals {

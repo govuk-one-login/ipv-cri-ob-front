@@ -1,18 +1,15 @@
 import type { NextFunction, Request, Response } from 'express'
 
-import { getLogger } from '../utils/logger'
+import { getLogger } from '@src/utils/logger'
+import { randomUUID } from 'node:crypto'
 
 const LOGGER = getLogger()
 
-const get = (req: Request, res: Response, _next: NextFunction) => {
+const get = (_req: Request, res: Response, _next: NextFunction) => {
   LOGGER.info('hello from the logger')
-  let message = 'hello from the controller'
-  if (req.language === 'cy') {
-    message = 'helo gan y rheolydd'
-  }
-
-  res.render('index.njk', {
-    message
+  const consentID = randomUUID()
+  res.render('pages/index.njk', {
+    consentID
   })
 }
 

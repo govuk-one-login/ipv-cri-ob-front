@@ -5,7 +5,7 @@ declare module '@govuk-one-login/di-ipv-cri-common-express' {
   import type { ErrorRequestHandler, Express, RequestHandler, Router } from 'express'
 
   export interface AppLogger {
-    debug(message: string, ...args: unknown[]): void
+    debug(message: Record<string, unknown> | string, ...args: unknown[]): void
     error(messageOrMeta: Error | Record<string, unknown> | string, ...args: unknown[]): void
     fatal(messageOrMeta: Error | Record<string, unknown> | string, ...args: unknown[]): void
     info(message: string, ...args: unknown[]): void

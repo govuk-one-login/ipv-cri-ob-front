@@ -74,7 +74,10 @@ export default defineConfig(
           newlinesBetween: 1,
           type: 'natural'
         }
-      ]
+      ],
+      'perfectionist/sort-object-types': 'warn',
+      'perfectionist/sort-objects': 'warn',
+      'perfectionist/sort-union-types': 'warn'
     }
   },
   {

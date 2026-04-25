@@ -1,0 +1,37 @@
+{% extends "layouts/base.njk" %}
+{% from "govuk/components/details/macro.njk" import govukDetails %}
+
+{% set pageTitleKey = "pages.index.title" %}
+
+{% block mainContent %}
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+      <h1 class="govuk-heading-l">{{ translate(pageTitleKey) }}</h1>
+      {% for item in translate("pages.index.content-a") %}
+        {{ item | safe }}
+      {% endfor %}
+      {{
+        govukDetails({
+          summaryText: translate("pages.index.details.summary"),
+          text: translate("pages.index.details.content") | safe
+        })
+      }}
+      {% for item in translate("pages.index.content-b") %}
+        {{ item | safe }}
+      {% endfor %}
+      <div class="govuk-button-group">
+        <a
+          href="/stubs/webhook?consent_id={{ consentID }}"
+          class="govuk-button"
+          data-module="govuk-button"
+          >{{ translate("pages.index.primaryButton") }}</a
+        >
+      </div>
+      <p class="govuk-body">
+        <a href="#" class="govuk-link govuk-link--no-visited-state"
+          >{{ translate("pages.index.secondaryLink") }}</a
+        >
+      </p>
+    </div>
+  </div>
+{% endblock %}

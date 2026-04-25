@@ -1,2 +1,20 @@
 index:
-  title: Cyhoeddwr Cymwysterau Bancio Agored
+  title: Gorffennwch brofi eich hunaniaeth drwy fewngofnodi i'ch bancio ar-lein
+  content-a:
+    - <p class="govuk-body">Rhaid i'ch cyfrif fod:</p>
+    - <ul class="govuk-list govuk-list--bullet">
+    - <li>cyfrif cyfredol, nid cyfrif cynilo, cyfrif cerdyn credyd na math arall o gyfrif</li>
+    - <li>yn eich enw (gallwch ddefnyddio cyfrif ar y cyd)</li>
+    - <li>mwy na 3 mis oed</li>
+    - </ul>
+  details:
+    summary: Sut mae bancio ar-lein yn profi fy hunaniaeth?
+    content: Mae gan fanciau ddiogelwch cryf iawn, felly pan fyddwch chi'n mewngofnodi, maen nhw'n gwybod mai chi ydyw mewn gwirionedd.<br><br> Yna gall y banc gadarnhau'r manylion a roddoch i ni, i'n helpu i fod yn siŵr mai chi yw pwy rydych chi'n dweud eich bod chi.
+  content-b:
+    - <h2 class="govuk-heading-m">Cyn i chi fewngofnodi</h2>
+    - <p class="govuk-body">Byddwn yn gofyn am eich caniatâd i rannu gwybodaeth o'ch cyfrif gyda chwmni o'r enw Ecospend.</p>
+    - <p class="govuk-body">Mae hyn er mwyn i ni allu cysylltu'n ddiogel â'ch banc a chadarnhau eich hunaniaeth. Fe welwch pa wybodaeth fydd yn cael ei rhannu gydag Ecospend cyn i chi gytuno iddi.</p>
+    - <p class="govuk-body"><a class="govuk-link govuk-link--no-visited-state" target="_blank" href="https://www.gov.uk/government/publications/govuk-one-login-privacy-notice">Ein hysbysiad preifatrwydd (yn agor mewn tab newydd)</a> mae ganddo fwy o fanylion am sut y bydd eich gwybodaeth yn cael ei defnyddio.</p>
+    - <p class="govuk-body">Mae Ecospend yn cael ei reoleiddio gan y <a class="govuk-link govuk-link--no-visited-state" target="_blank" href="https://register.fca.org.uk/s/firm?id=0010X00004KSo9HQAT">Awdurdod Ymddygiad Ariannol (yn agor mewn tab newydd)</a>.</p>
+  primaryButton: Parhewch
+  secondaryLink: Profi eich hunaniaeth mewn ffordd arall

@@ -1,0 +1,42 @@
+{% extends "govuk/template.njk" %}
+{% set govukRebrand = true %}
+{% set assetPath = "/public/rebrand" %}
+{% from "govuk/components/notification-banner/macro.njk" import govukNotificationBanner %}
+
+{% block head %}
+  {% if devServer %}
+    <script type="module" src="/@vite/client"></script>
+    <link rel="stylesheet" href="/src/assets/scss/application.scss" />
+  {% else %}
+    <link rel="stylesheet" href="/public/stylesheets/application.css" />
+  {% endif %}
+{% endblock %}
+
+{% block content %}
+  {% for f in flash %}
+    {% set html %}
+      <h3 class="govuk-notification-banner__heading">{{ f.message.header }}</h3>
+      {% if f.message.content %}
+        <pre style="font-size: 0.9rem;">{{ f.message.content }}</pre>
+      {% endif %}
+    {% endset %}
+
+    {{
+      govukNotificationBanner({
+        html: html,
+        type: f.type,
+        titleText: f.type | capitalize
+      })
+    }}
+  {% endfor %}
+  {% block mainContent %}
+  {% endblock %}
+{% endblock %}
+
+{% block bodyEnd %}
+  {% if devServer %}
+    <script type="module" src="/src/assets/js/application.ts"></script>
+  {% else %}
+    <script type="module" src="/public/javascripts/application.js"></script>
+  {% endif %}
+{% endblock %}

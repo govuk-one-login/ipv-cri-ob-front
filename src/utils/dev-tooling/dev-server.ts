@@ -1,9 +1,12 @@
 import type { Express } from 'express'
+import type { i18n } from 'i18next'
 import type { ViteDevServer } from 'vite'
 
 import { getLogger } from '@src/utils/logger'
+import { createRequire } from 'node:module'
 
-import i18next from 'i18next'
+const require = createRequire(import.meta.url)
+const i18next = require('i18next') as i18n
 
 const LOGGER = getLogger()
 
@@ -39,7 +42,7 @@ const setupDevServer = (app: Express, vite: ViteDevServer): void => {
   // eslint-disable-next-line @typescript-eslint/no-misused-promises
   vite.watcher.on('change', async (file) => {
     if (file.endsWith('.yml') && i18next.isInitialized) {
-      await i18next.reloadResources()
+      await i18next.reloadResources(['en', 'cy'])
     }
     if (file.endsWith('.njk') || file.endsWith('.yml') || file.endsWith('.json')) {
       LOGGER.debug(`[vite] reloading: ${file}`)

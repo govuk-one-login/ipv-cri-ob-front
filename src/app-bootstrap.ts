@@ -16,6 +16,7 @@ import { frontendVitalSignsInitFromApp } from '@govuk-one-login/frontend-vital-s
 import initSessionStore from './utils/session'
 import commonExpress from '@govuk-one-login/di-ipv-cri-common-express'
 import path from 'node:path'
+import { flash } from '@src/middleware/flash.middleware'
 
 const APP_ROOT = process.cwd()
 
@@ -57,7 +58,11 @@ export const createApp = async (): Promise<{ app: Express; router: Router }> => 
       fallbackLang: ['en'],
       query: 'lng'
     },
-    views: ['node_modules/@govuk-one-login/', path.resolve(import.meta.dirname, 'views')]
+    views: [
+      'node_modules/@govuk-one-login/',
+      'node_modules/govuk-frontend/dist',
+      path.resolve(import.meta.dirname, 'views')
+    ]
   })
 
   app.set('view engine', 'njk')
@@ -87,6 +92,7 @@ export const createApp = async (): Promise<{ app: Express; router: Router }> => 
     deviceIntelligenceEnabled: appConfig.APP.DEVICE_INTELLIGENCE_ENABLED
   })
 
+  router.use(flash)
   routes.configure(router)
   // error handling must be last
   router.use(commonExpress.lib.errorHandling.redirectAsErrorToCallback)
