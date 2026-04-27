@@ -81,6 +81,13 @@ export default defineConfig(
     }
   },
   {
+    // order of imports is important for index
+    files: ['src/index.ts'],
+    rules: {
+      'perfectionist/sort-imports': 'off'
+    }
+  },
+  {
     files: ['test/**/*'],
     rules: {
       'no-console': 'off',

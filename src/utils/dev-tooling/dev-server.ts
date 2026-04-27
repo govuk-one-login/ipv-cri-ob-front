@@ -8,8 +8,6 @@ import { createRequire } from 'node:module'
 const require = createRequire(import.meta.url)
 const i18next = require('i18next') as i18n
 
-const LOGGER = getLogger()
-
 const createViteServer = async (): Promise<ViteDevServer> => {
   const { createServer } = await import('vite')
   return createServer({
@@ -36,7 +34,7 @@ const setupDevServer = (app: Express, vite: ViteDevServer): void => {
   })
 
   app.use(vite.middlewares)
-  LOGGER.info(`[vite] local dev middlewares loaded`)
+  getLogger().info(`[vite] local dev middlewares loaded`)
 
   vite.watcher.add('src/**/*.{njk,yml,json}')
   // eslint-disable-next-line @typescript-eslint/no-misused-promises
@@ -45,7 +43,7 @@ const setupDevServer = (app: Express, vite: ViteDevServer): void => {
       await i18next.reloadResources(['en', 'cy'])
     }
     if (file.endsWith('.njk') || file.endsWith('.yml') || file.endsWith('.json')) {
-      LOGGER.debug(`[vite] reloading: ${file}`)
+      getLogger().debug(`[vite] reloading: ${file}`)
       vite.hot.send({ path: '*', type: 'full-reload' })
     }
   })

@@ -1,5 +1,5 @@
-import type { RecordType } from '@src/types/ecospend/webhooks/record-type'
 import type { EventValue } from '@src/types/ecospend/webhooks/event-value'
+import type { RecordType } from '@src/types/ecospend/webhooks/record-type'
 
 export interface EcospendWebhookData {
   consent_id: string

@@ -30,7 +30,7 @@ describe('forceSessionSaveBeforeRedirect middleware', () => {
     res.redirect('/next')
 
     expect(save).toHaveBeenCalled()
-    expect(redirectSpy).toHaveBeenCalledWith('/next', 302)
+    expect(redirectSpy).toHaveBeenCalledWith(302, '/next')
   })
 
   it('redirects even if session save errors', () => {
@@ -42,7 +42,7 @@ describe('forceSessionSaveBeforeRedirect middleware', () => {
     forceSessionSaveBeforeRedirect(req, res, vi.fn())
     res.redirect('/next')
 
-    expect(redirectSpy).toHaveBeenCalledWith('/next', 302)
+    expect(redirectSpy).toHaveBeenCalledWith(302, '/next')
   })
 
   it('redirects when there is no session', () => {
@@ -53,7 +53,7 @@ describe('forceSessionSaveBeforeRedirect middleware', () => {
     forceSessionSaveBeforeRedirect(req, res, vi.fn())
     res.redirect('/next')
 
-    expect(redirectSpy).toHaveBeenCalledWith('/next', 302)
+    expect(redirectSpy).toHaveBeenCalledWith(302, '/next')
   })
 
   it('uses the provided status code', () => {
@@ -64,6 +64,6 @@ describe('forceSessionSaveBeforeRedirect middleware', () => {
     forceSessionSaveBeforeRedirect(req, res, vi.fn())
     res.redirect(301, '/next')
 
-    expect(redirectSpy).toHaveBeenCalledWith('/next', 301)
+    expect(redirectSpy).toHaveBeenCalledWith(301, '/next')
   })
 })

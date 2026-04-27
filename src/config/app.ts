@@ -10,7 +10,8 @@ const AppConfigSchema = z.object({
     BASE_URL: z.url(),
     PATHS: z.object({
       AUTHORIZATION: z.string().nonempty(),
-      SESSION: z.string().nonempty()
+      SESSION: z.string().nonempty(),
+      WEBHOOK: z.string()
     })
   }),
   APP: z.object({
@@ -49,7 +50,8 @@ export default AppConfigSchema.parse({
     BASE_URL: process.env['API_BASE_URL']!,
     PATHS: {
       AUTHORIZATION: 'authorization',
-      SESSION: 'session'
+      SESSION: 'session',
+      WEBHOOK: 'webhook'
     }
   },
   APP: {

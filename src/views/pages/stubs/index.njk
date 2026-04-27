@@ -6,7 +6,6 @@
 
 {% block mainContent %}
   {{ govukBackLink({ text: "Back", href: "/" }) }}
-  <h1>stubby</h1>
 
   {{
     govukSummaryList({
@@ -28,7 +27,7 @@
         {{ govukButton({ text: "Send webhook", classes: "govuk-button--secondary" }) }}
       </form>
     </div>
-    <div class="govuk-grid-column-one-third">
+    <div class="govuk-grid-column-two-thirds">
       <form method="post">
         {{
           govukSelect({
