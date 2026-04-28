@@ -1,4 +1,4 @@
-index:
+start:
   title: Finish proving your identity by signing in to your online banking
   content-a:
     - <p class="govuk-body">Your account must be:</p>
@@ -18,3 +18,6 @@ index:
     - <p class="govuk-body">Ecospend is regulated by the <a class="govuk-link govuk-link--no-visited-state" target="_blank" href="https://register.fca.org.uk/s/firm?id=0010X00004KSo9HQAT">Financial Conduct Authority (opens in a new tab)</a>.</p>
   primaryButton: Continue
   secondaryLink: Prove your identity another way
+
+consent:
+  title: Agree to share information from your bank or building society account with Ecospend

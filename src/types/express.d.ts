@@ -5,6 +5,7 @@ export {}
 
 declare module 'express-session' {
   interface SessionData {
+    consentID?: string
     flash?: {
       message: {
         content?: string

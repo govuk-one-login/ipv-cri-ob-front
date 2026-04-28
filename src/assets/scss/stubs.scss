@@ -2,11 +2,6 @@ $govuk-assets-path: '/public/';
 
 @import 'govuk-frontend/dist/govuk';
 
-.govuk-summary-list .govuk-tag {
-  white-space: nowrap;
-  max-width: 100%;
-}
-
 .govuk-phase-banner .govuk-tag {
   background-color: #ffee80;
   color: #7a3c1c;

@@ -1,13 +1,10 @@
 import type { NextFunction, Request, Response } from 'express'
 
-import { getLogger } from '@src/utils/logger'
-import { randomUUID } from 'node:crypto'
+import paths from '@src/config/paths'
 
 const get = (_req: Request, res: Response, _next: NextFunction) => {
-  const consentID = randomUUID()
-  getLogger().info(`consent id: ${consentID}`)
-  res.render('pages/index.njk', {
-    consentID
+  res.render('pages/steps/start.njk', {
+    nextStep: paths.steps.consent
   })
 }
 

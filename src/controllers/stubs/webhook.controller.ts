@@ -2,14 +2,17 @@ import type {
   AccountAssessmentCompleteEventValue,
   ConsentJourneyCompleteEventValue
 } from '@src/types/ecospend/webhooks/event-value'
+import type { AxiosError } from 'axios'
 import type { NextFunction, Request, Response } from 'express'
 
 import { EcospendWebhookBuilder } from '@src/models/ecospend/webhooks/ecospend-webhook.class'
+import { RecordType } from '@src/types/ecospend/webhooks/record-type'
 import { addFlash } from '@src/utils/flash'
 import { getLogger } from '@src/utils/logger'
 import { createHmac, randomUUID } from 'node:crypto'
 import { z } from 'zod'
 
+import appConfig from '@src/config/app'
 import paths from '@src/config/paths'
 
 interface OutcomeOption<T = never> {
@@ -44,7 +47,7 @@ const withSelected = <T>(
   options.map((o) => ({ ...o, selected: o.value === selected }))
 
 const get = (req: Request, res: Response, _next: NextFunction) => {
-  const consentID = req.query['consent_id'] as string
+  const consentID = req.session.consentID!
   const sent = req.session.webhooksSent?.[consentID] ?? {}
   getLogger().debug(req.query)
   return res.render('pages/stubs/index.njk', {
@@ -60,28 +63,28 @@ const get = (req: Request, res: Response, _next: NextFunction) => {
 }
 
 const post = async (req: Request, res: Response, _next: NextFunction) => {
-  const consentID = req.query['consent_id'] as string
+  const consentID = req.session.consentID!
 
   const consentResult = ConsentBodySchema.safeParse(req.body)
   const accountAssessmentResult = AccountAssessmentBodySchema.safeParse(req.body)
 
-  const config = consentResult.success
-    ? { eventValue: consentResult.data.consent, recordType: 'Consent' as const }
+  const formVals = consentResult.success
+    ? { eventValue: consentResult.data.consent, recordType: RecordType.CONSENT }
     : accountAssessmentResult.success
       ? {
           eventValue: accountAssessmentResult.data.accountAssessment,
-          recordType: 'AccountAssessment' as const
+          recordType: RecordType.ACCOUNT_ASSESSMENT
         }
       : null
 
-  if (config) {
+  if (formVals) {
     const webhook = EcospendWebhookBuilder.create()
       .setConsentID(consentID)
       .setEventID(randomUUID())
-      .setEventValue(config.eventValue)
+      .setEventValue(formVals.eventValue)
       .setEventTimestamp(new Date())
       .setRecordID(randomUUID())
-      .setRecordType(config.recordType)
+      .setRecordType(formVals.recordType)
       .build()
 
     const webhookBody = JSON.stringify(webhook)
@@ -98,34 +101,38 @@ const post = async (req: Request, res: Response, _next: NextFunction) => {
       headers['X-Signature'] = createHmac('sha256', secret).update(webhookBody).digest('hex')
     }
 
-    await fetch('http://localhost:9999', { body: webhookBody, headers, method: 'POST' })
+    await req.axios
+      .post(appConfig.API.PATHS.WEBHOOK, webhookBody, { headers })
       .then(() => {
         addFlash(req, {
-          message: { header: 'Webhook sent' },
+          message: { header: 'Webhook send success' },
           type: 'success'
         })
-        const sent = (req.session.webhooksSent ??= {})
-        sent[consentID] ??= {}
+        const entry = req.session.webhooksSent?.[consentID] ?? {}
         if (consentResult.success) {
           const text = consentOutcomeOptions.find(
             (o) => o.value === consentResult.data.consent
           )?.text
-          if (text) sent[consentID].consent = text
+          if (text) entry.consent = text
         }
         if (accountAssessmentResult.success) {
           const text = accountAssessmentOutcomeOptions.find(
             (o) => o.value === accountAssessmentResult.data.accountAssessment
           )?.text
-          if (text) sent[consentID].accountAssessment = text
+          if (text) entry.accountAssessment = text
         }
+        req.session.webhooksSent = { [consentID]: entry }
       })
-      .catch((err: unknown) => {
-        getLogger().error('webhook monitor unavailable', err)
-        addFlash(req, { message: { header: 'Webhook monitor unavailable' }, type: 'error' })
+      .catch((err: AxiosError) => {
+        getLogger().error('webhook endpoint failure', err)
+        const detail = err.response
+          ? `${err.response.status} ${err.response.statusText}`
+          : (err.code ?? err.message)
+        addFlash(req, { message: { content: detail, header: 'Webhook send fail' }, type: 'error' })
       })
   }
 
-  const searchParams = new URLSearchParams({ consent_id: consentID })
+  const searchParams = new URLSearchParams()
   if (req.query['consent']) searchParams.set('consent', req.query['consent'] as string)
   if (req.query['accountAssessment'])
     searchParams.set('accountAssessment', req.query['accountAssessment'] as string)

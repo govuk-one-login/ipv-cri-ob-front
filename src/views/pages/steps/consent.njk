@@ -1,0 +1,15 @@
+{% extends "layouts/base.njk" %}
+{% from "govuk/components/details/macro.njk" import govukDetails %}
+
+{% set pageTitleKey = "pages.consent.title" %}
+
+{% block mainContent %}
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+      <h1 class="govuk-heading-l">{{ translate(pageTitleKey) }}</h1>
+      <a href="{{ nextStep }}" class="govuk-button" data-module="govuk-button"
+        >Generate consent ID</a
+      >
+    </div>
+  </div>
+{% endblock %}

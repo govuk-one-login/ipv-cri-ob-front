@@ -6,7 +6,7 @@ import { getLogger } from '@src/utils/logger'
  * patches a race condition in common-express where express-session with DynamoDB store
  * doesn't guarantee session persistence before redirect
  */
-const forceSessionSaveBeforeRedirect = (req: Request, res: Response, next: NextFunction): void => {
+const middleware = (req: Request, res: Response, next: NextFunction): void => {
   const originalRedirect = res.redirect.bind(res)
 
   res.redirect = function (statusOrUrl: number | string, url: string) {
@@ -29,4 +29,4 @@ const forceSessionSaveBeforeRedirect = (req: Request, res: Response, next: NextF
   next()
 }
 
-export { forceSessionSaveBeforeRedirect }
+export { middleware }

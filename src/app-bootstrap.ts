@@ -3,8 +3,7 @@ import type { ViteDevServer } from 'vite'
 
 import { frontendUiMiddlewareIdentityBypass } from '@govuk-one-login/frontend-ui'
 import { frontendVitalSignsInitFromApp } from '@govuk-one-login/frontend-vital-signs'
-import { flash } from '@src/middleware/flash.middleware'
-import { forceSessionSaveBeforeRedirect } from '@src/middleware/force-session-save.middleware'
+import { flash, forceSessionSave } from '@src/middleware'
 import { createViteServer, setupDevServer } from '@src/utils/dev-tooling/dev-server'
 
 import commonExpress from '@govuk-one-login/di-ipv-cri-common-express'
@@ -36,7 +35,7 @@ export const createApp = async (): Promise<{ app: Express; router: Router }> => 
         router: app
       })
       app.use(frontendUiMiddlewareIdentityBypass)
-      app.use(forceSessionSaveBeforeRedirect)
+      app.use(forceSessionSave.middleware)
       app.use(commonExpress.lib.locals.getGTM)
       app.use(commonExpress.lib.locals.getLanguageToggle)
       app.use(commonExpress.lib.locals.getDeviceIntelligence)
@@ -90,7 +89,7 @@ export const createApp = async (): Promise<{ app: Express; router: Router }> => 
     deviceIntelligenceEnabled: appConfig.APP.DEVICE_INTELLIGENCE_ENABLED
   })
 
-  router.use(flash)
+  router.use(flash.middleware)
   routes.configure(router)
   // error handling must be last
   router.use(commonExpress.lib.errorHandling.redirectAsErrorToCallback)
