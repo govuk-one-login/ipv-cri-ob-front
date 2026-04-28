@@ -1,21 +1,20 @@
 import type { Express, Router } from 'express'
 import type { ViteDevServer } from 'vite'
 
-import {
-  appConfig,
-  helmetConfig,
-  overloadProtectionConfig,
-  routes,
-  vitalSignsConfig
-} from './config'
-import { forceSessionSaveBeforeRedirect } from './middleware/force-session-save.middleware'
-import { createViteServer, setupDevServer } from './utils/dev-tooling/dev-server'
 import { frontendUiMiddlewareIdentityBypass } from '@govuk-one-login/frontend-ui'
 import { frontendVitalSignsInitFromApp } from '@govuk-one-login/frontend-vital-signs'
+import { flash, forceSessionSave } from '@src/middleware'
+import { createViteServer, setupDevServer } from '@src/utils/dev-tooling/dev-server'
 
-import initSessionStore from './utils/session'
 import commonExpress from '@govuk-one-login/di-ipv-cri-common-express'
+import appConfig from '@src/config/app'
+import helmetConfig from '@src/config/helmet'
+import overloadProtectionConfig from '@src/config/overload-protection'
+import vitalSignsConfig from '@src/config/vital-signs'
+import initSessionStore from '@src/utils/session'
 import path from 'node:path'
+
+import * as routes from '@src/config/routes'
 
 const APP_ROOT = process.cwd()
 
@@ -27,7 +26,6 @@ export const createApp = async (): Promise<{ app: Express; router: Router }> => 
     config: { APP_ROOT },
     env: appConfig.APP.NODE_ENV,
     helmet: helmetConfig,
-    logs: false, // pino logger is enabled so hmpo logger is false
     middlewareSetupFn: (app: Express) => {
       if (vite) setupDevServer(app, vite)
       commonExpress.lib.i18n.setI18n({
@@ -37,7 +35,7 @@ export const createApp = async (): Promise<{ app: Express; router: Router }> => 
         router: app
       })
       app.use(frontendUiMiddlewareIdentityBypass)
-      app.use(forceSessionSaveBeforeRedirect)
+      app.use(forceSessionSave.middleware)
       app.use(commonExpress.lib.locals.getGTM)
       app.use(commonExpress.lib.locals.getLanguageToggle)
       app.use(commonExpress.lib.locals.getDeviceIntelligence)
@@ -57,7 +55,11 @@ export const createApp = async (): Promise<{ app: Express; router: Router }> => 
       fallbackLang: ['en'],
       query: 'lng'
     },
-    views: ['node_modules/@govuk-one-login/', path.resolve(import.meta.dirname, 'views')]
+    views: [
+      'node_modules/@govuk-one-login/',
+      'node_modules/govuk-frontend/dist',
+      path.resolve(import.meta.dirname, 'views')
+    ]
   })
 
   app.set('view engine', 'njk')
@@ -87,6 +89,7 @@ export const createApp = async (): Promise<{ app: Express; router: Router }> => 
     deviceIntelligenceEnabled: appConfig.APP.DEVICE_INTELLIGENCE_ENABLED
   })
 
+  router.use(flash.middleware)
   routes.configure(router)
   // error handling must be last
   router.use(commonExpress.lib.errorHandling.redirectAsErrorToCallback)

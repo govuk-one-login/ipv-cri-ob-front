@@ -3,6 +3,20 @@ import type { TOptions } from 'i18next'
 
 export {}
 
+declare module 'express-session' {
+  interface SessionData {
+    consentID?: string
+    flash?: {
+      message: {
+        content?: string
+        header: string
+      }
+      type: 'error' | 'info' | 'success'
+    }[]
+    webhooksSent?: Record<string, { accountAssessment?: string; consent?: string }>
+  }
+}
+
 declare global {
   namespace Express {
     interface Locals {

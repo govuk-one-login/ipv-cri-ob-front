@@ -1,4 +1,6 @@
-import { appConfig } from '@src/config'
+// appConfig must be first: its module body calls loadDotenv(), which must run before common-express libs are evaluated
+import appConfig from '@src/config/app'
+
 import { registerShutdownHandler } from '@src/utils/shutdown-handler'
 import { config as loadDotenv } from 'dotenv'
 

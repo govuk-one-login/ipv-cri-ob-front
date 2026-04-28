@@ -1,13 +1,12 @@
-import { appConfig } from '../config'
 import { checkTableExists, dynamoDevOverrides } from './dev-tooling/local-dynamodb'
-import { getLogger } from './logger'
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb'
+import { getLogger } from '@src/utils/logger'
 
+import appConfig from '@src/config/app'
 import connectDynamoDB from 'connect-dynamodb'
 import session from 'express-session'
 
 const DynamoDBStore = connectDynamoDB(session)
-const LOGGER = getLogger()
 
 const createSessionStore = async () => {
   const clientConfig = {
@@ -17,10 +16,10 @@ const createSessionStore = async () => {
   const dynamodbClient = new DynamoDBClient(clientConfig)
   const table = appConfig.APP.SESSION.TABLE_NAME
   if ('endpoint' in clientConfig) {
-    LOGGER.warn(`[local DynamoDB] endpoint override is set: ${dynamoDevOverrides.endpoint}`)
+    getLogger().warn(`[local DynamoDB] endpoint override is set: ${dynamoDevOverrides.endpoint}`)
 
     await checkTableExists(dynamodbClient, table).catch((error) => {
-      LOGGER.error('[local DynamoDB] problem creating table:', error)
+      getLogger().error('[local DynamoDB] problem creating table:', error)
     })
   }
 

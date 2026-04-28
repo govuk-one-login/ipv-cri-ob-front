@@ -59,7 +59,10 @@ export default defineConfig({
   build: {
     outDir: 'dist',
     rolldownOptions: {
-      input: { application: 'src/assets/js/application.ts' },
+      input: {
+        application: 'src/assets/js/application.ts',
+        stubs: 'src/assets/scss/stubs.scss'
+      },
       output: {
         assetFileNames: ({ names }) =>
           names[0]?.endsWith('.css')
@@ -113,7 +116,7 @@ export default defineConfig({
         },
         {
           dest: 'public/javascripts',
-          rename: (_name, ext, _fullPath) => `../../../../../deviceIntelligence.${ext}`,
+          rename: { name: 'deviceIntelligence.js', stripBase: true },
           src: 'node_modules/@govuk-one-login/frontend-device-intelligence/build/esm/index.js'
         }
       ]

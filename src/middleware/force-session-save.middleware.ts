@@ -1,14 +1,12 @@
 import type { NextFunction, Request, Response } from 'express'
 
-import { getLogger } from '../utils/logger'
-
-const LOGGER = getLogger()
+import { getLogger } from '@src/utils/logger'
 
 /**
  * patches a race condition in common-express where express-session with DynamoDB store
  * doesn't guarantee session persistence before redirect
  */
-const forceSessionSaveBeforeRedirect = (req: Request, res: Response, next: NextFunction): void => {
+const middleware = (req: Request, res: Response, next: NextFunction): void => {
   const originalRedirect = res.redirect.bind(res)
 
   res.redirect = function (statusOrUrl: number | string, url: string) {
@@ -18,17 +16,17 @@ const forceSessionSaveBeforeRedirect = (req: Request, res: Response, next: NextF
     if (req?.session?.save) {
       req.session.save((err: Error | null) => {
         if (err) {
-          LOGGER.error({ error: err.message, url }, 'Error saving session before redirect')
-          return originalRedirect.call(res, actualUrl, status)
+          getLogger().error({ error: err.message, url }, 'Error saving session before redirect')
+          return originalRedirect(status, actualUrl)
         }
-        originalRedirect.call(res, actualUrl, status)
+        originalRedirect(status, actualUrl)
       })
     } else {
-      originalRedirect.call(res, actualUrl, status)
+      originalRedirect(status, actualUrl)
     }
   } as typeof res.redirect
 
   next()
 }
 
-export { forceSessionSaveBeforeRedirect }
+export { middleware }

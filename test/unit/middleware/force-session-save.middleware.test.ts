@@ -6,13 +6,12 @@ vi.mock('@src/utils/logger', () => ({
   getLogger: () => ({ error: vi.fn() })
 }))
 
-const { forceSessionSaveBeforeRedirect } =
-  await import('@src/middleware/force-session-save.middleware')
+const { forceSessionSave } = await import('@src/middleware')
 
 describe('forceSessionSaveBeforeRedirect middleware', () => {
   it('calls next()', () => {
     const next = vi.fn()
-    forceSessionSaveBeforeRedirect(
+    forceSessionSave.middleware(
       {} as Request,
       { redirect: vi.fn() } as unknown as Response,
       next as NextFunction
@@ -26,11 +25,11 @@ describe('forceSessionSaveBeforeRedirect middleware', () => {
     const req = { session: { save } } as unknown as Request
     const res = { redirect: redirectSpy } as unknown as Response
 
-    forceSessionSaveBeforeRedirect(req, res, vi.fn())
+    forceSessionSave.middleware(req, res, vi.fn())
     res.redirect('/next')
 
     expect(save).toHaveBeenCalled()
-    expect(redirectSpy).toHaveBeenCalledWith('/next', 302)
+    expect(redirectSpy).toHaveBeenCalledWith(302, '/next')
   })
 
   it('redirects even if session save errors', () => {
@@ -39,10 +38,10 @@ describe('forceSessionSaveBeforeRedirect middleware', () => {
     const req = { session: { save } } as unknown as Request
     const res = { redirect: redirectSpy } as unknown as Response
 
-    forceSessionSaveBeforeRedirect(req, res, vi.fn())
+    forceSessionSave.middleware(req, res, vi.fn())
     res.redirect('/next')
 
-    expect(redirectSpy).toHaveBeenCalledWith('/next', 302)
+    expect(redirectSpy).toHaveBeenCalledWith(302, '/next')
   })
 
   it('redirects when there is no session', () => {
@@ -50,10 +49,10 @@ describe('forceSessionSaveBeforeRedirect middleware', () => {
     const req = {} as Request
     const res = { redirect: redirectSpy } as unknown as Response
 
-    forceSessionSaveBeforeRedirect(req, res, vi.fn())
+    forceSessionSave.middleware(req, res, vi.fn())
     res.redirect('/next')
 
-    expect(redirectSpy).toHaveBeenCalledWith('/next', 302)
+    expect(redirectSpy).toHaveBeenCalledWith(302, '/next')
   })
 
   it('uses the provided status code', () => {
@@ -61,9 +60,9 @@ describe('forceSessionSaveBeforeRedirect middleware', () => {
     const req = {} as Request
     const res = { redirect: redirectSpy } as unknown as Response
 
-    forceSessionSaveBeforeRedirect(req, res, vi.fn())
+    forceSessionSave.middleware(req, res, vi.fn())
     res.redirect(301, '/next')
 
-    expect(redirectSpy).toHaveBeenCalledWith('/next', 301)
+    expect(redirectSpy).toHaveBeenCalledWith(301, '/next')
   })
 })

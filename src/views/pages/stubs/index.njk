@@ -1,0 +1,94 @@
+{% extends "layouts/stubs.njk" %}
+{% from "govuk/components/select/macro.njk" import govukSelect %}
+{% from "govuk/components/button/macro.njk" import govukButton %}
+{% from "govuk/components/summary-list/macro.njk" import govukSummaryList %}
+{% from "govuk/components/table/macro.njk" import govukTable %}
+
+{% block mainContent %}
+  <h1 class="govuk-heading-l">🍋‍🟩 Online Banking Portal</h1>
+
+  {{
+    govukSummaryList({
+      rows: [
+        { key: { text: "Consent ID" }, value: { html: "<code>" + consentID + "</code>" } }
+      ]
+    })
+  }}
+
+  {{
+    govukTable({
+      caption: "Webhook outbox",
+      captionClasses: "govuk-table__caption--m",
+      firstCellIsHeader: true,
+        head: [
+          {
+            text: "Type",
+            classes: "govuk-!-width-one-half"
+          },
+          {
+            text: "Status",
+            classes: "govuk-!-width-one-quarter"
+          },
+          {
+            text: "Outcome",
+            classes: "govuk-!-width-one-quarter"
+          }
+        ],
+      rows: [
+        [
+          {
+            text: "Consent"
+          },
+          {
+            html: "<strong class='govuk-tag govuk-tag--green'>Sent</strong>" if sentConsent else "<strong class='govuk-tag govuk-tag--grey'>Not sent</strong>"
+          },
+          {
+            text: sentConsent
+          }
+        ],
+        [
+          {
+            text: "Account assessment"
+          },
+          {
+            html: "<strong class='govuk-tag govuk-tag--green'>Sent</strong>" if sentAccountAssessment else "<strong class='govuk-tag govuk-tag--grey'>Not sent</strong>"
+          },
+          {
+            text: sentAccountAssessment
+          }
+        ]
+      ]
+    })
+  }}
+
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-one-half">
+      <form method="post">
+        {{
+          govukSelect({
+            id: "consent",
+            name: "consent",
+            label: { text: "Consent outcome" },
+            items: consentOutcomeOptions
+          })
+        }}
+        {{ govukButton({ text: "Send consent webhook", classes: "govuk-button--secondary" }) }}
+      </form>
+    </div>
+    <div class="govuk-grid-column-one-half">
+      <form method="post">
+        {{
+          govukSelect({
+            id: "account-assessment",
+            name: "accountAssessment",
+            label: { text: "Account assessment outcome" },
+            items: accountAssessmentOutcomeOptions
+          })
+        }}
+        {{ govukButton({ text: "Send account assessment webhook", classes: "govuk-button--secondary" }) }}
+      </form>
+    </div>
+  </div>
+
+  <form method="post">{{ govukButton({ text: "Continue to CRI" }) }}</form>
+{% endblock %}

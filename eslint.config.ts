@@ -74,7 +74,17 @@ export default defineConfig(
           newlinesBetween: 1,
           type: 'natural'
         }
-      ]
+      ],
+      'perfectionist/sort-object-types': 'warn',
+      'perfectionist/sort-objects': 'warn',
+      'perfectionist/sort-union-types': 'warn'
+    }
+  },
+  {
+    // order of imports is important for index
+    files: ['src/index.ts'],
+    rules: {
+      'perfectionist/sort-imports': 'off'
     }
   },
   {
