@@ -1,7 +1,6 @@
 {% extends "govuk/template.njk" %}
 {% set govukRebrand = true %}
 {% set assetPath = "/public/rebrand" %}
-{% from "govuk/components/notification-banner/macro.njk" import govukNotificationBanner %}
 {% from "govuk/components/phase-banner/macro.njk" import govukPhaseBanner %}
 
 {% block head %}
@@ -13,6 +12,10 @@
   {% endif %}
 {% endblock %}
 
+{% block pageTitle %}
+  Open Banking CRI Webhook Stubs
+{% endblock %}
+
 {% block bodyStart %}
 {% endblock %}
 
@@ -20,7 +23,7 @@
   {{
     govukHeader({
       rebrand: _rebrand,
-      productName: "Open Banking CRI Webhook Stubs",
+      productName: "Open Banking CRI",
       classes: "hazard-border"
     })
   }}
@@ -28,7 +31,7 @@
     {{
       govukPhaseBanner({
         tag: {
-          text: "ATTENTION",
+          text: "INTERNAL",
           classes: "govuk-tag--yellow"
         },
         html: 'This is an internal page used for testing – <a class="govuk-link" href="https://home.account.gov.uk/contact-gov-uk-one-login">contact us immediately</a> if you were not expecting to see this'
@@ -39,20 +42,10 @@
 
 {% block content %}
   {% for f in flash %}
-    {% set html %}
-      <h3 class="govuk-notification-banner__heading">{{ f.message.header }}</h3>
-      {% if f.message.content %}
-        <pre style="font-size: 0.9rem;">{{ f.message.content }}</pre>
-      {% endif %}
-    {% endset %}
-
-    {{
-      govukNotificationBanner({
-        html: html,
-        type: f.type,
-        titleText: f.type | capitalize
-      })
-    }}
+    <div class="stub-flash stub-flash--{{ f.type }}">
+      <h3 class="govuk-heading-s govuk-!-margin-bottom-0">{{ f.message.header }}</h3>
+      {% if f.message.content %}<pre>{{ f.message.content }}</pre>{% endif %}
+    </div>
   {% endfor %}
   {% block mainContent %}
   {% endblock %}

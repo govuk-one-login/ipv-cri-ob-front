@@ -116,7 +116,7 @@ export default defineConfig({
         },
         {
           dest: 'public/javascripts',
-          rename: (_name, ext, _fullPath) => `../../../../../deviceIntelligence.${ext}`,
+          rename: { name: 'deviceIntelligence.js', stripBase: true },
           src: 'node_modules/@govuk-one-login/frontend-device-intelligence/build/esm/index.js'
         }
       ]

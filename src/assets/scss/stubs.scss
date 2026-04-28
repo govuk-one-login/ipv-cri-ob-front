@@ -2,6 +2,17 @@ $govuk-assets-path: '/public/';
 
 @import 'govuk-frontend/dist/govuk';
 
+.govuk-summary-list .govuk-tag {
+  white-space: nowrap;
+  max-width: 100%;
+}
+
+.govuk-phase-banner .govuk-tag {
+  background-color: #ffee80;
+  color: #7a3c1c;
+  font-weight: bold;
+}
+
 .hazard-border {
   position: relative;
   padding-bottom: 20px;
@@ -16,6 +27,22 @@ $govuk-assets-path: '/public/';
   height: 15px;
 
   background: repeating-linear-gradient(45deg, #ffdd00, #ffdd00 10px, #0b0c0c 10px, #0b0c0c 20px);
+}
+
+.stub-flash {
+  border: 5px solid;
+  margin-bottom: govuk-spacing(4);
+  padding: govuk-spacing(3);
+
+  &--error {
+    border-color: govuk-colour('red');
+  }
+  &--info {
+    border-color: govuk-colour('blue');
+  }
+  &--success {
+    border-color: govuk-colour('green');
+  }
 }
 
 pre {

@@ -1,2 +1,2 @@
-export * as indexController from './index.controller'
+export * as steps from './steps'
 export * as stubs from './stubs'

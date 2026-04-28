@@ -10,8 +10,9 @@ declare module 'express-session' {
         content?: string
         header: string
       }
-      type: 'info' | 'success'
+      type: 'error' | 'info' | 'success'
     }[]
+    webhooksSent?: Record<string, { accountAssessment?: string; consent?: string }>
   }
 }
 

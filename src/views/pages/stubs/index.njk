@@ -7,9 +7,15 @@
 {% block mainContent %}
   {{ govukBackLink({ text: "Back", href: "/" }) }}
 
+  <h1 class="govuk-heading-l">Webhook stubs</h1>
+
   {{
     govukSummaryList({
-      rows: [{ key: { text: "Consent ID" }, value: { html: "<code>" + consentID + "</code>" } }]
+      rows: [
+        { key: { text: "Consent ID" }, value: { html: "<code>" + consentID + "</code>" } },
+        { key: { text: "Consent webhook" }, value: { html: "<strong class='govuk-tag govuk-tag--green'>Sent</strong>" + " " + sentConsent + "" if sentConsent else "<strong class='govuk-tag govuk-tag--grey'>Not sent</strong>" } },
+        { key: { text: "Account assessment webhook" }, value: { html: "<strong class='govuk-tag govuk-tag--green'>Sent</strong> " + " " + sentAccountAssessment + "" if sentAccountAssessment else "<strong class='govuk-tag govuk-tag--grey'>Not sent</strong>" } }
+      ]
     })
   }}
 
@@ -24,7 +30,7 @@
             items: consentOutcomeOptions
           })
         }}
-        {{ govukButton({ text: "Send webhook", classes: "govuk-button--secondary" }) }}
+        {{ govukButton({ text: "Send consent outcome webhook", classes: "govuk-button--secondary" }) }}
       </form>
     </div>
     <div class="govuk-grid-column-two-thirds">
@@ -37,10 +43,10 @@
             items: accountAssessmentOutcomeOptions
           })
         }}
-        {{ govukButton({ text: "Send webhook", classes: "govuk-button--secondary" }) }}
+        {{ govukButton({ text: "Send account assessment webhook", classes: "govuk-button--secondary" }) }}
       </form>
     </div>
   </div>
 
-  <form method="post">{{ govukButton({ text: "Continue" }) }}</form>
+  <form method="post">{{ govukButton({ text: "Continue to CRI" }) }}</form>
 {% endblock %}
