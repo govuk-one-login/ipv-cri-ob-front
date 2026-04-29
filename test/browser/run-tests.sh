@@ -23,4 +23,4 @@ if [[ "${STACK_NAME}" != "local" ]]; then
 fi
 
 cd /tests
-npx playwright test --config playwright.smoke.config.ts
+npx playwright test --project smoke

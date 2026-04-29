@@ -1,4 +1,4 @@
-import { APP_URL } from './playwright.mock.config'
+import { APP_URL } from '../../playwright.config'
 import { spawn } from 'child_process'
 import { existsSync } from 'node:fs'
 import { GenericContainer, Wait } from 'testcontainers'
@@ -68,6 +68,7 @@ const findAvailableDockerSockets = () => {
 }
 
 export default async function mockSetup() {
+  if (process.env['APP_URL']) return
   findAvailableDockerSockets()
 
   const [{ dynamoContainer, dynamoEndpoint }, { wiremockContainer, wiremockEndpoint }] =

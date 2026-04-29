@@ -6,7 +6,15 @@ import perfectionist from 'eslint-plugin-perfectionist'
 import tseslint from 'typescript-eslint'
 
 export default defineConfig(
-  { ignores: ['dist/**', 'node_modules/**', '.features-gen', 'playwright-report', 'coverage'] },
+  {
+    ignores: [
+      'dist/**',
+      'node_modules/**',
+      'test/browser/.features-gen/**',
+      'playwright-report',
+      'coverage'
+    ]
+  },
   eslint.configs.recommended,
   tseslint.configs.recommendedTypeChecked,
   tseslint.configs.stylisticTypeChecked,

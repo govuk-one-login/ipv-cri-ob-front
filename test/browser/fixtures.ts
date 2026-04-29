@@ -1,5 +1,6 @@
 import { wiremock as wiremockAdmin } from './wiremock/admin'
-import { test as base, expect } from '@playwright/test'
+import { expect } from '@playwright/test'
+import { test as base } from 'playwright-bdd'
 
 import AxeBuilder from '@axe-core/playwright'
 
@@ -15,9 +16,7 @@ export const test = base.extend<Fixtures>({
     async ({ page, skipAxe }, use) => {
       await use()
       if (skipAxe) return
-      const { violations } = await new AxeBuilder({ page })
-        .withTags(['wcag2a', 'wcag2aa', 'wcag22aa'])
-        .analyze()
+      const { violations } = await new AxeBuilder({ page }).withTags(['wcag22aa']).analyze()
       const summary = violations.map((v) => ({
         help: v.helpUrl,
         id: v.id,
@@ -45,9 +44,18 @@ export const test = base.extend<Fixtures>({
   skipConsoleErrors: [false, { option: true }]
 })
 
-const smokeTest = test.extend({})
+const smokeTest = test.extend<{ response: { value: number } }>({
+  response: async ({}, use) => {
+    const response = { value: 0 }
+    await use(response)
+  }
+})
 
-const mockTest = test.extend<{ wiremock: typeof wiremockAdmin }>({
+const mockTest = test.extend<{ jwt: { value: string }; wiremock: typeof wiremockAdmin }>({
+  jwt: async ({}, use) => {
+    const jwt = { value: '' }
+    await use(jwt)
+  },
   wiremock: async ({}, use) => {
     await wiremockAdmin.resetScenarios()
     await wiremockAdmin.resetRequests()

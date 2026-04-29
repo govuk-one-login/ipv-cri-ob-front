@@ -53,7 +53,6 @@ export const wiremock = {
     const data = (await res.json()) as { requests: WiremockRequest[] }
     return data.requests
   },
-  // Not currently used, if addMapping is used in any test, this will need to be added to the beforeEach for that test
   reset: async () => {
     const res = await fetch(`${getWiremockUrl()}/__admin/mappings/reset`, { method: 'POST' })
     if (!res.ok) throw new Error(`Failed to reset mappings: ${res.status}`)

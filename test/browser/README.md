@@ -31,7 +31,7 @@ Browser tests use a 'built' version of the application which is a more accurate 
 Run in CodePipeline against a deployed CloudFormation stack. Requires `APP_URL` env var pointing to the deployed stack.
 
 ```bash
-APP_URL=https://... npx playwright test --config playwright.smoke.config.ts
+APP_URL=https://... npx playwright test --project smoke
 ```
 
 ## Fixtures
