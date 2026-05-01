@@ -1,8 +1,10 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { ZodError } from 'zod'
 
+const mockLoggerError = vi.fn()
+
 vi.mock('@src/utils/logger', () => ({
-  getLogger: () => ({ warn: vi.fn() })
+  getLogger: () => ({ error: mockLoggerError, warn: vi.fn() })
 }))
 
 describe('session', () => {
@@ -30,7 +32,27 @@ describe('session', () => {
     expect(config.secret).toBe('test-secret-value')
     expect(config.cookieName).toBe('ob_session')
     expect(config.sessionStore).toHaveProperty('table', 'test-sessions-table')
-    expect(config.cookieOptions).toEqual({ maxAge: 3600000 })
+    expect(config.cookieOptions).toEqual({ maxAge: 3600000, secure: false })
+  })
+
+  it('sets secure cookie when NODE_ENV is production', async () => {
+    vi.stubEnv('NODE_ENV', 'production')
+    vi.resetModules()
+
+    const { default: initSessionStore } = await import('@src/utils/session')
+    const config = await initSessionStore()
+
+    expect(config.cookieOptions.secure).toBe(true)
+  })
+
+  it('does not set secure cookie when NODE_ENV is not production', async () => {
+    vi.stubEnv('NODE_ENV', 'test')
+    vi.resetModules()
+
+    const { default: initSessionStore } = await import('@src/utils/session')
+    const config = await initSessionStore()
+
+    expect(config.cookieOptions.secure).toBe(false)
   })
 
   it('uses local dynamodb when endpoint override is set', async () => {
@@ -50,7 +72,7 @@ describe('session', () => {
     const { default: initSessionStore } = await import('@src/utils/session')
     await initSessionStore()
 
-    expect(DynamoDBClient).toBeCalledWith({
+    expect(DynamoDBClient).toHaveBeenCalledWith({
       credentials: { accessKeyId: 'local', secretAccessKey: 'local' }, // pragma: allowlist secret
       endpoint: 'http://localdynamo:9999',
       region: 'eu-west-2'
@@ -77,7 +99,26 @@ describe('session', () => {
     const { default: initSessionStore } = await import('@src/utils/session')
     await initSessionStore()
 
-    expect(DynamoDBClient).toBeCalledWith({ region: 'eu-west-2' })
+    expect(DynamoDBClient).toHaveBeenCalledWith({ region: 'eu-west-2' })
     expect(checkTableExists).not.toHaveBeenCalled()
+  })
+
+  it('logs an error when checkTableExists fails', async () => {
+    const expectedError = new Error('checkTableExists failure')
+    const checkTableExists = vi.fn().mockRejectedValue(expectedError)
+    vi.doMock(import('@src/utils/dev-tooling/local-dynamodb'), async (importOriginal) => {
+      const originalModule = await importOriginal()
+      return { checkTableExists, dynamoDevOverrides: originalModule.dynamoDevOverrides }
+    })
+    vi.stubEnv('LOCAL_DYNAMO_ENDPOINT_OVERRIDE', 'http://localdynamo:9999')
+    vi.resetModules()
+
+    const { default: initSessionStore } = await import('@src/utils/session')
+    await initSessionStore()
+
+    expect(mockLoggerError).toHaveBeenCalledWith(
+      '[local DynamoDB] problem creating table:',
+      expectedError
+    )
   })
 })
