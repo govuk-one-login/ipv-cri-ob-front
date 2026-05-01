@@ -4,43 +4,64 @@ import { z } from 'zod'
 loadDotenv({ quiet: true })
 
 const NodeEnvSchema = z.enum(['development', 'production', 'test'])
+const DeploymentEnvSchema = z.enum([
+  'local',
+  'dev',
+  'build',
+  'staging',
+  'integration',
+  'production'
+])
 
-const AppConfigSchema = z.object({
-  API: z.object({
-    BASE_URL: z.url(),
-    PATHS: z.object({
-      AUTHORIZATION: z.string().nonempty(),
-      SESSION: z.string().nonempty()
+const AppConfigSchema = z
+  .object({
+    API: z.object({
+      BASE_URL: z.url(),
+      PATHS: z.object({
+        AUTHORIZATION: z.string().nonempty(),
+        SESSION: z.string().nonempty(),
+        WEBHOOK: z.string()
+      })
+    }),
+    APP: z.object({
+      BIND_HOST: z.string().nonempty(),
+      DEPLOYMENT_ENV: DeploymentEnvSchema,
+      DEVICE_INTELLIGENCE_DOMAIN: z.string().nonempty(),
+      DEVICE_INTELLIGENCE_ENABLED: z.string().nonempty(),
+      GTM: z.object({
+        ANALYTICS_COOKIE_DOMAIN: z.string().nonempty(),
+        ANALYTICS_DATA_SENSITIVE: z.boolean(),
+        GA4_ENABLED: z.boolean(),
+        GA4_FORM_CHANGE_ENABLED: z.boolean(),
+        GA4_FORM_ERROR_ENABLED: z.boolean(),
+        GA4_FORM_RESPONSE_ENABLED: z.boolean(),
+        GA4_ID: z.string().nonempty(),
+        GA4_NAVIGATION_ENABLED: z.boolean(),
+        GA4_PAGE_VIEW_ENABLED: z.boolean(),
+        GA4_SELECT_CONTENT_ENABLED: z.boolean()
+      }),
+      NODE_ENV: NodeEnvSchema,
+      PATHS: z.object({ OPEN_BANKING: z.string().nonempty() }),
+      PORT: z.number().int().positive(),
+      SESSION: z.object({
+        COOKIE_NAME: z.string().nonempty(),
+        SECRET: z.string().nonempty(),
+        TABLE_NAME: z.string().nonempty(),
+        TTL: z.number().int().positive()
+      }),
+      USE_PINO_LOGGER: z.boolean()
+    }),
+    STUBS: z.object({
+      ENABLED: z.boolean(),
+      WEBHOOK_SIGNING_SECRET: z.string().nonempty()
     })
-  }),
-  APP: z.object({
-    BIND_HOST: z.string().nonempty(),
-    DEVICE_INTELLIGENCE_DOMAIN: z.string().nonempty(),
-    DEVICE_INTELLIGENCE_ENABLED: z.string().nonempty(),
-    GTM: z.object({
-      ANALYTICS_COOKIE_DOMAIN: z.string().nonempty(),
-      ANALYTICS_DATA_SENSITIVE: z.boolean(),
-      GA4_ENABLED: z.boolean(),
-      GA4_FORM_CHANGE_ENABLED: z.boolean(),
-      GA4_FORM_ERROR_ENABLED: z.boolean(),
-      GA4_FORM_RESPONSE_ENABLED: z.boolean(),
-      GA4_ID: z.string().nonempty(),
-      GA4_NAVIGATION_ENABLED: z.boolean(),
-      GA4_PAGE_VIEW_ENABLED: z.boolean(),
-      GA4_SELECT_CONTENT_ENABLED: z.boolean()
-    }),
-    NODE_ENV: NodeEnvSchema,
-    PATHS: z.object({ OPEN_BANKING: z.string().nonempty() }),
-    PORT: z.number().int().positive(),
-    SESSION: z.object({
-      COOKIE_NAME: z.string().nonempty(),
-      SECRET: z.string().nonempty(),
-      TABLE_NAME: z.string().nonempty(),
-      TTL: z.number().int().positive()
-    }),
-    USE_PINO_LOGGER: z.literal(true)
   })
-})
+  .refine((c) => !(c.STUBS.ENABLED && c.APP.DEPLOYMENT_ENV === 'production'), {
+    message: 'STUBS_ENABLED cannot be true when DEPLOYMENT_ENV is production'
+  })
+  .refine((c) => c.APP.USE_PINO_LOGGER, {
+    message: 'USE_PINO_LOGGER must be true'
+  })
 
 export type AppConfig = z.infer<typeof AppConfigSchema>
 
@@ -49,11 +70,15 @@ export default AppConfigSchema.parse({
     BASE_URL: process.env['API_BASE_URL']!,
     PATHS: {
       AUTHORIZATION: 'authorization',
-      SESSION: 'session'
+      SESSION: 'session',
+      WEBHOOK: 'webhook'
     }
   },
   APP: {
     BIND_HOST: process.env['BIND_HOST'] || '127.0.0.1',
+    DEPLOYMENT_ENV: (process.env['DEPLOYMENT_ENV'] || 'production') as z.infer<
+      typeof DeploymentEnvSchema
+    >,
     DEVICE_INTELLIGENCE_DOMAIN: process.env['DEVICE_INTELLIGENCE_DOMAIN'] || 'localhost',
     DEVICE_INTELLIGENCE_ENABLED: process.env['DEVICE_INTELLIGENCE_ENABLED'] || 'false',
     GTM: {
@@ -80,5 +105,9 @@ export default AppConfigSchema.parse({
       TTL: Number(process.env['SESSION_TTL']) || 7200000 // two hours in ms
     },
     USE_PINO_LOGGER: process.env['USE_PINO_LOGGER'] === 'true'
+  },
+  STUBS: {
+    ENABLED: process.env['STUBS_ENABLED'] === 'true',
+    WEBHOOK_SIGNING_SECRET: process.env['STUBS_WEBHOOK_SIGNING_SECRET'] || 'hunter2'
   }
-})
+} satisfies AppConfig)
