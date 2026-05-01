@@ -14,3 +14,4 @@ notFoundError:
 
 sessionExpiredError:
   title: Session expired
+  content: Return to the service you were using and start again.
