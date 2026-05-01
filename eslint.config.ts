@@ -5,6 +5,12 @@ import prettier from 'eslint-config-prettier'
 import perfectionist from 'eslint-plugin-perfectionist'
 import tseslint from 'typescript-eslint'
 
+const perfectionistWarnRules = Object.fromEntries(
+  Object.keys(perfectionist.rules ?? {})
+    .filter((k) => k.startsWith('sort-'))
+    .map((k) => [`perfectionist/${k}`, 'warn'])
+)
+
 export default defineConfig(
   { ignores: ['dist/**', 'node_modules/**', '.features-gen', 'playwright-report', 'coverage'] },
   eslint.configs.recommended,
@@ -19,6 +25,7 @@ export default defineConfig(
       }
     },
     rules: {
+      ...perfectionistWarnRules,
       '@typescript-eslint/consistent-type-imports': [
         'error',
         { fixStyle: 'separate-type-imports' }
@@ -75,6 +82,13 @@ export default defineConfig(
           type: 'natural'
         }
       ]
+    }
+  },
+  {
+    // order of imports is important for index
+    files: ['src/index.ts'],
+    rules: {
+      'perfectionist/sort-imports': 'off'
     }
   },
   {
