@@ -80,6 +80,7 @@ export default async function mockSetup() {
     env: {
       ...process.env,
       API_BASE_URL: `${wiremockEndpoint}/`,
+      DEPLOYMENT_ENV: 'local',
       LOCAL_DYNAMO_ENDPOINT_OVERRIDE: dynamoEndpoint,
       LOG_LEVEL: 'debug',
       NODE_ENV: 'test',

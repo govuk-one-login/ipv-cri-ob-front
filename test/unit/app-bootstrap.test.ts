@@ -34,8 +34,10 @@ vi.mock('@govuk-one-login/di-ipv-cri-common-express', () => ({
 
 vi.mock('@govuk-one-login/frontend-ui', () => ({ frontendUiMiddlewareIdentityBypass: vi.fn() }))
 vi.mock('@govuk-one-login/frontend-vital-signs', () => ({ frontendVitalSignsInitFromApp: vi.fn() }))
-vi.mock('@src/middleware/force-session-save.middleware', () => ({
-  forceSessionSaveBeforeRedirect: vi.fn()
+vi.mock('@src/middleware', () => ({
+  errorHandler: { middleware: vi.fn() },
+  flash: { middleware: vi.fn() },
+  forceSessionSave: { middleware: vi.fn() }
 }))
 vi.mock('@src/utils/session', () => ({ default: vi.fn().mockResolvedValue({}) }))
 vi.mock('@src/config/routes', () => ({ configure: vi.fn() }))
@@ -71,9 +73,9 @@ describe('createApp', () => {
     expect(createViteServer).toHaveBeenCalled()
   })
 
-  it('registers redirectAsErrorToCallback on the router after routes are configured', async () => {
-    const { configure } = await import('@src/config/routes')
+  it('configures the router in the correct order', async () => {
     const { default: commonExpress } = await import('@govuk-one-login/di-ipv-cri-common-express')
+    const { errorHandler, flash } = await import('@src/middleware')
     const { createApp } = await import('@src/app-bootstrap')
     await createApp()
 
@@ -81,10 +83,16 @@ describe('createApp', () => {
       router: { use: Mock }
     }
 
-    expect(configure).toHaveBeenCalledBefore(router.use)
-    expect(router.use).toHaveBeenCalledWith(
+    const calls = vi.mocked(router.use).mock.calls.map((c) => c[0] as unknown)
+    const flashIndex = calls.indexOf(flash.middleware)
+    const redirectAsErrorToCallbackIndex = calls.indexOf(
       commonExpress.lib.errorHandling.redirectAsErrorToCallback
     )
+    const errorHandlerIndex = calls.indexOf(errorHandler.middleware)
+
+    expect(flashIndex).toBe(0)
+    expect(redirectAsErrorToCallbackIndex).toBeLessThan(errorHandlerIndex)
+    expect(errorHandlerIndex).toBe(calls.length - 1)
   })
 
   it('enables request logging in production', async () => {
@@ -101,8 +109,7 @@ describe('createApp', () => {
   it('sets i18n and applies middleware in the correct order', async () => {
     vi.stubEnv('NODE_ENV', 'development')
     const { frontendUiMiddlewareIdentityBypass } = await import('@govuk-one-login/frontend-ui')
-    const { forceSessionSaveBeforeRedirect } =
-      await import('@src/middleware/force-session-save.middleware')
+    const { forceSessionSave } = await import('@src/middleware')
     const { default: commonExpress } = await import('@govuk-one-login/di-ipv-cri-common-express')
     const { createApp } = await import('@src/app-bootstrap')
     const { app } = await createApp()
@@ -111,7 +118,7 @@ describe('createApp', () => {
       expect.objectContaining({ router: app })
     )
     expect(app.use).toHaveBeenNthCalledWith(1, frontendUiMiddlewareIdentityBypass)
-    expect(app.use).toHaveBeenNthCalledWith(2, forceSessionSaveBeforeRedirect)
+    expect(app.use).toHaveBeenNthCalledWith(2, forceSessionSave.middleware)
     expect(app.use).toHaveBeenNthCalledWith(3, commonExpress.lib.locals.getGTM)
     expect(app.use).toHaveBeenNthCalledWith(4, commonExpress.lib.locals.getLanguageToggle)
     expect(app.use).toHaveBeenNthCalledWith(5, commonExpress.lib.locals.getDeviceIntelligence)
