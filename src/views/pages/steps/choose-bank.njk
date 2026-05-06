@@ -1,0 +1,39 @@
+{% extends "layouts/base.njk" %}
+{% from "govuk/components/select/macro.njk" import govukSelect %}
+{% from "govuk/components/button/macro.njk" import govukButton %}
+
+{% set pageTitleKey = "pages.chooseBank.title" %}
+
+{% block mainContent %}
+  <form method="post">
+    {{
+      govukSelect({
+        id: "bank-select",
+        name: "bankSelect",
+        label: {
+          text: translate(pageTitleKey),
+          isPageHeading: true,
+          classes: "govuk-label--l"
+        },
+        errorMessage: { text: formErrors["bankSelect"] } if formErrors["bankSelect"] else false,
+        items: banksList,
+        classes: "govuk-!-width-one-half"
+      })
+    }}
+    <p class="govuk-body">
+      <a
+        href="{{ bankNotListedLink }}"
+        class="govuk-link govuk-link--no-visited-state"
+        data-module="govuk-button"
+        >{{ translate("pages.chooseBank.notListedLinkText") }}</a
+      >
+    </p>
+    <div class="govuk-button-group">
+      {{
+        govukButton({
+          text: "Continue"
+        })
+      }}
+    </div>
+  </form>
+{% endblock %}

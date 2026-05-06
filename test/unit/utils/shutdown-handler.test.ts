@@ -61,7 +61,7 @@ describe('registerShutdownHandler', () => {
     expect(mockLogger.info).toHaveBeenCalledWith('SIGTERM received: closing HTTP server')
     expect(mockLogger.info).toHaveBeenCalledWith('SIGTERM received: close already called')
     expect(mockLogger.info).toHaveBeenCalledWith('HTTP server closed')
-    expect(mockLogger.info).toHaveBeenCalledTimes(3)
+    expect(mockLogger.info).toHaveBeenCalledTimes(4)
     expect(mockLogger.error).not.toHaveBeenCalled()
   })
 
@@ -70,7 +70,7 @@ describe('registerShutdownHandler', () => {
     process.emit('SIGTERM')
     vi.runAllTimers()
     expect(exitSpy).toHaveBeenCalledWith(0)
-    expect(mockLogger.info).toHaveBeenCalledTimes(2)
+    expect(mockLogger.info).toHaveBeenCalledTimes(3)
     expect(mockLogger.error).not.toHaveBeenCalled()
   })
 })

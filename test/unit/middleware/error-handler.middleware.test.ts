@@ -2,10 +2,10 @@ import type { NextFunction, Request, Response } from 'express'
 
 import { describe, expect, it, vi } from 'vitest'
 
-const mockLoggerError = vi.fn()
+const mockLogger = vi.hoisted(() => ({ error: vi.fn() }))
 
 vi.mock('@src/utils/logger', () => ({
-  getLogger: () => ({ error: mockLoggerError })
+  getLogger: () => mockLogger
 }))
 
 const { errorHandler } = await import('@src/middleware')
@@ -21,7 +21,7 @@ describe('error handler middleware', () => {
 
     errorHandler.middleware(err, {} as Request, res, vi.fn() as NextFunction)
 
-    expect(mockLoggerError).toHaveBeenCalledWith(
+    expect(mockLogger.error).toHaveBeenCalledWith(
       {
         location: expect.any(String) as string,
         type: 'Error'

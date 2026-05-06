@@ -1,10 +1,10 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { ZodError } from 'zod'
 
-const mockLoggerError = vi.fn()
+const mockLogger = vi.hoisted(() => ({ error: vi.fn(), warn: vi.fn() }))
 
 vi.mock('@src/utils/logger', () => ({
-  getLogger: () => ({ error: mockLoggerError, warn: vi.fn() })
+  getLogger: () => mockLogger
 }))
 
 describe('session', () => {
@@ -72,6 +72,10 @@ describe('session', () => {
     const { default: initSessionStore } = await import('@src/utils/session')
     await initSessionStore()
 
+    expect(mockLogger.warn).toHaveBeenCalledWith(
+      '[local DynamoDB] endpoint override is set: http://localdynamo:9999'
+    )
+
     expect(DynamoDBClient).toHaveBeenCalledWith({
       credentials: { accessKeyId: 'local', secretAccessKey: 'local' }, // pragma: allowlist secret
       endpoint: 'http://localdynamo:9999',
@@ -116,7 +120,7 @@ describe('session', () => {
     const { default: initSessionStore } = await import('@src/utils/session')
     await initSessionStore()
 
-    expect(mockLoggerError).toHaveBeenCalledWith(
+    expect(mockLogger.error).toHaveBeenCalledWith(
       '[local DynamoDB] problem creating table:',
       expectedError
     )

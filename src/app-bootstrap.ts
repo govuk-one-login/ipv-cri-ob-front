@@ -26,7 +26,6 @@ export const createApp = async (): Promise<{ app: Express; router: Router }> => 
     config: { APP_ROOT },
     env: appConfig.APP.NODE_ENV,
     helmet: helmetConfig,
-    logs: false, // pino logger is enabled so hmpo logger is false
     middlewareSetupFn: (app: Express) => {
       if (vite) setupDevServer(app, vite)
       commonExpress.lib.i18n.setI18n({
@@ -56,7 +55,11 @@ export const createApp = async (): Promise<{ app: Express; router: Router }> => 
       fallbackLang: ['en'],
       query: 'lng'
     },
-    views: ['node_modules/@govuk-one-login/', path.resolve(import.meta.dirname, 'views')]
+    views: [
+      'node_modules/@govuk-one-login/',
+      'node_modules/govuk-frontend/dist',
+      path.resolve(import.meta.dirname, 'views')
+    ]
   })
 
   app.set('view engine', 'njk')

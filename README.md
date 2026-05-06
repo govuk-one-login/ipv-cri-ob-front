@@ -1,4 +1,5 @@
 [![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=govuk-one-login_ipv-cri-ob-front&metric=security_rating)](https://sonarcloud.io/summary/new_code?id=govuk-one-login_ipv-cri-ob-front)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=govuk-one-login_ipv-cri-ob-front&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=govuk-one-login_ipv-cri-ob-front)
 [![Coverage](https://sonarcloud.io/api/project_badges/measure?project=govuk-one-login_ipv-cri-ob-front&metric=coverage)](https://sonarcloud.io/summary/new_code?id=govuk-one-login_ipv-cri-ob-front)
 
 # Open Banking Credential Issuer Frontend
@@ -32,7 +33,7 @@ npm ci
 
 Vite handles all static asset bundling for you so there is no additional build step.
 
-Copy the `.env.example`, some env vars are pre-configured for you (`REBRAND_ENABLED`, `USE_PINO_LOGGER` and
+Copy the `.env.example`, some env vars are pre-configured for you (`REBRAND_ENABLED`, `DEPLOYMENT_ENV`, `LOG_LEVEL`, `USE_PINO_LOGGER` and
 `LOCAL_DYNAMO_ENDPOINT_OVERRIDE`).
 
 ```shell

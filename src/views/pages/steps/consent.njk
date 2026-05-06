@@ -1,0 +1,56 @@
+{% extends "layouts/base.njk" %}
+{% from "govuk/components/button/macro.njk" import govukButton %}
+{% from "govuk/components/inset-text/macro.njk" import govukInsetText %}
+{% from "govuk/components/checkboxes/macro.njk" import govukCheckboxes %}
+
+{% set pageTitleKey = "pages.consent.title" %}
+
+{% block mainContent %}
+  <h1 class="govuk-heading-l">{{ translate(pageTitleKey) }}</h1>
+  {% for item in translate("pages.consent.contentA") %}
+    {{ item | safe }}
+  {% endfor %}
+  {{
+    govukInsetText({
+      text: translate("pages.consent.insetText")
+    })
+  }}
+  {% for item in translate("pages.consent.contentB") %}
+    {{ item | safe }}
+  {% endfor %}
+  <form method="post">
+    {{
+      govukCheckboxes({
+        name: "consent",
+        id: "consent",
+        fieldset: {
+          legend: {
+            text: translate("pages.consent.checkbox.legendText"),
+            isPageHeading: false,
+            classes: "govuk-fieldset__legend--m"
+          }
+        },
+        errorMessage: { text: formErrors["consent"] } if formErrors["consent"] else false,
+        items: [
+          {
+            value: "consent",
+            text: translate("pages.consent.checkbox.itemText")
+          }
+        ]
+      })
+    }}
+    <div class="govuk-button-group">
+      {{
+        govukButton({
+          text: translate("pages.start.primaryButton"),
+          href: nextStep
+        })
+      }}
+    </div>
+    <p class="govuk-body">
+      <a href="#" class="govuk-link govuk-link--no-visited-state"
+        >{{ translate("pages.start.secondaryLink") }}</a
+      >
+    </p>
+  </form>
+{% endblock %}
