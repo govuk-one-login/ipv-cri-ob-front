@@ -1,6 +1,6 @@
 import type { ErrorRequestHandler, NextFunction, Request } from 'express'
 
-import { getLogger } from '@src/utils/logger'
+import { LOGGER } from '@src/utils/logger'
 
 export const middleware: ErrorRequestHandler = (
   err: Error,
@@ -8,7 +8,7 @@ export const middleware: ErrorRequestHandler = (
   res,
   _next: NextFunction
 ) => {
-  getLogger().error(
+  LOGGER.error(
     {
       location: err.stack?.split('\n')[1]?.trim(),
       type: err.constructor.name

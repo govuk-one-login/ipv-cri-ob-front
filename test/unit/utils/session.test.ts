@@ -4,7 +4,7 @@ import { ZodError } from 'zod'
 const mockLogger = vi.hoisted(() => ({ error: vi.fn(), warn: vi.fn() }))
 
 vi.mock('@src/utils/logger', () => ({
-  getLogger: () => mockLogger
+  LOGGER: mockLogger
 }))
 
 describe('session', () => {

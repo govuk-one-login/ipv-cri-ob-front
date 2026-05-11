@@ -11,7 +11,7 @@ import {
 } from '@src/types/ecospend/webhooks/event-value'
 import { RecordType } from '@src/types/ecospend/webhooks/record-type'
 import { addFlash } from '@src/utils/flash'
-import { getLogger } from '@src/utils/logger'
+import { LOGGER } from '@src/utils/logger'
 import { randomUUID } from 'node:crypto'
 import { z } from 'zod'
 
@@ -119,7 +119,7 @@ const post = async (req: Request, res: Response, _next: NextFunction) => {
       })
     })
     .catch((err: AxiosError) => {
-      getLogger().error('webhook endpoint failure', err)
+      LOGGER.error('webhook endpoint failure', err)
       const errorDetail = err.response
         ? `${err.response.status} ${err.response.statusText}`
         : (err.code ?? err.message)

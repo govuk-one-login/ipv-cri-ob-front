@@ -5,7 +5,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 const mockLogger = vi.hoisted(() => ({ error: vi.fn(), info: vi.fn() }))
 
 vi.mock('@src/utils/logger', () => ({
-  getLogger: () => mockLogger
+  LOGGER: mockLogger
 }))
 
 const { registerShutdownHandler } = await import('@src/utils/shutdown-handler')

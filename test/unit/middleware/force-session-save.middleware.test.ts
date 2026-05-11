@@ -5,7 +5,7 @@ import { describe, expect, it, vi } from 'vitest'
 const mockLogger = vi.hoisted(() => ({ error: vi.fn() }))
 
 vi.mock('@src/utils/logger', () => ({
-  getLogger: () => mockLogger
+  LOGGER: mockLogger
 }))
 
 const { forceSessionSave } = await import('@src/middleware')

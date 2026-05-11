@@ -12,7 +12,7 @@ vi.mock('@src/clients/stubs/webhook.client', () => ({
 }))
 
 vi.mock('@src/utils/flash', () => ({ addFlash: mockAddFlash }))
-vi.mock('@src/utils/logger', () => ({ getLogger: () => ({ error: vi.fn() }) }))
+vi.mock('@src/utils/logger', () => ({ LOGGER: { error: vi.fn() } }))
 
 const { get, post } = await import('@src/controllers/stubs/webhook.controller')
 

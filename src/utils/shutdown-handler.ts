@@ -1,6 +1,6 @@
 import type { Server } from 'node:http'
 
-import { getLogger } from '@src/utils/logger'
+import { LOGGER } from '@src/utils/logger'
 
 import appConfig from '@src/config/app'
 
@@ -13,19 +13,19 @@ export const registerShutdownHandler = (server: Server) => {
   if (appConfig.APP.NODE_ENV !== 'development') {
     process.on('SIGTERM', () => {
       if (serverAlreadyExiting) {
-        getLogger().info('SIGTERM received: close already called')
+        LOGGER.info('SIGTERM received: close already called')
         return
       }
       serverAlreadyExiting = true
 
-      getLogger().info('SIGTERM received: closing HTTP server')
+      LOGGER.info('SIGTERM received: closing HTTP server')
 
       server.close((err) => {
         if (err) {
-          getLogger().error('Error closing HTTP server:', err.message)
+          LOGGER.error('Error closing HTTP server:', err.message)
           exitCode = 1
         } else {
-          getLogger().info('HTTP server closed')
+          LOGGER.info('HTTP server closed')
         }
       })
 
@@ -34,6 +34,6 @@ export const registerShutdownHandler = (server: Server) => {
         process.exit(exitCode)
       }, SHUTDOWN_TIMEOUT)
     })
-    getLogger().info('shutdown handler registered')
+    LOGGER.info('shutdown handler registered')
   }
 }
