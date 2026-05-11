@@ -1,5 +1,4 @@
 import type { Express } from 'express'
-import type { Mock } from 'vitest'
 
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
@@ -76,23 +75,28 @@ describe('createApp', () => {
   it('configures the router in the correct order', async () => {
     const { default: commonExpress } = await import('@govuk-one-login/di-ipv-cri-common-express')
     const { errorHandler, flash } = await import('@src/middleware')
+    const routes = await import('@src/config/routes')
     const { createApp } = await import('@src/app-bootstrap')
     await createApp()
 
     const { router } = vi.mocked(commonExpress.bootstrap.setup).mock.results[0]!.value as {
-      router: { use: Mock }
+      router: { use: ReturnType<typeof vi.fn> }
     }
 
-    const calls = vi.mocked(router.use).mock.calls.map((c) => c[0] as unknown)
-    const flashIndex = calls.indexOf(flash.middleware)
-    const redirectAsErrorToCallbackIndex = calls.indexOf(
+    expect(router.use).toHaveBeenNthCalledWith(1, flash.middleware)
+    expect(router.use).toHaveBeenNthCalledWith(
+      2,
       commonExpress.lib.errorHandling.redirectAsErrorToCallback
     )
-    const errorHandlerIndex = calls.indexOf(errorHandler.middleware)
+    expect(router.use).toHaveBeenNthCalledWith(3, errorHandler.middleware)
+    expect(router.use).toHaveBeenCalledTimes(3)
 
-    expect(flashIndex).toBe(0)
-    expect(redirectAsErrorToCallbackIndex).toBeLessThan(errorHandlerIndex)
-    expect(errorHandlerIndex).toBe(calls.length - 1)
+    const flashCallOrder = vi.mocked(router.use).mock.invocationCallOrder[0]!
+    const routeConfigurationCallOrder = vi.mocked(routes.configure).mock.invocationCallOrder[0]!
+    const redirectAsErrorCallOrder = vi.mocked(router.use).mock.invocationCallOrder[1]!
+
+    expect(flashCallOrder).toBeLessThan(routeConfigurationCallOrder)
+    expect(redirectAsErrorCallOrder).toBeGreaterThan(routeConfigurationCallOrder)
   })
 
   it('enables request logging in production', async () => {

@@ -1,4 +1,6 @@
-import { appConfig } from '@src/config'
+// appConfig must be first: its module body calls loadDotenv(), which must run before common-express libs are evaluated
+import appConfig from '@src/config/app'
+
 import { registerShutdownHandler } from '@src/utils/shutdown-handler'
 import { config as loadDotenv } from 'dotenv'
 
@@ -21,6 +23,7 @@ const banner = `
 ================ START =======================
 PLATFORM: ${platform}/${arch}
 NODE_ENV: ${appConfig.APP.NODE_ENV}, ${version}
+DEPLOYMENT_ENV: ${appConfig.APP.DEPLOYMENT_ENV}
 HOST/PORT: ${BIND_HOST}:${PORT}
 .ENV: ${parsed ? `loaded (${Object.keys(parsed).length} vars)` : 'not found'}
 ==============================================`

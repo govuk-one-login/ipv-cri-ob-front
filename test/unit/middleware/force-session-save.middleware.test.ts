@@ -2,8 +2,10 @@ import type { NextFunction, Request, Response } from 'express'
 
 import { describe, expect, it, vi } from 'vitest'
 
+const mockLogger = vi.hoisted(() => ({ error: vi.fn() }))
+
 vi.mock('@src/utils/logger', () => ({
-  getLogger: () => ({ error: vi.fn() })
+  getLogger: () => mockLogger
 }))
 
 const { forceSessionSave } = await import('@src/middleware')
@@ -39,8 +41,15 @@ describe('forceSessionSaveBeforeRedirect middleware', () => {
     const res = { redirect: redirectSpy } as unknown as Response
 
     forceSessionSave.middleware(req, res, vi.fn())
-    res.redirect('/next')
 
+    res.redirect('/next')
+    expect(mockLogger.error).toHaveBeenCalledWith(
+      {
+        error: 'save failure',
+        url: '/next'
+      },
+      'Error saving session before redirect'
+    )
     expect(redirectSpy).toHaveBeenCalledWith(302, '/next')
   })
 

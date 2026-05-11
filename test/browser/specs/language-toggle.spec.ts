@@ -13,8 +13,10 @@ test.describe('Language toggle', () => {
     expect(pref).toBeDefined()
 
     await expect(page.locator('.govuk-heading-l')).toContainText(
-      'Cyhoeddwr Cymwysterau Bancio Agored'
+      "Gorffennwch brofi eich hunaniaeth drwy fewngofnodi i'ch bancio ar-lein\n"
     )
-    await expect(page).toHaveTitle('Cyhoeddwr Cymwysterau Bancio Agored – GOV.UK One Login')
+    await expect(page).toHaveTitle(
+      "Gorffennwch brofi eich hunaniaeth drwy fewngofnodi i'ch bancio ar-lein – GOV.UK One Login"
+    )
   })
 })

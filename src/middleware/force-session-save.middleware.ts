@@ -16,7 +16,10 @@ const middleware = (req: Request, res: Response, next: NextFunction): void => {
     if (req?.session?.save) {
       req.session.save((err: Error | null) => {
         if (err) {
-          getLogger().error({ error: err.message, url }, 'Error saving session before redirect')
+          getLogger().error(
+            { error: err.message, url: actualUrl },
+            'Error saving session before redirect'
+          )
           return originalRedirect(status, actualUrl)
         }
         originalRedirect(status, actualUrl)

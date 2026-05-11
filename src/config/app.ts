@@ -19,8 +19,10 @@ const AppConfigSchema = z
       BASE_URL: z.url(),
       PATHS: z.object({
         AUTHORIZATION: z.string().nonempty(),
+        BANKS: z.string().nonempty(),
+        CONSENT: z.string().nonempty(),
         SESSION: z.string().nonempty(),
-        WEBHOOK: z.string()
+        WEBHOOK: z.string().nonempty()
       })
     }),
     APP: z.object({
@@ -65,11 +67,13 @@ const AppConfigSchema = z
 
 export type AppConfig = z.infer<typeof AppConfigSchema>
 
-export default AppConfigSchema.parse({
+export const appConfig = AppConfigSchema.parse({
   API: {
     BASE_URL: process.env['API_BASE_URL']!,
     PATHS: {
       AUTHORIZATION: 'authorization',
+      BANKS: 'banks',
+      CONSENT: 'consent',
       SESSION: 'session',
       WEBHOOK: 'webhook'
     }
@@ -111,3 +115,5 @@ export default AppConfigSchema.parse({
     WEBHOOK_SIGNING_SECRET: process.env['STUBS_WEBHOOK_SIGNING_SECRET'] || 'hunter2'
   }
 } satisfies AppConfig)
+
+export default appConfig

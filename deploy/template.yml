@@ -110,18 +110,23 @@ Mappings:
     dev:
       ga4Enabled: "true"
       deviceIntelligenceEnabled: "true"
+      stubsEnabled: "true"
     build:
       ga4Enabled: "true"
       deviceIntelligenceEnabled: "true"
+      stubsEnabled: "true"
     staging:
       ga4Enabled: "true"
       deviceIntelligenceEnabled: "true"
+      stubsEnabled: "true"
     integration:
       ga4Enabled: "true"
       deviceIntelligenceEnabled: "true"
+      stubsEnabled: "false"
     production:
       ga4Enabled: "true"
       deviceIntelligenceEnabled: "true"
+      stubsEnabled: "false" # app will not boot if you set this to true in production
 
   # see https://docs.aws.amazon.com/elasticloadbalancing/latest/application/load-balancer-access-logs.html
   ElasticLoadBalancerAccountIds:
@@ -448,6 +453,8 @@ Resources:
           Image: CONTAINER-IMAGE-PLACEHOLDER
           Name: app
           Environment:
+            - Name: STUBS_ENABLED
+              Value: !FindInMap [ FeatureFlagMapping, !Ref Environment, stubsEnabled ]
             - Name: DEPLOYMENT_ENV
               Value: !Ref Environment
             - Name: API_BASE_URL
