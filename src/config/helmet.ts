@@ -1,6 +1,6 @@
 import type { CommonExpressHelmetConfig } from '@govuk-one-login/di-ipv-cri-common-express'
 
-import { getLogger } from '@src/utils/logger'
+import { LOGGER } from '@src/utils/logger'
 
 import commonExpress from '@govuk-one-login/di-ipv-cri-common-express'
 import appConfig from '@src/config/app'
@@ -10,7 +10,7 @@ const helmetConfig = commonExpress.lib.helmet
 const viteDevOverrides = () => {
   if (appConfig.APP.NODE_ENV === 'production') return {}
 
-  getLogger().warn(
+  LOGGER.warn(
     '\x1b[97;101mINSECURE DEVELOPER OVERRIDES ARE PRESENT IN THE CONTENT SECURITY POLICY\x1b[0m'
   )
 

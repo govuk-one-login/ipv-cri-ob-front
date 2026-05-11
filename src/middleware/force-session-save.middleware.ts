@@ -1,6 +1,6 @@
 import type { NextFunction, Request, Response } from 'express'
 
-import { getLogger } from '@src/utils/logger'
+import { LOGGER } from '@src/utils/logger'
 
 /**
  * patches a race condition in common-express where express-session with DynamoDB store
@@ -16,7 +16,7 @@ const middleware = (req: Request, res: Response, next: NextFunction): void => {
     if (req?.session?.save) {
       req.session.save((err: Error | null) => {
         if (err) {
-          getLogger().error(
+          LOGGER.error(
             { error: err.message, url: actualUrl },
             'Error saving session before redirect'
           )

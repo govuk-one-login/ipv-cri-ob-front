@@ -2,10 +2,6 @@ import type { Express } from 'express'
 
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
-vi.mock('@src/utils/logger', () => ({
-  getLogger: () => ({ warn: vi.fn() })
-}))
-
 vi.mock('@govuk-one-login/di-ipv-cri-common-express', () => ({
   default: {
     bootstrap: {

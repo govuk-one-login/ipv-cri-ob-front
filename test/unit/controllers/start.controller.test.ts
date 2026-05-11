@@ -4,10 +4,6 @@ import { beforeAll, describe, expect, it, vi } from 'vitest'
 
 import paths from '@src/config/paths'
 
-vi.mock('@src/utils/logger', () => ({
-  getLogger: () => ({ info: vi.fn() })
-}))
-
 const { get } = await import('@src/controllers/steps/start.controller')
 
 describe('start controller', () => {
