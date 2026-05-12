@@ -6,13 +6,17 @@ import paths from '@src/config/paths'
 
 const { mockSend } = vi.hoisted(() => ({ mockSend: vi.fn().mockResolvedValue(undefined) }))
 const { mockAddFlash } = vi.hoisted(() => ({ mockAddFlash: vi.fn() }))
+const { mockChildLogger, mockLogger } = vi.hoisted(() => {
+  const mockChildLogger = { error: vi.fn(), info: vi.fn() }
+  return { mockChildLogger, mockLogger: { child: vi.fn().mockReturnValue(mockChildLogger) } }
+})
 
 vi.mock('@src/clients/stubs/webhook.client', () => ({
   webhookClient: () => ({ send: mockSend })
 }))
 
 vi.mock('@src/utils/flash', () => ({ addFlash: mockAddFlash }))
-vi.mock('@src/utils/logger', () => ({ LOGGER: { error: vi.fn() } }))
+vi.mock('@src/utils/logger', () => ({ LOGGER: mockLogger }))
 
 const { get, post } = await import('@src/controllers/stubs/webhook.controller')
 
@@ -114,6 +118,10 @@ describe('webhook stub controller', () => {
         await post(req, { redirect } as unknown as Response, vi.fn() as NextFunction)
 
         expect(mockSend).toHaveBeenCalled()
+        expect(mockLogger.child).toHaveBeenCalledWith(
+          expect.objectContaining({ component: 'webhook-stub', consent_id: 'test-consent-id' })
+        )
+        expect(mockChildLogger.info).toHaveBeenCalledWith('webhook send success')
         expect(redirect).toHaveBeenCalledWith(expectedRedirect)
       }
     )
@@ -153,6 +161,10 @@ describe('webhook stub controller', () => {
 
       await post(req, { redirect: vi.fn() } as unknown as Response, vi.fn() as NextFunction)
 
+      expect(mockChildLogger.error).toHaveBeenCalledWith(
+        expect.objectContaining({ code: 'ECONNREFUSED' }),
+        'webhook send failure'
+      )
       expect(mockAddFlash).toHaveBeenCalledWith(req, expect.objectContaining({ type: 'error' }))
     })
   })

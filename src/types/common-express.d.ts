@@ -5,12 +5,18 @@ declare module '@govuk-one-login/di-ipv-cri-common-express' {
   import type { ErrorRequestHandler, Express, RequestHandler, Router } from 'express'
 
   export interface AppLogger {
-    debug(message: Record<string, unknown> | string, ...args: unknown[]): void
-    error(messageOrMeta: Error | Record<string, unknown> | string, ...args: unknown[]): void
-    fatal(messageOrMeta: Error | Record<string, unknown> | string, ...args: unknown[]): void
-    info(message: string, ...args: unknown[]): void
-    request(message: string, ...args: unknown[]): void
-    warn(message: string, ...args: unknown[]): void
+    child(bindings: Record<string, unknown>): AppLogger
+    debug(obj: Record<string, unknown>, msg: string, ...args: unknown[]): void
+    debug(msg: string, ...args: unknown[]): void
+    error(obj: Error | Record<string, unknown>, msg: string, ...args: unknown[]): void
+    error(msg: string, ...args: unknown[]): void
+    fatal(obj: Error | Record<string, unknown>, msg: string, ...args: unknown[]): void
+    fatal(msg: string, ...args: unknown[]): void
+    info(obj: Record<string, unknown>, msg: string, ...args: unknown[]): void
+    info(msg: string, ...args: unknown[]): void
+    request(msg: string, ...args: unknown[]): void
+    warn(obj: Record<string, unknown>, msg: string, ...args: unknown[]): void
+    warn(msg: string, ...args: unknown[]): void
   }
 
   export interface BootstrapSetupOptions {

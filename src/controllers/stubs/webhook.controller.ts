@@ -103,6 +103,12 @@ const post = async (req: Request, res: Response, _next: NextFunction) => {
     .setRecordType(formVals.recordType)
     .build()
 
+  const WEBHOOK_LOGGER = LOGGER.child({
+    component: 'webhook-stub',
+    consent_id: consentID,
+    webhook_type: webhook.record_type
+  })
+
   addFlash(req, {
     message: { content: JSON.stringify(webhook, null, 2), header: 'Webhook created' },
     type: 'info'
@@ -113,18 +119,16 @@ const post = async (req: Request, res: Response, _next: NextFunction) => {
     .then(() => {
       storeWebhookHistoryOnSession(req, consentID, consentResult)
       storeWebhookHistoryOnSession(req, consentID, accountAssessmentResult)
+      WEBHOOK_LOGGER.info('webhook send success')
       addFlash(req, {
         message: { header: 'Webhook send success' },
         type: 'success'
       })
     })
     .catch((err: AxiosError) => {
-      LOGGER.error('webhook endpoint failure', err)
-      const errorDetail = err.response
-        ? `${err.response.status} ${err.response.statusText}`
-        : (err.code ?? err.message)
+      WEBHOOK_LOGGER.error({ code: err.code }, 'webhook send failure')
       addFlash(req, {
-        message: { content: errorDetail, header: 'Webhook send fail' },
+        message: { content: err.code ?? err.message, header: 'Webhook send failure' },
         type: 'error'
       })
     })
