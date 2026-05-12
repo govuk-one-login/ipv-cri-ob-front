@@ -2,16 +2,6 @@ const paths = {
   failureSteps: {
     bankUnavailable: '/sorry-problem-bank',
     couldNotConfirmIdentity: '/banking-no-match',
-    hasPhotoIdentification: {
-      photoIdentificationPresentFindAnotherWay: '/photo-id-banking-find-another-way',
-      photoIdentificationPresentProveAnotherWay: '/photo-id-banking-another-way'
-    },
-    noPhotoIdentificationAvailable: {
-      photoIdentificationNotPresentFindAnotherWay: '/no-photo-id-banking-find-another-way',
-      photoIdentificationNotPresentProveAnotherWay: '/no-photo-id-banking-another-way'
-    },
-    technicalProblem: '/sorry-technical-problem',
-    terminalErrorConfirmIdentity: '/sorry-cannot-confirm-banking',
     useACurrentAccount: '/use-current-account'
   },
   index: '/',
