@@ -1,6 +1,7 @@
 import type { Express, Router } from 'express'
 import type { ViteDevServer } from 'vite'
 
+// @ts-expect-error type declarations are missing in frontend-ui v5.2.1
 import { frontendUiMiddlewareIdentityBypass } from '@govuk-one-login/frontend-ui'
 import { frontendVitalSignsInitFromApp } from '@govuk-one-login/frontend-vital-signs'
 import { errorHandler, flash, forceSessionSave } from '@src/middleware'

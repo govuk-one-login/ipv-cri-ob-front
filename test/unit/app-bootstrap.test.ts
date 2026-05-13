@@ -108,6 +108,8 @@ describe('createApp', () => {
 
   it('sets i18n and applies middleware in the correct order', async () => {
     vi.stubEnv('NODE_ENV', 'development')
+    // @ts-expect-error type declarations are missing in frontend-ui v5.2.1
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- type declarations are missing in frontend-ui v5.2.1
     const { frontendUiMiddlewareIdentityBypass } = await import('@govuk-one-login/frontend-ui')
     const { forceSessionSave } = await import('@src/middleware')
     const { default: commonExpress } = await import('@govuk-one-login/di-ipv-cri-common-express')
