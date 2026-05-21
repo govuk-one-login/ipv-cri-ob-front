@@ -1,10 +1,5 @@
-{% extends "frontend-ui/build/components/bases/identity/identity-base-page.njk" %}
+{% extends "frontend-ui/build/components/bases/identity/v2/identity-base.njk" %}
 {% from "govuk/components/error-summary/macro.njk" import govukErrorSummary %}
-
-{% block pageTitle %}
-  {{ translate(pageTitleKey, { default: pageTitleKey }) if pageTitleKey }}
-  – GOV.UK One Login
-{% endblock %}
 
 {% block head %}
   {% if devServer %}
@@ -15,21 +10,20 @@
   {% endif %}
 {% endblock %}
 
+{% set errorTitlePrefix = translate("govuk.errorSummary") %}
+{% set backLinkText = translate("govuk.backLink") %}
+
 {% block content %}
-  <div class="govuk-grid-row">
-    <div class="govuk-grid-column-two-thirds">
-      {% if errorList %}
-        {{
-          govukErrorSummary({
-            titleText: translate("govuk.errorSummary"),
-            errorList: errorList
-          })
-        }}
-      {% endif %}
-      {% block mainContent %}
-      {% endblock %}
-    </div>
-  </div>
+  {% if errorList %}
+    {{
+      govukErrorSummary({
+        titleText: translate("govuk.errorSummary"),
+        errorList: errorList
+      })
+    }}
+  {% endif %}
+  {% block mainContent %}
+  {% endblock %}
 {% endblock %}
 
 {% block bodyEnd %}

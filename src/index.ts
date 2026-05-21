@@ -27,7 +27,6 @@ DEPLOYMENT_ENV: ${appConfig.APP.DEPLOYMENT_ENV}
 HOST/PORT: ${BIND_HOST}:${PORT}
 .ENV: ${parsed ? `loaded (${Object.keys(parsed).length} vars)` : 'not found'}
 ==============================================`
-// eslint-disable-next-line no-console
 console.log(banner)
 
 const { createApp } = await import('./app-bootstrap')

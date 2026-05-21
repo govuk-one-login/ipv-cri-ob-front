@@ -1,12 +1,9 @@
 import type { Express } from 'express'
-import type { i18n } from 'i18next'
 import type { ViteDevServer } from 'vite'
 
 import { LOGGER } from '@src/utils/logger'
-import { createRequire } from 'node:module'
 
-const require = createRequire(import.meta.url)
-const i18next = require('i18next') as i18n // hmpo translate uses the cjs version so we need to 'require' it in our module
+import commonExpress from '@govuk-one-login/di-ipv-cri-common-express'
 
 const createViteServer = async (): Promise<ViteDevServer> => {
   const { createServer } = await import('vite')
@@ -41,8 +38,8 @@ const setupDevServer = (app: Express, vite: ViteDevServer): void => {
   vite.watcher.add('src/**/*.{njk,yml,json}')
   // eslint-disable-next-line @typescript-eslint/no-misused-promises
   vite.watcher.on('change', async (file) => {
-    if (file.endsWith('.yml') && i18next.isInitialized) {
-      await i18next.reloadResources(['en', 'cy'])
+    if (file.endsWith('.yml') && commonExpress.lib.i18n.i18next.isInitialized) {
+      await commonExpress.lib.i18n.i18next.reloadResources(['en', 'cy'])
     }
     if (file.endsWith('.njk') || file.endsWith('.yml') || file.endsWith('.json')) {
       LOGGER.debug(`[vite] reloading: ${file}`)

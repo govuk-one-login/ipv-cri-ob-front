@@ -50,3 +50,4 @@ chooseBank:
   title: Choose your bank or building society
   errorMessage: Select a bank or building society
   notListedLinkText: My bank is not listed
+  primaryButton: Continue

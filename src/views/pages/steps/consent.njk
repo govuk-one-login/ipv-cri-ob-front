@@ -3,10 +3,10 @@
 {% from "govuk/components/inset-text/macro.njk" import govukInsetText %}
 {% from "govuk/components/checkboxes/macro.njk" import govukCheckboxes %}
 
-{% set pageTitleKey = "pages.consent.title" %}
+{% set pageTitle = translate("pages.consent.title") %}
 
 {% block mainContent %}
-  <h1 class="govuk-heading-l">{{ translate(pageTitleKey) }}</h1>
+  <h1 class="govuk-heading-l">{{ pageTitle }}</h1>
   {% for item in translate("pages.consent.contentA") %}
     {{ item | safe }}
   {% endfor %}

@@ -2,10 +2,10 @@
 {% from "govuk/components/button/macro.njk" import govukButton %}
 {% from "govuk/components/details/macro.njk" import govukDetails %}
 
-{% set pageTitleKey = "pages.start.title" %}
+{% set pageTitle = translate("pages.start.title") %}
 
 {% block mainContent %}
-  <h1 class="govuk-heading-l">{{ translate(pageTitleKey) }}</h1>
+  <h1 class="govuk-heading-l">{{ pageTitle }}</h1>
   {% for item in translate("pages.start.contentA") %}
     {{ item | safe }}
   {% endfor %}

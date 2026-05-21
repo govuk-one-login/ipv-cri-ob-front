@@ -85,10 +85,10 @@ export default defineConfig(
     }
   },
   {
-    // order of imports is important for index
     files: ['src/index.ts'],
     rules: {
-      'perfectionist/sort-imports': 'off'
+      'no-console': 'off',
+      'perfectionist/sort-imports': 'off' // order of imports is important for index
     }
   },
   {

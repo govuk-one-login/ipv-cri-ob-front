@@ -3,7 +3,7 @@ import type { Router } from 'express'
 import { steps, stubs } from '@src/controllers'
 import { requireSessionKey } from '@src/middleware'
 import { asyncControllerHandler } from '@src/utils/async-controller-handler'
-import { LOGGER } from '@src/utils/logger'
+import { alarmBadge, LOGGER } from '@src/utils/logger'
 
 import commonExpress from '@govuk-one-login/di-ipv-cri-common-express'
 import appConfig from '@src/config/app'
@@ -28,7 +28,7 @@ const configure = (router: Router) => {
     asyncControllerHandler(steps.consentController.post)
   )
   if (appConfig.STUBS.ENABLED) {
-    LOGGER.warn('\x1b[97;101mSTUBS ARE ENABLED\x1b[0m')
+    LOGGER.warn(`${alarmBadge} stubs are enabled`)
     router.get(
       paths.stubs.webhook,
       requireSessionKey.middleware('consentID', paths.steps.consent),
