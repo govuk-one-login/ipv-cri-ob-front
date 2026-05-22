@@ -1,6 +1,6 @@
 version: 2
 updates:
-  - package-ecosystem: 'npm'
+  - package-ecosystem: npm
     directory: '/'
     schedule:
       interval: weekly
@@ -9,10 +9,9 @@ updates:
     target-branch: main
     labels:
       - dependabot
-    open-pull-requests-limit: 20
-    ignore:
-      - dependency-name: 'node'
-        versions: ['22.x']
+    open-pull-requests-limit: 10
+    commit-message:
+      prefix: BAU
     groups:
       vite:
         patterns:
@@ -40,8 +39,7 @@ updates:
         patterns:
           - 'typescript'
           - 'typescript-eslint'
-    commit-message:
-      prefix: BAU
+
   - package-ecosystem: docker
     directories:
       - '/'
@@ -55,10 +53,15 @@ updates:
       - dependabot
     commit-message:
       prefix: BAU
-  - package-ecosystem: 'github-actions'
+    groups:
+      docker:
+        patterns:
+          - '*'
+
+  - package-ecosystem: github-actions
     directory: '/'
     schedule:
-      interval: 'weekly'
+      interval: weekly
       day: monday
       time: '03:00'
     target-branch: main
@@ -66,3 +69,23 @@ updates:
       - dependabot
     commit-message:
       prefix: BAU
+    groups:
+      actions:
+        patterns:
+          - '*'
+
+  - package-ecosystem: pre-commit
+    directory: '/'
+    schedule:
+      interval: weekly
+      day: monday
+      time: '03:00'
+    target-branch: main
+    labels:
+      - dependabot
+    commit-message:
+      prefix: BAU
+    groups:
+      pre-commit-hooks:
+        patterns:
+          - '*'
