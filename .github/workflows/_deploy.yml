@@ -41,7 +41,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Push to ECR and upload SAM template to S3
-        uses: govuk-one-login/devplatform-upload-action-ecr@16c6cc3afaaffa6e7402e5f23ef011cba35a3bfc
+        uses: govuk-one-login/devplatform-upload-action-ecr@153ab4b180a795a56763d2424f6a27e46545398c
         with:
           private-docker-registry: khw46367.live.dynatrace.com
           private-docker-login-username: khw46367
