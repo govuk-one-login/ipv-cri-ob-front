@@ -50,7 +50,7 @@
     "prettier": "3.8.3",
     "prettier-plugin-jinja-template": "2.2.0",
     "prettier-plugin-organize-imports": "4.3.0",
-    "sass-embedded": "1.99.0",
+    "sass-embedded": "1.100.0",
     "testcontainers": "11.14.0",
     "tsx": "4.21.0",
     "typescript": "6.0.3",
