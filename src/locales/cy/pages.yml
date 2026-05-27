@@ -38,7 +38,7 @@ consent:
     - <li>gweld eich manylion mewngofnodi bancio ar-lein</li>
     - <li>defnyddio eich gwybodaeth i gymryd taliadau</li>
     - </ul>
-    - <p class="govuk-body">None of your bank account information will be shared with the government service you’re using.</p>
+    - <p class="govuk-body">Ni fydd unrhyw wybodaeth am eich cyfrif banc yn cael ei rhannu â'r gwasanaeth llywodraeth rydych chi'n ei ddefnyddio.</p>
   checkbox:
     legendText: Rhoi caniatâd i rannu gwybodaeth eich cyfrif banc
     itemText: Rwy'n cytuno i rannu gwybodaeth fy nghyfrif banc gydag Ecospend
