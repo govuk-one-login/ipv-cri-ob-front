@@ -16,7 +16,7 @@ start:
     - <p class="govuk-body">Mae hyn er mwyn i ni allu cysylltu'n ddiogel â'ch banc a chadarnhau eich hunaniaeth. Fe welwch pa wybodaeth fydd yn cael ei rhannu gydag Ecospend cyn i chi gytuno iddi.</p>
     - <p class="govuk-body"><a class="govuk-link govuk-link--no-visited-state" target="_blank" href="https://www.gov.uk/government/publications/govuk-one-login-privacy-notice">Ein hysbysiad preifatrwydd (yn agor mewn tab newydd)</a> mae ganddo fwy o fanylion am sut y bydd eich gwybodaeth yn cael ei defnyddio.</p>
     - <p class="govuk-body">Mae Ecospend yn cael ei reoleiddio gan y <a class="govuk-link govuk-link--no-visited-state" target="_blank" href="https://register.fca.org.uk/s/firm?id=0010X00004KSo9HQAT">Awdurdod Ymddygiad Ariannol (yn agor mewn tab newydd)</a>.</p>
-  primaryButton: Parhewch
+  primaryButton: Parhau
   secondaryLink: Profi eich hunaniaeth mewn ffordd arall
 
 consent:
@@ -38,15 +38,16 @@ consent:
     - <li>gweld eich manylion mewngofnodi bancio ar-lein</li>
     - <li>defnyddio eich gwybodaeth i gymryd taliadau</li>
     - </ul>
-    - <p class="govuk-body">None of your bank account information will be shared with the government service you’re using.</p>
+    - <p class="govuk-body">Ni fydd unrhyw wybodaeth am eich cyfrif banc yn cael ei rhannu â'r gwasanaeth llywodraeth rydych chi'n ei ddefnyddio.</p>
   checkbox:
     legendText: Rhoi caniatâd i rannu gwybodaeth eich cyfrif banc
     itemText: Rwy'n cytuno i rannu gwybodaeth fy nghyfrif banc gydag Ecospend
     errorMessage: Rhaid i chi gytuno i rannu gwybodaeth eich cyfrif banc i barhau
-  primaryButton: Parhewch
+  primaryButton: Parhau
   secondaryLink: Profi eich hunaniaeth mewn ffordd arall
 
 chooseBank:
   title: Dewiswch eich banc neu gymdeithas adeiladu
   errorMessage: Dewiswch fanc neu gymdeithas adeiladu
   notListedLinkText: Nid yw fy banc wedi'i restru
+  primaryButton: Parhau

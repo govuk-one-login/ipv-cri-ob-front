@@ -1,36 +1,42 @@
-import type { CommonExpressHelmetConfig } from '@govuk-one-login/di-ipv-cri-common-express'
+import type { HelmetOptions } from 'helmet'
 
-import { LOGGER } from '@src/utils/logger'
+import { getHelmetConfig } from '@govuk-one-login/frontend-ui'
+import { alarmBadge, LOGGER } from '@src/utils/logger'
 
-import commonExpress from '@govuk-one-login/di-ipv-cri-common-express'
 import appConfig from '@src/config/app'
 
-const helmetConfig = commonExpress.lib.helmet
+interface HelmetCSP {
+  directives: Record<string, string[]>
+}
 
-const viteDevOverrides = () => {
+const helmetConfig = getHelmetConfig()
+
+const viteDevOverrides = (): Partial<HelmetOptions> => {
   if (appConfig.APP.NODE_ENV === 'production') return {}
 
   LOGGER.warn(
-    '\x1b[97;101mINSECURE DEVELOPER OVERRIDES ARE PRESENT IN THE CONTENT SECURITY POLICY\x1b[0m'
+    `${alarmBadge} insecure developer overrides are present in the content security policy`
   )
+
+  const { directives: existingDirectives } = helmetConfig.contentSecurityPolicy as HelmetCSP
 
   return {
     contentSecurityPolicy: {
       directives: {
-        ...helmetConfig.contentSecurityPolicy.directives,
+        ...existingDirectives,
         connectSrc: [
-          ...helmetConfig.contentSecurityPolicy.directives.connectSrc,
+          ...(existingDirectives['connectSrc'] ?? []),
           'ws://localhost:*',
           'http://localhost:*'
         ],
-        scriptSrc: [...helmetConfig.contentSecurityPolicy.directives.scriptSrc, "'unsafe-inline'"],
-        styleSrc: [...helmetConfig.contentSecurityPolicy.directives.styleSrc, "'unsafe-inline'"],
+        scriptSrc: [...(existingDirectives['scriptSrc'] ?? []), "'unsafe-inline'"],
+        styleSrc: [...(existingDirectives['styleSrc'] ?? []), "'unsafe-inline'"],
         upgradeInsecureRequests: null, // required for safari local dev
         workerSrc: ['blob:']
       }
     },
     hsts: false // required for safari local dev
-  } satisfies Partial<CommonExpressHelmetConfig>
+  } satisfies Partial<HelmetOptions>
 }
 
-export default { ...helmetConfig, ...viteDevOverrides() }
+export default { ...helmetConfig, ...viteDevOverrides() } as HelmetOptions

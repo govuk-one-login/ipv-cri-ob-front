@@ -1,6 +1,8 @@
 /**
  * converts zod errors into govuk ds compatible error objects for use in nunjucks views
+ *
  * zod error messages are i18n keys and passed through `translate`
+ *
  * input field names are assumed to be camelCase, hrefs are converted to kebab-case
  *
  * @param error - ZodError from a failed `safeParse`

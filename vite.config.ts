@@ -111,11 +111,6 @@ export default defineConfig({
         },
         {
           dest: 'public/javascripts',
-          rename: { stripBase: true },
-          src: 'node_modules/hmpo-components/all.js'
-        },
-        {
-          dest: 'public/javascripts',
           rename: { name: 'deviceIntelligence.js', stripBase: true },
           src: 'node_modules/@govuk-one-login/frontend-device-intelligence/build/esm/index.js'
         }

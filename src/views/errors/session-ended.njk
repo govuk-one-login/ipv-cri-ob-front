@@ -1,17 +1,14 @@
 {% extends "layouts/base.njk" %}
 
-{% set pageTitleKey = "sessionExpiredError.title" %}
+{% set pageTitle = translate("errors.sessionExpiredError.title") %}
+
 <!--ga4 tags-->
 {% set taxLevel2 = "session-expired" %}
 {% set statusCode = "401" %}
 <!--ga4 tags-->
 
 {% block mainContent %}
-  <div class="govuk-grid-row">
-    <div class="govuk-grid-column-two-thirds">
-      <h1 class="govuk-heading-l">{{ translate(pageTitleKey) }}</h1>
-    </div>
-  </div>
+  <h1 class="govuk-heading-l">{{ pageTitle }}</h1>
 {% endblock %}
 
 {% block scripts %}

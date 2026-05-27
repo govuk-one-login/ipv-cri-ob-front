@@ -19,24 +19,26 @@ vi.mock('@govuk-one-login/di-ipv-cri-common-express', () => ({
       axios: vi.fn(),
       errorHandling: { redirectAsErrorToCallback: vi.fn() },
       headers: vi.fn(),
-      i18n: { setI18n: vi.fn() },
-      locals: { getDeviceIntelligence: vi.fn(), getGTM: vi.fn(), getLanguageToggle: vi.fn() },
-      settings: { setDeviceIntelligence: vi.fn(), setGTM: vi.fn() }
+      i18n: { setI18n: vi.fn() }
     },
     routes: { oauth2: vi.fn() }
   }
 }))
 
-vi.mock('@govuk-one-login/frontend-ui', () => ({ frontendUiMiddlewareIdentityBypass: vi.fn() }))
+vi.mock('@govuk-one-login/frontend-ui', () => ({
+  frontendUiMiddleware: vi.fn(),
+  locals: { getDeviceIntelligence: vi.fn(), getGTM: vi.fn(), getLanguageToggle: vi.fn() },
+  setFrontendUiTranslations: vi.fn(),
+  settings: { setDeviceIntelligence: vi.fn(), setGTM: vi.fn(), setLanguageToggle: vi.fn() }
+}))
 vi.mock('@govuk-one-login/frontend-vital-signs', () => ({ frontendVitalSignsInitFromApp: vi.fn() }))
 vi.mock('@src/middleware', () => ({
   errorHandler: { middleware: vi.fn() },
-  flash: { middleware: vi.fn() },
-  forceSessionSave: { middleware: vi.fn() }
+  flash: { middleware: vi.fn() }
 }))
 vi.mock('@src/utils/session', () => ({ default: vi.fn().mockResolvedValue({}) }))
 vi.mock('@src/config/routes', () => ({ configure: vi.fn() }))
-vi.mock('@src/config/helmet', () => ({ default: vi.fn().mockResolvedValue({}) }))
+vi.mock('@src/config/helmet', () => ({ default: {} }))
 
 vi.mock('@src/utils/dev-tooling/dev-server', () => ({
   createViteServer: vi.fn().mockResolvedValue({}),
@@ -108,21 +110,23 @@ describe('createApp', () => {
 
   it('sets i18n and applies middleware in the correct order', async () => {
     vi.stubEnv('NODE_ENV', 'development')
-    const { frontendUiMiddlewareIdentityBypass } = await import('@govuk-one-login/frontend-ui')
-    const { forceSessionSave } = await import('@src/middleware')
+    const {
+      frontendUiMiddleware,
+      locals: frontendUiLocals,
+      setFrontendUiTranslations
+    } = await import('@govuk-one-login/frontend-ui')
     const { default: commonExpress } = await import('@govuk-one-login/di-ipv-cri-common-express')
     const { createApp } = await import('@src/app-bootstrap')
     const { app } = await createApp()
 
     expect(commonExpress.lib.i18n.setI18n).toHaveBeenCalledWith(
-      expect.objectContaining({ router: app })
+      expect.objectContaining({ onInit: setFrontendUiTranslations, router: app })
     )
-    expect(app.use).toHaveBeenNthCalledWith(1, frontendUiMiddlewareIdentityBypass)
-    expect(app.use).toHaveBeenNthCalledWith(2, forceSessionSave.middleware)
-    expect(app.use).toHaveBeenNthCalledWith(3, commonExpress.lib.locals.getGTM)
-    expect(app.use).toHaveBeenNthCalledWith(4, commonExpress.lib.locals.getLanguageToggle)
-    expect(app.use).toHaveBeenNthCalledWith(5, commonExpress.lib.locals.getDeviceIntelligence)
-    expect(app.use).toHaveBeenNthCalledWith(6, commonExpress.lib.headers)
-    expect(app.use).toHaveBeenNthCalledWith(7, commonExpress.lib.axios)
+    expect(app.use).toHaveBeenNthCalledWith(1, frontendUiMiddleware)
+    expect(app.use).toHaveBeenNthCalledWith(2, frontendUiLocals.getGTM)
+    expect(app.use).toHaveBeenNthCalledWith(3, frontendUiLocals.getLanguageToggle)
+    expect(app.use).toHaveBeenNthCalledWith(4, frontendUiLocals.getDeviceIntelligence)
+    expect(app.use).toHaveBeenNthCalledWith(5, commonExpress.lib.headers)
+    expect(app.use).toHaveBeenNthCalledWith(6, commonExpress.lib.axios)
   })
 })

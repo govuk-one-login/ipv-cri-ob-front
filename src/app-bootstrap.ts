@@ -1,9 +1,14 @@
 import type { Express, Router } from 'express'
 import type { ViteDevServer } from 'vite'
 
-import { frontendUiMiddlewareIdentityBypass } from '@govuk-one-login/frontend-ui'
+import {
+  locals as frontendUiLocals,
+  frontendUiMiddleware,
+  settings as frontendUiSettings,
+  setFrontendUiTranslations
+} from '@govuk-one-login/frontend-ui'
 import { frontendVitalSignsInitFromApp } from '@govuk-one-login/frontend-vital-signs'
-import { errorHandler, flash, forceSessionSave } from '@src/middleware'
+import { errorHandler, flash } from '@src/middleware'
 import { createViteServer, setupDevServer } from '@src/utils/dev-tooling/dev-server'
 
 import commonExpress from '@govuk-one-login/di-ipv-cri-common-express'
@@ -30,31 +35,24 @@ export const createApp = async (): Promise<{ app: Express; router: Router }> => 
       if (vite) setupDevServer(app, vite)
       commonExpress.lib.i18n.setI18n({
         config: {
+          additionalNamespaces: ['translation', 'errors'],
           cookieDomain: appConfig.APP.GTM.ANALYTICS_COOKIE_DOMAIN
         },
+        onInit: setFrontendUiTranslations,
         router: app
       })
-      app.use(frontendUiMiddlewareIdentityBypass)
-      app.use(forceSessionSave.middleware)
-      app.use(commonExpress.lib.locals.getGTM)
-      app.use(commonExpress.lib.locals.getLanguageToggle)
-      app.use(commonExpress.lib.locals.getDeviceIntelligence)
+      app.use(frontendUiMiddleware)
+      app.use(frontendUiLocals.getGTM)
+      app.use(frontendUiLocals.getLanguageToggle)
+      app.use(frontendUiLocals.getDeviceIntelligence)
       frontendVitalSignsInitFromApp(app, vitalSignsConfig)
       app.use(commonExpress.lib.headers)
       app.use(commonExpress.lib.axios)
     },
     overloadProtection: overloadProtectionConfig,
-    port: false, // app startup controlled in index.ts
     publicDirs: [path.resolve(import.meta.dirname, 'public')],
-    redis: false,
     requestLogging: appConfig.APP.NODE_ENV === 'production',
     session: await initSessionStore(),
-    translation: {
-      allowedLangs: ['en', 'cy'],
-      cookie: { name: 'lng' },
-      fallbackLang: ['en'],
-      query: 'lng'
-    },
     views: [
       'node_modules/@govuk-one-login/',
       'node_modules/govuk-frontend/dist',
@@ -68,7 +66,7 @@ export const createApp = async (): Promise<{ app: Express; router: Router }> => 
   app.set('API.PATHS.AUTHORIZATION', appConfig.API.PATHS.AUTHORIZATION)
   app.set('APP.PATHS.ENTRYPOINT', appConfig.APP.PATHS.OPEN_BANKING)
 
-  commonExpress.lib.settings.setGTM({
+  frontendUiSettings.setGTM({
     analyticsCookieDomain: appConfig.APP.GTM.ANALYTICS_COOKIE_DOMAIN,
     analyticsDataSensitive: appConfig.APP.GTM.ANALYTICS_DATA_SENSITIVE,
     app,
@@ -79,11 +77,15 @@ export const createApp = async (): Promise<{ app: Express; router: Router }> => 
     ga4FormResponseEnabled: appConfig.APP.GTM.GA4_FORM_RESPONSE_ENABLED,
     ga4NavigationEnabled: appConfig.APP.GTM.GA4_NAVIGATION_ENABLED,
     ga4PageViewEnabled: appConfig.APP.GTM.GA4_PAGE_VIEW_ENABLED,
-    ga4SelectContentEnabled: appConfig.APP.GTM.GA4_SELECT_CONTENT_ENABLED,
-    uaEnabled: false
+    ga4SelectContentEnabled: appConfig.APP.GTM.GA4_SELECT_CONTENT_ENABLED
   })
 
-  commonExpress.lib.settings.setDeviceIntelligence({
+  frontendUiSettings.setLanguageToggle({
+    app,
+    showLanguageToggle: true
+  })
+
+  frontendUiSettings.setDeviceIntelligence({
     app,
     deviceIntelligenceDomain: appConfig.APP.DEVICE_INTELLIGENCE_DOMAIN,
     deviceIntelligenceEnabled: appConfig.APP.DEVICE_INTELLIGENCE_ENABLED

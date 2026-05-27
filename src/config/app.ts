@@ -29,7 +29,7 @@ const AppConfigSchema = z
       BIND_HOST: z.string().nonempty(),
       DEPLOYMENT_ENV: DeploymentEnvSchema,
       DEVICE_INTELLIGENCE_DOMAIN: z.string().nonempty(),
-      DEVICE_INTELLIGENCE_ENABLED: z.string().nonempty(),
+      DEVICE_INTELLIGENCE_ENABLED: z.boolean(),
       GTM: z.object({
         ANALYTICS_COOKIE_DOMAIN: z.string().nonempty(),
         ANALYTICS_DATA_SENSITIVE: z.boolean(),
@@ -84,7 +84,7 @@ export const appConfig = AppConfigSchema.parse({
       typeof DeploymentEnvSchema
     >,
     DEVICE_INTELLIGENCE_DOMAIN: process.env['DEVICE_INTELLIGENCE_DOMAIN'] || 'localhost',
-    DEVICE_INTELLIGENCE_ENABLED: process.env['DEVICE_INTELLIGENCE_ENABLED'] || 'false',
+    DEVICE_INTELLIGENCE_ENABLED: process.env['DEVICE_INTELLIGENCE_ENABLED'] === 'true',
     GTM: {
       ANALYTICS_COOKIE_DOMAIN: process.env['FRONTEND_DOMAIN'] || 'localhost',
       ANALYTICS_DATA_SENSITIVE: process.env['ANALYTICS_DATA_SENSITIVE'] === 'true',

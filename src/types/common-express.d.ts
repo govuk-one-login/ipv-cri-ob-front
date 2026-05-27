@@ -3,6 +3,8 @@ declare module '@govuk-one-login/di-ipv-cri-common-express' {
   import type { DynamoDBStore } from 'connect-dynamodb'
   import type { Request, Response } from 'express'
   import type { ErrorRequestHandler, Express, RequestHandler, Router } from 'express'
+  import type { HelmetOptions } from 'helmet'
+  import type { i18n } from 'i18next'
 
   export interface AppLogger {
     child(bindings: Record<string, unknown>): AppLogger
@@ -39,23 +41,10 @@ declare module '@govuk-one-login/di-ipv-cri-common-express' {
           startUrl?: ((err: Error, req: Express.Request, res: Express.Response) => string) | string
         }
     /** helmet security headers config */
-    helmet?: CommonExpressHelmetConfig
+    helmet?: HelmetOptions
     host?: false
     /** locale directories relative to APP_ROOT. defaults to '.'. */
     locales?: string | string[]
-    /** hmpo-logger config - only used when USE_PINO_LOGGER is not 'true', pino reads LOG_LEVEL from env */
-    logs?:
-      | false
-      | {
-          app?: boolean | string // path to app log file. false disables file logging. default: false
-          console?: boolean // enable console (stdout) transport. default: false
-          consoleJSON?: boolean // format console output as logstash JSON. false uses human-readable pretty format. default: false
-          /**
-           * minimum severity level for console output. default: 'debug'
-           * levels available: fatal, error, warn, request, outbound, info, verbose, debug, silly
-           */
-          consoleLevel?: HMPOLogLevel
-        }
     /** called after middleware is wired up but before the router is created. use for app.locals, custom middleware etc */
     middlewareSetupFn?: (app: Express) => void
     /** additional nunjucks environment options, views/express/dev/noCache/watch are set automatically */
@@ -70,7 +59,7 @@ declare module '@govuk-one-login/di-ipv-cri-common-express' {
       }
     }
     overloadProtection?: OverloadProtectionConfig
-    port: false
+    port?: false
     /**
      * opts passed to express.static for all public asset dirs.
      * false to disable static file serving entirely.
@@ -92,7 +81,7 @@ declare module '@govuk-one-login/di-ipv-cri-common-express' {
     publicDirs?: string[]
     /** directories to serve as static files under urls.publicImages */
     publicImagesDirs?: string[]
-    redis: false
+    redis?: false
     /** enable request/response logging middleware. default: true */
     requestLogging?: boolean
     session?:
@@ -103,17 +92,6 @@ declare module '@govuk-one-login/di-ipv-cri-common-express' {
           secret: string
           sessionStore: DynamoDBStore
         }
-    /** hmpo-i18n translation options */
-    translation?: {
-      /** supported languages. default: ['en', 'cy'] */
-      allowedLangs?: string[]
-      /** cookie used to persist language choice. default: { name: 'lang' } */
-      cookie?: { name: string }
-      /** fallback languages */
-      fallbackLang?: string[]
-      /** query param used to switch language. default: 'lang' */
-      query?: string
-    }
     /** trust the X-Forwarded-For proxy header. default: true */
     trustProxy?: boolean
     /** URL path prefixes used throughout the app */
@@ -129,29 +107,6 @@ declare module '@govuk-one-login/di-ipv-cri-common-express' {
     }
     /** nunjucks template directories */
     views?: string[]
-  }
-
-  export interface CommonExpressHelmetConfig {
-    contentSecurityPolicy: {
-      directives: {
-        connectSrc: string[]
-        defaultSrc: string[]
-        formAction: string[]
-        imgSrc: string[]
-        objectSrc: string[]
-        scriptSrc: (((req: Request, res: Response) => string) | string)[]
-        styleSrc: string[]
-        upgradeInsecureRequests: null | string[] // not actually in ce config but autoconfigured by helmet
-        workerSrc: string[] // not actually in ce config but autoconfigured by helmet
-      }
-    }
-    crossOriginEmbedderPolicy: boolean
-    dnsPrefetchControl: { allow: boolean }
-    expectCt: boolean
-    frameguard: { action: string }
-    hsts: false | { includeSubDomains: boolean; maxAge: number; preload: boolean }
-    permittedCrossDomainPolicies: boolean
-    referrerPolicy: boolean
   }
 
   interface BootstrapSetupResult {
@@ -175,64 +130,23 @@ declare module '@govuk-one-login/di-ipv-cri-common-express' {
         redirectAsErrorToCallback: ErrorRequestHandler
       }
       headers: RequestHandler // security headers middleware
-      helmet: CommonExpressHelmetConfig
       i18n: {
+        i18next: i18n
         setI18n: (options: {
-          config: { cookieDomain?: string; debug?: boolean; secure?: boolean }
+          config: {
+            additionalNamespaces?: string[]
+            cookieDomain?: string
+            debug?: boolean
+            secure?: boolean
+          }
+          onInit?: (i18next: i18n) => void
           router: Express | Router
         }) => void
-      }
-      locals: {
-        getAssetPath: RequestHandler // sets res.locals.assetPath from app setting
-        getDeviceIntelligence: RequestHandler
-        getGTM: RequestHandler // copies GTM app settings into res.locals for templates
-        getLanguageToggle: RequestHandler // copies language toggle state into res.locals, sets res.locals.htmlLang from req.i18n.language
-      }
-      settings: {
-        setDeviceIntelligence: (settings: DeviceIntelligenceSettings) => void
-        setGTM: (settings: GTMSettings) => void // sets GA4/UA analytics config on app settings
-        setLanguageToggle: (settings: LanguageToggleSettings) => void
       }
     }
     routes: {
       oauth2: Router
     }
-  }
-
-  interface DeviceIntelligenceSettings {
-    app: Express
-    deviceIntelligenceDomain: string
-    deviceIntelligenceEnabled: string
-  }
-
-  type GTMSettings = {
-    analyticsCookieDomain: string
-    analyticsDataSensitive: boolean
-    app: Express
-    ga4ContainerId: string
-    ga4Enabled: boolean
-    ga4FormChangeEnabled: boolean
-    ga4FormErrorEnabled: boolean
-    ga4FormResponseEnabled: boolean
-    ga4NavigationEnabled: boolean
-    ga4PageViewEnabled: boolean
-    ga4SelectContentEnabled: boolean
-  } & ({ uaContainerId: string; uaEnabled: true } | { uaContainerId?: never; uaEnabled: false })
-
-  type HMPOLogLevel =
-    | 'debug'
-    | 'error'
-    | 'fatal'
-    | 'info'
-    | 'outbound'
-    | 'request'
-    | 'silly'
-    | 'verbose'
-    | 'warn'
-
-  interface LanguageToggleSettings {
-    app: Express
-    showLanguageToggle: '0' | '1' // must be the string "1" to enable, "0" or any other value disables
   }
 
   const commonExpress: CommonExpress
