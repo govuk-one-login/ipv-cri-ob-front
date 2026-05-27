@@ -5,9 +5,11 @@ import { alarmBadge, LOGGER } from '@src/utils/logger'
 
 import appConfig from '@src/config/app'
 
-const helmetConfig = getHelmetConfig() as HelmetOptions & {
-  contentSecurityPolicy: { directives: Record<string, string[]> }
+interface HelmetCSP {
+  directives: Record<string, string[]>
 }
+
+const helmetConfig = getHelmetConfig()
 
 const viteDevOverrides = (): Partial<HelmetOptions> => {
   if (appConfig.APP.NODE_ENV === 'production') return {}
@@ -16,15 +18,19 @@ const viteDevOverrides = (): Partial<HelmetOptions> => {
     `${alarmBadge} insecure developer overrides are present in the content security policy`
   )
 
-  const { directives } = helmetConfig.contentSecurityPolicy
+  const { directives: existingDirectives } = helmetConfig.contentSecurityPolicy as HelmetCSP
 
   return {
     contentSecurityPolicy: {
       directives: {
-        ...directives,
-        connectSrc: [...(directives['connectSrc'] ?? []), 'ws://localhost:*', 'http://localhost:*'],
-        scriptSrc: [...(directives['scriptSrc'] ?? []), "'unsafe-inline'"],
-        styleSrc: [...(directives['styleSrc'] ?? []), "'unsafe-inline'"],
+        ...existingDirectives,
+        connectSrc: [
+          ...(existingDirectives['connectSrc'] ?? []),
+          'ws://localhost:*',
+          'http://localhost:*'
+        ],
+        scriptSrc: [...(existingDirectives['scriptSrc'] ?? []), "'unsafe-inline'"],
+        styleSrc: [...(existingDirectives['styleSrc'] ?? []), "'unsafe-inline'"],
         upgradeInsecureRequests: null, // required for safari local dev
         workerSrc: ['blob:']
       }

@@ -680,7 +680,7 @@ Resources:
         PermissionsBoundary: !If
           - UsePermissionsBoundary
           - Fn::ImportValue: !Sub "${AWS::StackName}-ECSCanaryPermissionsBoundaryArn"
-          - AWS::NoValue
+          - !Ref AWS::NoValue
         SecurityGroups: !GetAtt ECSSecurityGroup.GroupId
         Subnets: !Join
           - ","
