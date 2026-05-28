@@ -26,6 +26,6 @@ export class Bank {
   }
 
   static fromData(data: BankData) {
-    return new Bank(data.bank_id, data.friendly_name, data.is_sandbox, data.service_status)
+    return new Bank(data.bank_id, data.bank_id, data.is_sandbox, data.service_status)
   }
 }
