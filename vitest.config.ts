@@ -19,6 +19,7 @@ export default defineConfig({
         test: {
           env: {
             API_BASE_URL: 'http://api.ob.cri.gov.uk:1337',
+            CSRF_SECRET: 'not-a-real-csrf-secret', // pragma: allowlist secret
             SESSION_SECRET: 'not-a-real-secret', // pragma: allowlist secret
             USE_PINO_LOGGER: 'true' // this shouldn't be needed once common-express defaults to pino, prevents the 'config as early as possible' warning when running unit tests
           },

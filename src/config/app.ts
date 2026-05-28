@@ -27,6 +27,7 @@ const AppConfigSchema = z
     }),
     APP: z.object({
       BIND_HOST: z.string().nonempty(),
+      CSRF_SECRET: z.string().nonempty().or(z.array(z.string().nonempty()).nonempty()),
       DEPLOYMENT_ENV: DeploymentEnvSchema,
       DEVICE_INTELLIGENCE_DOMAIN: z.string().nonempty(),
       DEVICE_INTELLIGENCE_ENABLED: z.boolean(),
@@ -80,6 +81,7 @@ export const appConfig = AppConfigSchema.parse({
   },
   APP: {
     BIND_HOST: process.env['BIND_HOST'] || '127.0.0.1',
+    CSRF_SECRET: process.env['CSRF_SECRET']!,
     DEPLOYMENT_ENV: (process.env['DEPLOYMENT_ENV'] || 'production') as z.infer<
       typeof DeploymentEnvSchema
     >,

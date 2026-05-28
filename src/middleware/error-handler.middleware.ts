@@ -2,12 +2,7 @@ import type { ErrorRequestHandler, NextFunction, Request } from 'express'
 
 import { LOGGER } from '@src/utils/logger'
 
-export const middleware: ErrorRequestHandler = (
-  err: Error,
-  _req: Request,
-  res,
-  _next: NextFunction
-) => {
+const middleware: ErrorRequestHandler = (err: Error, _req: Request, res, _next: NextFunction) => {
   LOGGER.error(
     {
       location: err.stack?.split('\n')[1]?.trim(),
@@ -20,3 +15,5 @@ export const middleware: ErrorRequestHandler = (
     error: err
   })
 }
+
+export { middleware }

@@ -6,6 +6,7 @@
 
 {% block mainContent %}
   <form method="post">
+    <input type="hidden" name="_csrf" value="{{ csrfToken }}" />
     {{
       govukSelect({
         id: "bank-select",
@@ -28,12 +29,6 @@
         >{{ translate("pages.chooseBank.notListedLinkText") }}</a
       >
     </p>
-    <div class="govuk-button-group">
-      {{
-        govukButton({
-          text: translate("pages.chooseBank.primaryButton")
-        })
-      }}
-    </div>
+    <div class="govuk-button-group">{% include "includes/progress-button.njk" %}</div>
   </form>
 {% endblock %}

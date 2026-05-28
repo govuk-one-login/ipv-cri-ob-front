@@ -1,0 +1,11 @@
+{% from "frontend-ui/build/components/progress-button/macro.njk" import frontendUiProgressButton %}
+{{
+  frontendUiProgressButton({
+    text: translate("translation.progressButton.text"),
+    translations: {
+      waitingText: translate("translation.progressButton.waitingText"),
+      longWaitingText: translate("translation.progressButton.longWaitingText"),
+      noJavascriptMessage: translate("translation.progressButton.noJavascriptMessage")
+    }
+  })
+}}

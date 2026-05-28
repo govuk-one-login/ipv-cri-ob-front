@@ -16,13 +16,17 @@ declare module '@govuk-one-login/di-ipv-cri-common-express' {
     fatal(msg: string, ...args: unknown[]): void
     info(obj: Record<string, unknown>, msg: string, ...args: unknown[]): void
     info(msg: string, ...args: unknown[]): void
+    isLevelEnabled(level: string): boolean
     request(msg: string, ...args: unknown[]): void
     warn(obj: Record<string, unknown>, msg: string, ...args: unknown[]): void
     warn(msg: string, ...args: unknown[]): void
   }
 
   export interface BootstrapSetupOptions {
-    config: { APP_ROOT: string }
+    config?: { APP_ROOT: string }
+    csrf?: {
+      secret: string | string[]
+    }
     /** disable response compression. default: false */
     disableCompression?: boolean
     env?: string // sets app "dev" to true when not 'production'

@@ -62,6 +62,7 @@
   <div class="govuk-grid-row">
     <div class="govuk-grid-column-one-half">
       <form method="post">
+        <input type="hidden" name="_csrf" value="{{ csrfToken }}" />
         {{
           govukSelect({
             id: "consent",
@@ -75,6 +76,7 @@
     </div>
     <div class="govuk-grid-column-one-half">
       <form method="post">
+        <input type="hidden" name="_csrf" value="{{ csrfToken }}" />
         {{
           govukSelect({
             id: "account-assessment",
@@ -87,5 +89,8 @@
       </form>
     </div>
   </div>
-  <form method="post">{{ govukButton({ text: "Continue to CRI" }) }}</form>
+  <form method="post">
+    <input type="hidden" name="_csrf" value="{{ csrfToken }}" />
+    {{ govukButton({ text: "Continue to CRI" }) }}
+  </form>
 {% endblock %}

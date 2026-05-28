@@ -1,31 +1,30 @@
 export const AccountAssessmentCompleteEventValue = {
-  NOT_VALID: 'NotValid' as AccountAssessmentCompleteEventValue,
-  VALID: 'Valid' as AccountAssessmentCompleteEventValue
-}
+  NOT_VALID: 'NotValid',
+  VALID: 'Valid'
+} as const
 
-export type AccountAssessmentCompleteEventValue = 'NotValid' | 'Valid'
+export type AccountAssessmentCompleteEventValue =
+  (typeof AccountAssessmentCompleteEventValue)[keyof typeof AccountAssessmentCompleteEventValue]
 
 export const ConsentJourneyCompleteEventValue = {
-  AUTHORISED: 'Authorized' as ConsentJourneyCompleteEventValue,
-  CANCELLED: 'Canceled' as ConsentJourneyCompleteEventValue,
-  FAILED: 'Failed' as ConsentJourneyCompleteEventValue,
-  REJECTED: 'Rejected' as ConsentJourneyCompleteEventValue
-}
+  AUTHORISED: 'Authorized',
+  CANCELLED: 'Canceled',
+  FAILED: 'Failed',
+  REJECTED: 'Rejected'
+} as const
 
-export type ConsentJourneyCompleteEventValue = 'Authorized' | 'Canceled' | 'Failed' | 'Rejected'
+export type ConsentJourneyCompleteEventValue =
+  (typeof ConsentJourneyCompleteEventValue)[keyof typeof ConsentJourneyCompleteEventValue]
 
 export const ConsentStatusChangeEventValue = {
-  EXPIRATION_WARNING: 'ExpirationWarning' as ConsentStatusChangeEventValue,
-  EXPIRED: 'Expired' as ConsentStatusChangeEventValue,
-  RECONFIRM_WARNING: 'ReconfirmWarning' as ConsentStatusChangeEventValue,
-  REVOKED: 'Revoked' as ConsentStatusChangeEventValue
-}
+  EXPIRATION_WARNING: 'ExpirationWarning',
+  EXPIRED: 'Expired',
+  RECONFIRM_WARNING: 'ReconfirmWarning',
+  REVOKED: 'Revoked'
+} as const
 
 export type ConsentStatusChangeEventValue =
-  | 'ExpirationWarning'
-  | 'Expired'
-  | 'ReconfirmWarning'
-  | 'Revoked'
+  (typeof ConsentStatusChangeEventValue)[keyof typeof ConsentStatusChangeEventValue]
 
 export type EventValue =
   | AccountAssessmentCompleteEventValue

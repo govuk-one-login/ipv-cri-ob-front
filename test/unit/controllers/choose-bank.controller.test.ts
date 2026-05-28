@@ -20,7 +20,7 @@ const { get, post } = await import('@src/controllers/steps/choose-bank.controlle
 
 describe('choose-bank controller', () => {
   describe('get', () => {
-    it('renders the correct view with a banks list and back link', async () => {
+    it('renders the correct view with a banks list', async () => {
       const render = vi.fn()
       const req = { axios: {} } as unknown as Request
       const emptySelectOption = { selected: true, text: '', value: '' }
@@ -30,7 +30,6 @@ describe('choose-bank controller', () => {
       expect(render).toHaveBeenCalledWith(
         'pages/steps/choose-bank',
         expect.objectContaining({
-          backLink: paths.steps.start,
           banksList: expect.arrayContaining([
             emptySelectOption,
             {

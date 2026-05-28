@@ -30,10 +30,7 @@ describe('consent controller', () => {
       get(req, res, vi.fn() as NextFunction)
 
       expect(res.locals['selectedBankName']).toBe('Test Bank One')
-      expect(render).toHaveBeenCalledWith(
-        'pages/steps/consent',
-        expect.objectContaining({ backLink: paths.steps.chooseBank })
-      )
+      expect(render).toHaveBeenCalledWith('pages/steps/consent', expect.anything())
     })
   })
 

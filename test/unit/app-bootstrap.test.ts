@@ -97,6 +97,17 @@ describe('createApp', () => {
     expect(redirectAsErrorCallOrder).toBeGreaterThan(routeConfigurationCallOrder)
   })
 
+  it('passes the csrf secret from app config to bootstrap setup', async () => {
+    vi.stubEnv('CSRF_SECRET', 'top-secret') // pragma: allowlist secret
+    const commonExpress = (await import('@govuk-one-login/di-ipv-cri-common-express')).default
+    const { createApp } = await import('@src/app-bootstrap')
+    await createApp()
+
+    expect(commonExpress.bootstrap.setup).toHaveBeenCalledWith(
+      expect.objectContaining({ csrf: { secret: 'top-secret' } }) // pragma: allowlist secret
+    )
+  })
+
   it('enables request logging in production', async () => {
     vi.stubEnv('NODE_ENV', 'production')
     const commonExpress = (await import('@govuk-one-login/di-ipv-cri-common-express')).default
