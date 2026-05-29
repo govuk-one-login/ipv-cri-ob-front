@@ -1,0 +1,54 @@
+name: Static checks
+
+on:
+  workflow_call:
+    inputs:
+      ts-used:
+        required: false
+        default: false
+        type: boolean
+
+jobs:
+  pre-commit:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v6
+      - name: Pre-commit checks
+        uses: govuk-one-login/github-actions/code-quality/run-pre-commit@3b0015c58dd0e19e1572fda59dda4184df387d1e
+        with:
+          package-manager: 'npm'
+          install-dependencies: 'true'
+          all-files: 'true'
+
+  static-checks:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v6
+      - name: Setup Node
+        uses: govuk-one-login/github-actions/node/install-dependencies@4c76410195b5fcb1804fc7c183ed20704252830f
+        with:
+          node-version-file: '.nvmrc'
+      - name: Type check
+        if: ${{ inputs.ts-used == true }}
+        run: npm run type-check
+      - name: i18n check
+        run: npm run check-translation
+      - name: SAM lint
+        run: sam validate --region eu-west-2 -t deploy/template.yml --lint
+
+  infra-tests:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v6
+      - name: Setup Node
+        uses: govuk-one-login/github-actions/node/install-dependencies@4c76410195b5fcb1804fc7c183ed20704252830f
+        with:
+          node-version-file: '.nvmrc'
+      - name: Infra tests
+        run: npm run test:infra
