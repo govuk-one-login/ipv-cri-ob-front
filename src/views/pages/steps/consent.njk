@@ -42,8 +42,7 @@
     <div class="govuk-button-group">
       {{
         govukButton({
-          text: translate("pages.start.primaryButton"),
-          href: nextStep
+          text: translate("pages.consent.button." + ("mobile" if isMobile else "desktop"))
         })
       }}
     </div>

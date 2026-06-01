@@ -41,6 +41,7 @@
     "@types/js-yaml": "4.0.9",
     "@types/node": "25.9.1",
     "@types/nunjucks": "3.2.6",
+    "@types/ua-parser-js": "0.7.39",
     "@vitest/coverage-v8": "4.1.7",
     "eslint": "10.4.0",
     "eslint-config-prettier": "10.1.8",
@@ -74,6 +75,7 @@
     "express-session": "1.19.0",
     "govuk-frontend": "5.14.0",
     "nunjucks": "3.2.4",
+    "ua-parser-js": "2.0.10",
     "zod": "4.4.3"
   },
   "overrides": {

@@ -43,7 +43,9 @@ consent:
     legendText: Give approval for your bank account information to be shared
     itemText: I agree to my bank account information being shared with Ecospend
     errorMessage: You must agree to share your bank account information to continue
-  primaryButton: Continue
+  button:
+    mobile: Continue to your bank's app or website
+    desktop: Continue
   secondaryLink: Prove your identity another way
 
 chooseBank:
