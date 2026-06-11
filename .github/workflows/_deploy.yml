@@ -25,11 +25,10 @@ jobs:
     name: Build and push test image
     runs-on: ubuntu-latest
     steps:
-      - uses: govuk-one-login/devplatform-upload-action-ecr@f82c8774a6390f200b15112b3cbb9faf3442173c
+      - uses: govuk-one-login/devplatform-upload-action-ecr@156ca69f253c67f2f71488d0d81f7a3d97657e43 # v1.6.1
         with:
           role-to-assume-arn: ${{ secrets.role_arn }}
           build-and-push-image-only: true
-          artifact-bucket-name: ''
           ecr-repo-name: ${{ secrets.ecr_repository_tests }}
           dockerfile: test/browser/smoke.Dockerfile
           push-latest-tag: true
@@ -41,7 +40,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Push to ECR and upload SAM template to S3
-        uses: govuk-one-login/devplatform-upload-action-ecr@f82c8774a6390f200b15112b3cbb9faf3442173c
+        uses: govuk-one-login/devplatform-upload-action-ecr@156ca69f253c67f2f71488d0d81f7a3d97657e43 # v1.6.1
         with:
           private-docker-registry: khw46367.live.dynatrace.com
           private-docker-login-username: khw46367
