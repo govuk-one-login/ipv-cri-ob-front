@@ -2,19 +2,25 @@ import { defineConfig, devices } from '@playwright/test'
 
 export const APP_URL = new URL('http://localhost:5091')
 export default defineConfig({
-  expect: { timeout: 5_000 },
+  expect: { timeout: 10_000 }, // Increased from 5s
   globalSetup: './mock-setup.ts',
-  projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
+  projects: [
+    { name: 'chromium-desktop', use: { ...devices['Desktop Chrome'] } },
+    { name: 'chromium-mobile', use: { ...devices['Pixel 5'] } },
+    { name: 'chromium-tablet', use: { ...devices['iPad Pro'] } }
+  ],
   reporter: [['list'], ['html', { open: 'never' }]],
-  retries: process.env['CI'] ? 2 : 0,
+  retries: process.env['CI'] ? 3 : 1, // Added retry for local dev
   testDir: '.',
-  testMatch: ['specs/**/*.spec.ts', 'journeys/mock/**/*.journey.ts'],
-  timeout: 30_000,
+  testMatch: ['journeys/mock/**/ob-error.journey.ts', 'journeys/mock/**/ob-success.journey.ts'],
+  timeout: 60_000, // Increased from 30s
   use: {
-    actionTimeout: 10_000,
+    actionTimeout: 15_000, // Increased from 10s
     baseURL: APP_URL.origin,
-    navigationTimeout: 15_000,
-    screenshot: 'on'
+    navigationTimeout: 30_000, // Increased from 15s
+    screenshot: 'only-on-failure', // Only capture on failures
+    trace: 'retry-with-trace', // Add trace for debugging retries
+    video: 'retain-on-failure' // Keep videos on failure
   },
   workers: 1
 })

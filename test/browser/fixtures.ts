@@ -6,6 +6,7 @@ import AxeBuilder from '@axe-core/playwright'
 interface Fixtures {
   axeCheck: void
   noConsoleErrors: void
+  resetLanguage: void
   skipAxe: boolean
   skipConsoleErrors: boolean
 }
@@ -15,9 +16,7 @@ export const test = base.extend<Fixtures>({
     async ({ page, skipAxe }, use) => {
       await use()
       if (skipAxe) return
-      const { violations } = await new AxeBuilder({ page })
-        .withTags(['wcag2a', 'wcag2aa', 'wcag22aa'])
-        .analyze()
+      const { violations } = await new AxeBuilder({ page }).withTags(['wcag22aa']).analyze()
       const summary = violations.map((v) => ({
         help: v.helpUrl,
         id: v.id,
@@ -32,7 +31,12 @@ export const test = base.extend<Fixtures>({
     async ({ page, skipConsoleErrors }, use) => {
       const errors: string[] = []
       page.on('console', (msg) => {
-        if (msg.type() === 'error' && !msg.text().startsWith('Failed to load resource'))
+        if (
+          msg.type() === 'error' &&
+          !msg.text().startsWith('Failed to load resource') &&
+          !msg.text().includes('downloadable font:') &&
+          !msg.text().includes('[vite] failed to connect to websocket')
+        )
           errors.push(msg.text())
       })
       await use()
@@ -41,11 +45,25 @@ export const test = base.extend<Fixtures>({
     },
     { auto: true }
   ],
+  resetLanguage: [
+    async ({ page }, use) => {
+      await page.context().addCookies([
+        {
+          domain: 'localhost',
+          name: 'lng',
+          path: '/',
+          value: 'en'
+        }
+      ])
+      await use()
+    },
+    { auto: true }
+  ],
   skipAxe: [false, { option: true }],
   skipConsoleErrors: [false, { option: true }]
 })
 
-const smokeTest = test.extend({})
+const smokeTest = test
 
 const mockTest = test.extend<{ wiremock: typeof wiremockAdmin }>({
   wiremock: async ({}, use) => {

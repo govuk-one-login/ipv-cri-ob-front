@@ -1,11 +1,11 @@
 {
   "mappings": [
     {
-      "name": "create session",
+      "name": "create session (failure path)",
       "request": {
         "method": "POST",
         "url": "/session",
-        "bodyPatterns": [{ "matchesJsonPath": "$[?(@.request == 'test-jwt-success')]" }]
+        "bodyPatterns": [{ "matchesJsonPath": "$[?(@.request == 'test-jwt-failure')]" }]
       },
       "response": {
         "status": 201,
@@ -13,7 +13,7 @@
           "Content-Type": "application/json"
         },
         "jsonBody": {
-          "session_id": "CAFEBABE",
+          "session_id": "FA11FA11",
           "state": "sT@t3",
           "redirect_uri": "{{request.baseUrl}}/callback"
         },
@@ -21,39 +21,55 @@
       }
     },
     {
-      "name": "get authorization code",
-      "request": {
-        "method": "GET",
-        "urlPath": "/authorization",
-        "headers": {
-          "session_id": {
-            "equalTo": "CAFEBABE"
-          }
-        }
-      },
-      "response": {
-        "status": 200,
-        "headers": {
-          "Content-Type": "application/json"
-        },
-        "jsonBody": {
-          "authorizationCode": {
-            "value": "DEADBEEF"
-          },
-          "redirect_uri": "{{request.baseUrl}}/callback",
-          "state": "sT@t3"
-        },
-        "transformers": ["response-template"]
-      }
-    },
-    {
-      "name": "get banks",
+      "name": "get banks (failure path - 500)",
       "request": {
         "method": "GET",
         "urlPath": "/banks",
         "headers": {
           "session_id": {
-            "equalTo": "CAFEBABE"
+            "equalTo": "FA11FA11"
+          }
+        }
+      },
+      "response": {
+        "status": 500,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "message": "Internal server error",
+          "code": "server_error"
+        }
+      }
+    },
+    {
+      "name": "create session (prove another way path)",
+      "request": {
+        "method": "POST",
+        "url": "/session",
+        "bodyPatterns": [{ "matchesJsonPath": "$[?(@.request == 'test-jwt-prove-another-way')]" }]
+      },
+      "response": {
+        "status": 201,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "session_id": "AB0RTAB0",
+          "state": "sT@t3",
+          "redirect_uri": "{{request.baseUrl}}/callback"
+        },
+        "transformers": ["response-template"]
+      }
+    },
+    {
+      "name": "get banks (prove another way path)",
+      "request": {
+        "method": "GET",
+        "urlPath": "/banks",
+        "headers": {
+          "session_id": {
+            "equalTo": "AB0RTAB0"
           }
         }
       },
@@ -68,55 +84,44 @@
             "friendly_name": "Vault of Ironforge",
             "is_sandbox": false,
             "service_status": true
-          },
-          {
-            "bank_id": "org-counting-house",
-            "friendly_name": "Orgrimmar Counting House",
-            "is_sandbox": false,
-            "service_status": true
-          },
-          {
-            "bank_id": "royal-bank-sw",
-            "friendly_name": "Royal Bank of Stormwind",
-            "is_sandbox": false,
-            "service_status": true
           }
         ]
       }
     },
     {
-      "name": "create consent",
+      "name": "authorization (prove another way path)",
       "request": {
-        "method": "POST",
-        "urlPath": "/consent",
+        "method": "GET",
+        "urlPath": "/authorization",
         "headers": {
           "session_id": {
-            "equalTo": "CAFEBABE"
+            "equalTo": "AB0RTAB0"
           }
         }
       },
       "response": {
-        "status": 201,
+        "status": 200,
         "headers": {
           "Content-Type": "application/json"
         },
         "jsonBody": {
-          "bank_consent_url": "{{request.baseUrl}}/mock-bank/consent",
-          "bank_id": "ironforge-vault",
-          "id": "CONSENT-SUCCESS-UUID",
-          "redirect_url": "{{request.baseUrl}}/return"
+          "authorizationCode": {
+            "value": "ABORT-CODE"
+          },
+          "redirect_uri": "{{request.baseUrl}}/callback",
+          "state": "sT@t3"
         },
         "transformers": ["response-template"]
       }
     },
     {
-      "name": "oauth callback",
+      "name": "oauth callback (prove another way)",
       "request": {
         "method": "GET",
         "urlPath": "/callback",
         "queryParameters": {
           "code": {
-            "equalTo": "DEADBEEF"
+            "equalTo": "ABORT-CODE"
           },
           "state": {
             "equalTo": "sT@t3"
@@ -128,7 +133,7 @@
       },
       "response": {
         "status": 200,
-        "body": "OAuth callback received successfully"
+        "body": "OAuth callback received (prove another way)"
       }
     }
   ]
