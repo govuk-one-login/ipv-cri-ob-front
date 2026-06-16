@@ -17,9 +17,10 @@ describe('start controller', () => {
     expect(render).toHaveBeenCalledWith('pages/steps/start.njk', expect.anything())
   })
 
-  it('provides the next step link in the context', () => {
+  it('provides the correct links in the context', () => {
     expect(render).toHaveBeenCalledWith(expect.anything(), {
-      nextStep: paths.steps.chooseBank
+      nextStep: paths.steps.chooseBank,
+      proveAnotherWay: paths.steps.proveAnotherWay
     })
   })
 })
