@@ -14,3 +14,13 @@ notFoundError:
 
 sessionExpiredError:
   title: Session expired
+
+sessionMissingError:
+  title: There is a problem
+  subTitle: What you need to do
+  content:
+    - <p class="govuk-body">It looks like you started proving your identity using a different web browser to the one you're using now.</p>
+  subContent:
+    - <p class="govuk-body">Go back to the service you were trying to use and start again. You can look for the service using your search engine or find it from the GOV.UK homepage.<p class="govuk-body">
+  primaryButton: Go the GOV.UK homepage
+  secondaryButton: Contact the GOV.UK One Login team (opens in a new tab)

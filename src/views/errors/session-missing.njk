@@ -1,0 +1,40 @@
+{% extends "layouts/base.njk" %}
+{% from "govuk/components/button/macro.njk" import govukButton %}
+
+{% set pageTitle = translate("errors.sessionMissingError.title") %}
+{% set pageSubTitle = translate("errors.sessionMissingError.subTitle") %}
+
+<!--ga4 tags-->
+{% set taxLevel2 = "session-missing" %}
+{% set statusCode = "401" %}
+<!--ga4 tags-->
+
+{% block mainContent %}
+  <h1 class="govuk-heading-l">{{ pageTitle }}</h1>
+  {% for item in translate("errors.sessionMissingError.content") %}
+    {{ item | safe }}
+  {% endfor %}
+  <h2 class="govuk-heading-m">{{ pageSubTitle }}</h2>
+  {% for item in translate("errors.sessionMissingError.subContent") %}
+    {{ item | safe }}
+  {% endfor %}
+  <div class="govuk-button-group">
+    <a href="https://www.gov.uk/" class="govuk-button" data-module="govuk-button"
+        >{{ translate("errors.notFoundError.primaryButton") }}</a
+    >
+    <a
+        href="https://home.account.gov.uk/contact-gov-uk-one-login"
+        class="govuk-link govuk-link--no-visited-state"
+        target="_blank"
+        >{{ translate("errors.notFoundError.secondaryButton") }}</a
+    >
+  </div>
+{% endblock %}
+
+{% block scripts %}
+  <script type="text/javascript" nonce="{{cspNonce}}">
+    window.DI = window.DI || {}
+    window.DI.httpStatusCode = 401
+  </script>
+  {{ super () }}
+{% endblock %}

@@ -1,7 +1,7 @@
 import type { Router } from 'express'
 
 import { steps, stubs } from '@src/controllers'
-import { requireSessionKey } from '@src/middleware'
+import { requireSession, requireSessionKey } from '@src/middleware'
 import { asyncControllerHandler } from '@src/utils/async-controller-handler'
 import { alarmBadge, LOGGER } from '@src/utils/logger'
 
@@ -14,7 +14,7 @@ const configure = (router: Router) => {
   router.get(paths.index, (_req, res) => {
     res.redirect(paths.steps.start)
   })
-  router.get(paths.steps.start, steps.startController.get)
+  router.get(paths.steps.start, requireSession.middleware, steps.startController.get)
   router.get(paths.steps.chooseBank, asyncControllerHandler(steps.chooseBankController.get))
   router.post(paths.steps.chooseBank, asyncControllerHandler(steps.chooseBankController.post))
   router.get(
@@ -40,6 +40,8 @@ const configure = (router: Router) => {
       asyncControllerHandler(stubs.webhookController.post)
     )
   }
+  router.get(paths.errors.sessionEnded, (_req, res) => res.render('errors/session-ended'))
+  router.get(paths.errors.sessionMissing, (_req, res) => res.render('errors/session-missing'))
 }
 
 export { configure }

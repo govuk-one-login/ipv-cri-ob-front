@@ -1,4 +1,8 @@
 const paths = {
+  errors: {
+    sessionEnded: '/session-ended',
+    sessionMissing: '/session-missing'
+  },
   failureSteps: {
     bankUnavailable: '/sorry-problem-bank',
     couldNotConfirmIdentity: '/banking-no-match',
