@@ -1,7 +1,7 @@
 import type { Router } from 'express'
 
 import { steps, stubs } from '@src/controllers'
-import { requireSessionKey } from '@src/middleware'
+import { detectDevice, requireSessionKey } from '@src/middleware'
 import { asyncControllerHandler } from '@src/utils/async-controller-handler'
 import { alarmBadge, LOGGER } from '@src/utils/logger'
 
@@ -10,11 +10,12 @@ import appConfig from '@src/config/app'
 import paths from '@src/config/paths'
 
 const configure = (router: Router) => {
-  router.use(paths.oauth2, commonExpress.routes.oauth2)
-  router.get(paths.index, (_req, res) => {
+  router.use(paths.oauth2.index, commonExpress.routes.oauth2)
+  router.get(paths.index, detectDevice.middleware, (_req, res) => {
     res.redirect(paths.steps.start)
   })
   router.get(paths.steps.start, steps.startController.get)
+  router.get(paths.steps.proveAnotherWay, steps.proveAnotherWayController.get)
   router.get(paths.steps.chooseBank, asyncControllerHandler(steps.chooseBankController.get))
   router.post(paths.steps.chooseBank, asyncControllerHandler(steps.chooseBankController.post))
   router.get(

@@ -16,6 +16,7 @@ declare module 'express-session' {
       }
       type: 'error' | 'info' | 'success'
     }[]
+    isMobile?: boolean
     webhooksSent?: Record<string, { accountAssessment?: string; consent?: string }>
   }
 }
