@@ -1,6 +1,6 @@
 export const RecordType = {
-  ACCOUNT_ASSESSMENT: 'AccountAssessment' as RecordType,
-  CONSENT: 'Consent' as RecordType
-}
+  ACCOUNT_ASSESSMENT: 'AccountAssessment',
+  CONSENT: 'Consent'
+} as const
 
-export type RecordType = 'AccountAssessment' | 'Consent'
+export type RecordType = (typeof RecordType)[keyof typeof RecordType]

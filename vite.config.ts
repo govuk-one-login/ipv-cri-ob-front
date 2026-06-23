@@ -119,16 +119,22 @@ export default defineConfig({
   ],
   publicDir: false,
   resolve: {
-    alias: {
-      '@govuk-one-login/frontend-language-toggle': path.resolve(
-        __dirname,
-        'node_modules/@govuk-one-login/frontend-language-toggle/build/stylesheet/styles.css'
-      ),
-      '@govuk-one-login/frontend-ui': path.resolve(
-        __dirname,
-        'node_modules/@govuk-one-login/frontend-ui/build/all.css'
-      ),
-      '@src': path.resolve(__dirname, 'src')
-    }
+    alias: [
+      {
+        find: /^@govuk-one-login\/frontend-language-toggle$/,
+        replacement: path.resolve(
+          __dirname,
+          'node_modules/@govuk-one-login/frontend-language-toggle/build/stylesheet/styles.css'
+        )
+      },
+      {
+        find: /^@govuk-one-login\/frontend-ui$/,
+        replacement: path.resolve(
+          __dirname,
+          'node_modules/@govuk-one-login/frontend-ui/build/all.css'
+        )
+      },
+      { find: '@src', replacement: path.resolve(__dirname, 'src') }
+    ]
   }
 })

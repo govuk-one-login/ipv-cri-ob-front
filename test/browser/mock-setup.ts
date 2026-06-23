@@ -86,6 +86,7 @@ export default async function mockSetup() {
       NODE_ENV: 'test',
       PORT: APP_URL.port,
       SESSION_SECRET: 'hunter2', // pragma: allowlist secret
+      CSRF_SECRET: 'Tr0ub4dor&3', // pragma: allowlist secret
       USE_PINO_LOGGER: 'true'
     }
   })

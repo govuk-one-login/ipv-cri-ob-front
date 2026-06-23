@@ -21,21 +21,18 @@ import path from 'node:path'
 
 import * as routes from '@src/config/routes'
 
-const APP_ROOT = process.cwd()
-
 export const createApp = async (): Promise<{ app: Express; router: Router }> => {
   const vite: null | ViteDevServer =
     appConfig.APP.NODE_ENV === 'development' ? await createViteServer() : null
 
   const { app, router } = commonExpress.bootstrap.setup({
-    config: { APP_ROOT },
     env: appConfig.APP.NODE_ENV,
     helmet: helmetConfig,
     middlewareSetupFn: (app: Express) => {
       if (vite) setupDevServer(app, vite)
       commonExpress.lib.i18n.setI18n({
         config: {
-          additionalNamespaces: ['translation', 'errors'],
+          additionalNamespaces: ['translation', 'errors'], // 'translation' is the namespace frontend-ui provides for common components (cookie banner, progress button etc)
           cookieDomain: appConfig.APP.GTM.ANALYTICS_COOKIE_DOMAIN
         },
         onInit: setFrontendUiTranslations,
@@ -45,7 +42,8 @@ export const createApp = async (): Promise<{ app: Express; router: Router }> => 
       app.use(frontendUiLocals.getGTM)
       app.use(frontendUiLocals.getLanguageToggle)
       app.use(frontendUiLocals.getDeviceIntelligence)
-      frontendVitalSignsInitFromApp(app, vitalSignsConfig)
+      if (appConfig.APP.NODE_ENV === 'production')
+        frontendVitalSignsInitFromApp(app, vitalSignsConfig)
       app.use(commonExpress.lib.headers)
       app.use(commonExpress.lib.axios)
     },
@@ -53,11 +51,8 @@ export const createApp = async (): Promise<{ app: Express; router: Router }> => 
     publicDirs: [path.resolve(import.meta.dirname, 'public')],
     requestLogging: appConfig.APP.NODE_ENV === 'production',
     session: await initSessionStore(),
-    views: [
-      'node_modules/@govuk-one-login/',
-      'node_modules/govuk-frontend/dist',
-      path.resolve(import.meta.dirname, 'views')
-    ]
+    csrf: { secret: appConfig.APP.CSRF_SECRET },
+    views: [path.resolve(import.meta.dirname, 'views')]
   })
 
   app.set('view engine', 'njk')

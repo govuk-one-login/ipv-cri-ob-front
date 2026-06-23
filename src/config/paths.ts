@@ -11,7 +11,7 @@ const paths = {
   },
   steps: {
     chooseBank: '/choose-bank',
-    confirmBankDetails: '/confirm-details-bank',
+    checkDetailsHolding: '/confirm-details-bank',
     consent: '/agree-share-bank-information',
     proveAnotherWay: '/prove-another-way',
     return: '/return',

@@ -81,7 +81,8 @@ export default defineConfig(
           newlinesBetween: 1,
           type: 'natural'
         }
-      ]
+      ],
+      'perfectionist/sort-objects': 'off'
     }
   },
   {

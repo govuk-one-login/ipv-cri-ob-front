@@ -18,6 +18,7 @@ declare module 'express-session' {
     }[]
     isMobile?: boolean
     webhooksSent?: Record<string, { accountAssessment?: string; consent?: string }>
+    wizard: Record<string, { history: string[] }>
   }
 }
 

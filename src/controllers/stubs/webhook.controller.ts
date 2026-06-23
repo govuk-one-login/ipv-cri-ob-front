@@ -22,17 +22,23 @@ interface OutcomeOption<T = never> {
   value: T
 }
 
-const consentOutcomeOptions: OutcomeOption<ConsentJourneyCompleteEventValue>[] = [
-  { text: 'Authorised', value: 'Authorized' },
-  { text: 'Cancelled', value: 'Canceled' },
-  { text: 'Failed', value: 'Failed' },
-  { text: 'Rejected', value: 'Rejected' }
-]
+const consentOutcomeText: Record<ConsentJourneyCompleteEventValue, string> = {
+  Authorized: 'Authorised',
+  Canceled: 'Cancelled',
+  Failed: 'Failed',
+  Rejected: 'Rejected'
+}
 
-const accountAssessmentOutcomeOptions: OutcomeOption<AccountAssessmentCompleteEventValue>[] = [
-  { text: 'Valid', value: 'Valid' },
-  { text: 'Not valid', value: 'NotValid' }
-]
+const accountAssessmentOutcomeText: Record<AccountAssessmentCompleteEventValue, string> = {
+  NotValid: 'Not valid',
+  Valid: 'Valid'
+}
+
+const toOptions = <T extends string>(text: Record<T, string>): OutcomeOption<T>[] =>
+  (Object.entries(text) as [T, string][]).map(([value, text]) => ({ text, value }))
+
+const consentOutcomeOptions = toOptions(consentOutcomeText)
+const accountAssessmentOutcomeOptions = toOptions(accountAssessmentOutcomeText)
 
 const withSelected = <T>(
   options: OutcomeOption<T>[],
@@ -58,19 +64,11 @@ const get = (req: Request, res: Response, _next: NextFunction) => {
 }
 
 const ConsentBodySchema = z.object({
-  consent: z.enum([
-    ConsentJourneyCompleteEventValue.AUTHORISED,
-    ConsentJourneyCompleteEventValue.CANCELLED,
-    ConsentJourneyCompleteEventValue.FAILED,
-    ConsentJourneyCompleteEventValue.REJECTED
-  ])
+  consent: z.enum(ConsentJourneyCompleteEventValue)
 })
 
 const AccountAssessmentBodySchema = z.object({
-  accountAssessment: z.enum([
-    AccountAssessmentCompleteEventValue.VALID,
-    AccountAssessmentCompleteEventValue.NOT_VALID
-  ])
+  accountAssessment: z.enum(AccountAssessmentCompleteEventValue)
 })
 
 const post = async (req: Request, res: Response, _next: NextFunction) => {
@@ -160,11 +158,9 @@ const storeWebhookHistoryOnSession = (
   const { data } = result
   const webhooksSent = req.session.webhooksSent?.[consentID] ?? {}
   if ('consent' in data) {
-    webhooksSent.consent = consentOutcomeOptions.find((o) => o.value === data.consent)!.text
+    webhooksSent.consent = consentOutcomeText[data.consent]
   } else {
-    webhooksSent.accountAssessment = accountAssessmentOutcomeOptions.find(
-      (o) => o.value === data.accountAssessment
-    )!.text
+    webhooksSent.accountAssessment = accountAssessmentOutcomeText[data.accountAssessment]
   }
   req.session.webhooksSent = { [consentID]: webhooksSent }
 }

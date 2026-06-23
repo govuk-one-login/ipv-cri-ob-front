@@ -17,7 +17,6 @@ const renderPage = (
   context: Record<string, unknown> = {}
 ) =>
   res.render('pages/steps/choose-bank', {
-    backLink: paths.steps.start,
     banksList: [{ selected: true, text: '', value: '' }, ...banksList],
     ...context
   })

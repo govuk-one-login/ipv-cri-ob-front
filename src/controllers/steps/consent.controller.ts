@@ -11,7 +11,6 @@ import paths from '@src/config/paths'
 const renderPage = (req: Request, res: Response, context: Record<string, unknown> = {}) => {
   res.locals['selectedBankName'] = req.session.bankName
   res.render('pages/steps/consent', {
-    backLink: paths.steps.chooseBank,
     ...context
   })
 }
@@ -31,7 +30,7 @@ const post = async (req: Request, res: Response) => {
     renderPage(req, res, zodErrorsForView(result.error, res.locals.translate))
     return
   }
-  const bankID = req.session.bankID! // guaranteed by require-session-key middleware
+  const bankID = req.session.bankID!
   const consentResponse = await consentsClient(req.axios).createConsent(
     new ConsentRequest(req.sessionID, bankID).toData()
   )

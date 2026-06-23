@@ -19,6 +19,7 @@
     {{ item | safe }}
   {% endfor %}
   <form method="post">
+    <input type="hidden" name="_csrf" value="{{ csrfToken }}" />
     {{
       govukCheckboxes({
         name: "consent",
@@ -39,14 +40,7 @@
         ]
       })
     }}
-    <div class="govuk-button-group">
-      {{
-        govukButton({
-          text: translate("pages.start.primaryButton"),
-          href: nextStep
-        })
-      }}
-    </div>
+    <div class="govuk-button-group">{% include "includes/progress-button.njk" %}</div>
     <p class="govuk-body">
       <a href="#" class="govuk-link govuk-link--no-visited-state"
         >{{ translate("pages.start.secondaryLink") }}</a
