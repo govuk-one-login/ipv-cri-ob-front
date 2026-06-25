@@ -18,11 +18,17 @@ const renderPage = (
 ) =>
   res.render('pages/steps/choose-bank', {
     banksList: [{ selected: true, text: '', value: '' }, ...banksList],
+    bankNotListedLink: paths.steps.proveAnotherWay,
     ...context
   })
 
 const get = async (req: Request, res: Response) => {
   const banksList = await banksClient(req.axios).getBanks()
+  // This also covers empty banksList
+  if (banksList.every((b) => b.status === 'Offline')) {
+    res.redirect(paths.steps.proveAnotherWay)
+    return
+  }
   renderPage(res, transformBanksForView(banksList))
 }
 
@@ -37,6 +43,7 @@ const chooseBankSchema = (banksList: Bank[]) =>
   })
 
 const post = async (req: Request, res: Response) => {
+  // Second getBanks handles race condition where selected bank has changed status or been removed between page load and submission
   const banksList = await banksClient(req.axios).getBanks()
   const result = chooseBankSchema(banksList).safeParse(req.body)
   if (!result.success) {
@@ -48,8 +55,15 @@ const post = async (req: Request, res: Response) => {
     return
   }
   const { bankSelect } = result.data
+  const selectedBank = banksList.find((b) => b.bankID === bankSelect)!
+
   req.session.bankID = bankSelect
-  req.session.bankName = banksList.find((b) => b.bankID === bankSelect)!.friendlyName
+  req.session.bankName = selectedBank.friendlyName
+
+  if (selectedBank.status === 'Offline') {
+    res.redirect(paths.failureSteps.bankUnavailable)
+    return
+  }
   res.redirect(paths.steps.consent)
 }
 

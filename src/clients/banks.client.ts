@@ -35,10 +35,10 @@ const DUMMY_BANKS_RESPONSE: BankData[] = [
     service_status: true
   },
   {
-    bank_id: 'first-bank-kezan',
-    friendly_name: 'First Bank of Kezan',
+    bank_id: 'forgotten-uldaman-vault',
+    friendly_name: 'Forgotten Vault of Uldaman',
     is_sandbox: false,
-    service_status: true
+    service_status: false
   }
 ]
 
