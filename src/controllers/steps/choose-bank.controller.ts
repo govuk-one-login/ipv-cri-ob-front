@@ -25,7 +25,8 @@ const renderPage = (
 
 const get = async (req: Request, res: Response) => {
   const banksList = await banksClient(req.axios).getBanks()
-  if (banksList.length === 0 || banksList.every((b) => b.status === 'Offline')) {
+  // This also covers empty banksList
+  if (banksList.every((b) => b.status === 'Offline')) {
     res.redirect(paths.steps.proveAnotherWay)
     return
   }

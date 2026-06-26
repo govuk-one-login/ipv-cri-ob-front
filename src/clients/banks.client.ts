@@ -38,12 +38,6 @@ const DUMMY_BANKS_RESPONSE: BankData[] = [
     bank_id: 'forgotten-uldaman-vault',
     friendly_name: 'Forgotten Vault of Uldaman',
     is_sandbox: false,
-    service_status: true
-  },
-  {
-    bank_id: 'forgotten-uldaman-vault',
-    friendly_name: 'Forgotten Vault of Uldaman',
-    is_sandbox: false,
     service_status: false
   }
 ]
