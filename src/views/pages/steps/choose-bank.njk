@@ -26,9 +26,9 @@
         href="{{ bankNotListedLink }}"
         class="govuk-link govuk-link--no-visited-state"
         data-module="govuk-button"
-        >{{ translate("pages.chooseBank.notListedLinkText") }}</a
-      >
+        >{{ translate("pages.chooseBank.notListedLinkText") }}
+      </a>
     </p>
-    <div class="govuk-button-group">{% include "includes/progress-button.njk" %}</div>
+    {% include "includes/progress-button.njk" %}
   </form>
 {% endblock %}
