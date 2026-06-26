@@ -19,13 +19,13 @@ const renderPage = (
   res.render('pages/steps/choose-bank', {
     banksList: [{ selected: true, text: '', value: '' }, ...banksList],
     bankNotListedLink: paths.steps.proveAnotherWay,
+    bankNotListedLink: paths.steps.proveAnotherWay,
     ...context
   })
 
 const get = async (req: Request, res: Response) => {
   const banksList = await banksClient(req.axios).getBanks()
-  // This also covers empty banksList
-  if (banksList.every((b) => b.status === 'Offline')) {
+  if (banksList.length === 0 || banksList.every((b) => b.status === 'Offline')) {
     res.redirect(paths.steps.proveAnotherWay)
     return
   }
