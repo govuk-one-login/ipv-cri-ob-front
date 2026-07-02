@@ -10,10 +10,10 @@ This document outlines the complete browser test coverage for the Open Banking C
 
 #### Pages & Journeys
 - **Start page**: Content, interactions, external links, accessibility
-- **Choose bank page**: Form validation, dropdown interaction, error handling
+- **Choose bank page**: Form validation, dropdown interaction, error handling, bank list contents, successful navigation to consent, offline bank redirect, not-listed link href
 - **Consent page**: Checkbox validation, form submission, content verification
 - **Language switching**: Welsh translations, cookie persistence
-- **Journey tests**: Success flows, prove another way flow
+- **Journey tests**: Success flows, prove another way flow, all-banks-offline and bank-list-unavailable (skipped pending `banks.client.ts` API wiring)
 - **Error handling**: 404 pages, basic error scenarios
 - **Keyboard navigation**: Tab order, focus management
 - **Cookie banner**: Basic functionality
@@ -70,7 +70,7 @@ npm run test:browser        # run
 npm run test:browser:ui     # interactive UI mode
 ```
 - **Devices**: Desktop Chrome, Pixel 5, iPad Pro
-- **Tests**: `journeys/mock/**/ob-error.journey.ts`, `journeys/mock/**/ob-success.journey.ts`
+- **Tests**: `journeys/mock/**/ob-error.journey.ts`, `journeys/mock/**/ob-success.journey.ts`, `journeys/mock/**/ob-prove-another-way.journey.ts`, `journeys/mock/**/ob-banks-unavailable.journey.ts`
 - **Cross-browser subset**: `--project=chromium-desktop --project=chromium-mobile --project=chromium-tablet`
 
 ### 2. Mobile Testing (`playwright.mobile.config.ts`)
@@ -241,7 +241,7 @@ npx playwright test --debug
 - Session expiry
 - Network failures
 - Validation errors
-- Bank unavailable scenarios (mock journey coverage pending)
+- Bank unavailable scenarios — journey tests written in `ob-banks-unavailable.journey.ts`, skipped pending real `/banks` API wiring in `banks.client.ts`
 
 ### User Errors
 - Missing form data
@@ -273,11 +273,10 @@ npx playwright test --debug
 
 ### Test Stability
 
-#### 1. Enhanced Wait Strategies (`wait-strategies.ts`)
+#### 1. Wait Strategies (`wait-strategies.ts`)
 
-- **`waitForNetworkIdle`**: Robust network idle waiting with retry logic
 - **`waitForElement`**: Enhanced element waiting that ensures interactive readiness
-- **`navigateAndWait`**: Race-condition-free navigation handling
+- **`navigateAndWait`**: Race-condition-free navigation — registers the URL listener before triggering the action, uses `waitUntil: 'load'` to avoid `networkidle` instability in Vite dev environments
 - **`waitWithBackoff`**: Exponential backoff for custom conditions
 
 #### 2. Updated Navigation Helpers

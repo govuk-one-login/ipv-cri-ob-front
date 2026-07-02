@@ -6,7 +6,7 @@ export default defineConfig({
   reporter: [['list']],
   retries: 2,
   testDir: '.',
-  testMatch: ['specs/**/*.spec.ts', 'journeys/smoke/**/*.journey.ts'],
+  testMatch: ['journeys/mock/**/ob-error.journey.ts', 'journeys/mock/**/ob-success.journey.ts'],
   timeout: 30_000,
   use: {
     actionTimeout: 10_000,

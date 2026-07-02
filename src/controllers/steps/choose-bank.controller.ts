@@ -19,7 +19,6 @@ const renderPage = (
   res.render('pages/steps/choose-bank', {
     banksList: [{ selected: true, text: '', value: '' }, ...banksList],
     bankNotListedLink: paths.steps.proveAnotherWay,
-    bankNotListedLink: paths.steps.proveAnotherWay,
     ...context
   })
 

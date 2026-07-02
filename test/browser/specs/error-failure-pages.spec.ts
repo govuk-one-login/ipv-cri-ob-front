@@ -31,8 +31,9 @@ test.describe('Error and failure pages', () => {
     page
   }) => {
     await page.goto(paths.steps.start)
+    const toChooseBank = page.waitForURL(`**${paths.steps.chooseBank}`)
     await page.getByRole('button', { name: 'Continue' }).click()
-    await page.waitForURL(`**${paths.steps.chooseBank}`)
+    await toChooseBank
 
     await page.goto(paths.steps.consent)
 

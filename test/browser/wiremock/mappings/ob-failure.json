@@ -1,7 +1,7 @@
 {
   "mappings": [
     {
-      "name": "create session (failure path)",
+      "name": "create session (failure path - banks unavailable)",
       "request": {
         "method": "POST",
         "url": "/session",
@@ -40,6 +40,58 @@
           "message": "Internal server error",
           "code": "server_error"
         }
+      }
+    },
+    {
+      "name": "create session (all banks offline path)",
+      "request": {
+        "method": "POST",
+        "url": "/session",
+        "bodyPatterns": [{ "matchesJsonPath": "$[?(@.request == 'test-jwt-all-banks-offline')]" }]
+      },
+      "response": {
+        "status": 201,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "session_id": "DEADB4NK",
+          "state": "sT@t3",
+          "redirect_uri": "{{request.baseUrl}}/callback"
+        },
+        "transformers": ["response-template"]
+      }
+    },
+    {
+      "name": "get banks (all banks offline)",
+      "request": {
+        "method": "GET",
+        "urlPath": "/banks",
+        "headers": {
+          "session_id": {
+            "equalTo": "DEADB4NK"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": [
+          {
+            "bank_id": "ironforge-vault",
+            "friendly_name": "Vault of Ironforge",
+            "is_sandbox": false,
+            "service_status": false
+          },
+          {
+            "bank_id": "org-counting-house",
+            "friendly_name": "Orgrimmar Counting House",
+            "is_sandbox": false,
+            "service_status": false
+          }
+        ]
       }
     },
     {

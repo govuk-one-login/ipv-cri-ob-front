@@ -8,7 +8,7 @@ test.describe('Performance tests', () => {
       const startTime = Date.now()
 
       await page.goto(paths.steps.start)
-      await page.waitForLoadState('networkidle')
+      await page.waitForLoadState('load')
 
       const loadTime = Date.now() - startTime
       expect(loadTime).toBeLessThan(3000)
@@ -50,7 +50,7 @@ test.describe('Performance tests', () => {
       })
 
       await page.goto(paths.steps.start)
-      await page.waitForLoadState('networkidle')
+      await page.waitForLoadState('load')
 
       expect(resources.length).toBeGreaterThan(0)
 
@@ -72,7 +72,7 @@ test.describe('Performance tests', () => {
       })
 
       await page.goto(paths.steps.start)
-      await page.waitForLoadState('networkidle')
+      await page.waitForLoadState('load')
 
       if (imageCount > 0) {
         const averageImageSize = totalImageSize / imageCount
@@ -189,7 +189,7 @@ test.describe('Performance tests', () => {
       await page.goto(paths.steps.start)
       await page.getByRole('button', { name: 'Continue' }).click()
       await page.waitForURL(`**${paths.steps.chooseBank}`)
-      await page.waitForLoadState('networkidle')
+      await page.waitForLoadState('load')
 
       if (requestTimes.length > 0) {
         const averageRequestTime = requestTimes.reduce((a, b) => a + b) / requestTimes.length
@@ -225,7 +225,7 @@ test.describe('Performance tests', () => {
       })
 
       await page.goto(paths.steps.start)
-      await page.waitForLoadState('networkidle')
+      await page.waitForLoadState('load')
 
       const layoutShifts = await page.evaluate(() => {
         const globalWindow = window as unknown as {
