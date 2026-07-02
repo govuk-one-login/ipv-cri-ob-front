@@ -41,3 +41,7 @@ APP_URL=https://... npx playwright test --config playwright.smoke.config.ts
 | `test`      | Specs and general use — includes axe and console error checks             |
 | `mockTest`  | Mock journeys (adds `wiremock` fixture and resets state before each test) |
 | `smokeTest` | Smoke journeys                                                            |
+
+## Coverage
+
+For a full breakdown of test coverage, devices, and configurations see [COVERAGE.md](./COVERAGE.md).

@@ -44,6 +44,50 @@
       }
     },
     {
+      "name": "get banks error",
+      "request": {
+        "method": "GET",
+        "urlPath": "/banks",
+        "headers": {
+          "session_id": {
+            "equalTo": "8BADF00D"
+          }
+        }
+      },
+      "response": {
+        "status": 500,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "message": "Internal server error",
+          "code": "server_error"
+        }
+      }
+    },
+    {
+      "name": "create consent error",
+      "request": {
+        "method": "POST",
+        "urlPath": "/consent",
+        "headers": {
+          "session_id": {
+            "equalTo": "8BADF00D"
+          }
+        }
+      },
+      "response": {
+        "status": 500,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "message": "Internal server error",
+          "code": "server_error"
+        }
+      }
+    },
+    {
       "name": "oauth error callback",
       "request": {
         "method": "GET",

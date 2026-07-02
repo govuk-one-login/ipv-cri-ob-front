@@ -29,6 +29,14 @@
     "test:watch": "vitest",
     "test:browser": "playwright test --config test/browser/playwright.mock.config.ts",
     "test:browser:ui": "playwright test --config test/browser/playwright.mock.config.ts --ui",
+    "test:browser:mobile": "playwright test --config test/browser/playwright.mobile.config.ts",
+    "test:browser:mobile:ui": "playwright test --config test/browser/playwright.mobile.config.ts --ui",
+    "test:browser:cross-browser": "playwright test --config test/browser/playwright.mock.config.ts --project=chromium-desktop --project=firefox-desktop --project=webkit-desktop",
+    "test:browser:local": "playwright test --config test/browser/playwright.local.config.ts",
+    "test:browser:local:ui": "playwright test --config test/browser/playwright.local.config.ts --ui",
+    "test:browser:local:firefox": "BROWSER=firefox playwright test --config test/browser/playwright.local.config.ts",
+    "test:browser:local:edge": "BROWSER=edge playwright test --config test/browser/playwright.local.config.ts",
+    "test:browser:local:all": "BROWSER=all playwright test --config test/browser/playwright.local.config.ts",
     "type-check": "tsc --noEmit"
   },
   "devDependencies": {
