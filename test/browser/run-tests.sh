@@ -19,7 +19,14 @@ if [[ "${STACK_NAME}" != "local" ]]; then
     --query "Parameter.Value" \
     --output text)
 
+  CORE_STUB_URL=$(aws ssm get-parameter \
+    --name "/tests/${STACK_NAME}/coreStubUrl" \
+    --region eu-west-2 \
+    --query "Parameter.Value" \
+    --output text)
+
   export APP_URL
+  export CORE_STUB_URL
 fi
 
 cd /tests

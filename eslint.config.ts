@@ -12,7 +12,16 @@ const perfectionistWarnRules = Object.fromEntries(
 )
 
 export default defineConfig(
-  { ignores: ['dist/**', 'node_modules/**', '.features-gen', 'playwright-report', 'coverage'] },
+  {
+    ignores: [
+      'dist/**',
+      'node_modules/**',
+      '.features-gen',
+      'playwright-report',
+      'test/browser/playwright-report-mobile',
+      'coverage'
+    ]
+  },
   eslint.configs.recommended,
   tseslint.configs.recommendedTypeChecked,
   tseslint.configs.stylisticTypeChecked,
