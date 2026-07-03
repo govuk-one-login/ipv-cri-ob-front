@@ -7,23 +7,6 @@ export interface WaitOptions {
 }
 
 /**
- * Wait for network to be idle with retry logic
- */
-export const waitForNetworkIdle = async (page: Page, options: WaitOptions = {}): Promise<void> => {
-  const { timeout = 10000, retries = 3, retryDelay = 1000 } = options
-
-  for (let i = 0; i < retries; i++) {
-    try {
-      await page.waitForLoadState('networkidle', { timeout: timeout / retries })
-      return
-    } catch (error) {
-      if (i === retries - 1) throw error
-      await new Promise((resolve) => setTimeout(resolve, retryDelay))
-    }
-  }
-}
-
-/**
  * Wait for element to be ready for interaction
  */
 export const waitForElement = async (
@@ -57,17 +40,10 @@ export const navigateAndWait = async (
 ): Promise<void> => {
   const { timeout = 20000 } = options
 
-  // Start navigation and URL waiting in parallel
-  await Promise.all([
-    page.waitForURL(expectedUrl, {
-      timeout,
-      waitUntil: 'networkidle'
-    }),
-    trigger()
-  ])
-
-  // Ensure page is fully loaded
-  await waitForNetworkIdle(page, { timeout: timeout / 2 })
+  // Register the URL listener before triggering to avoid missing the navigation event
+  const navigationPromise = page.waitForURL(expectedUrl, { timeout, waitUntil: 'load' })
+  await trigger()
+  await navigationPromise
 }
 
 /**

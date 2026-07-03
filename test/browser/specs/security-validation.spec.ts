@@ -6,8 +6,9 @@ test.describe('Security and validation tests', () => {
   test.describe('CSRF Protection', () => {
     test('form submissions without CSRF token are rejected', async ({ page }) => {
       await page.goto(paths.steps.start)
+      const toChooseBank = page.waitForURL(`**${paths.steps.chooseBank}`)
       await page.getByRole('button', { name: 'Continue' }).click()
-      await page.waitForURL(`**${paths.steps.chooseBank}`)
+      await toChooseBank
 
       await page.evaluate(() => {
         document.querySelector('input[name="_csrf"]')?.remove()
@@ -35,13 +36,13 @@ test.describe('Security and validation tests', () => {
   test.describe('Input validation', () => {
     test('bank selection validates required field', async ({ page }) => {
       await page.goto(paths.steps.start)
+      const toChooseBank = page.waitForURL(`**${paths.steps.chooseBank}`)
       await page.getByRole('button', { name: 'Continue' }).click()
-      await page.waitForURL(`**${paths.steps.chooseBank}`)
+      await toChooseBank
 
-      await Promise.all([
-        page.waitForURL(`**${paths.steps.chooseBank}`),
-        page.getByRole('button', { name: 'Continue' }).click()
-      ])
+      const stayOnChooseBank = page.waitForURL(`**${paths.steps.chooseBank}`)
+      await page.getByRole('button', { name: 'Continue' }).click()
+      await stayOnChooseBank
 
       await expect(page.locator('.govuk-error-summary')).toBeVisible()
       await expect(page.locator('.govuk-error-message')).toContainText('Select a bank')
@@ -49,17 +50,18 @@ test.describe('Security and validation tests', () => {
 
     test('consent checkbox validates required field', async ({ page }) => {
       await page.goto(paths.steps.start)
+      const toChooseBank = page.waitForURL(`**${paths.steps.chooseBank}`)
       await page.getByRole('button', { name: 'Continue' }).click()
-      await page.waitForURL(`**${paths.steps.chooseBank}`)
+      await toChooseBank
 
       await page.selectOption('#bank-select', 'ironforge-vault')
+      const toConsent = page.waitForURL(`**${paths.steps.consent}`)
       await page.getByRole('button', { name: 'Continue' }).click()
-      await page.waitForURL(`**${paths.steps.consent}`)
+      await toConsent
 
-      await Promise.all([
-        page.waitForURL(`**${paths.steps.consent}`),
-        page.getByRole('button', { name: 'Continue' }).click()
-      ])
+      const stayOnConsent = page.waitForURL(`**${paths.steps.consent}`)
+      await page.getByRole('button', { name: 'Continue' }).click()
+      await stayOnConsent
 
       await expect(page.locator('.govuk-error-summary')).toBeVisible()
       await expect(page.locator('.govuk-error-message')).toContainText('You must agree to share')
