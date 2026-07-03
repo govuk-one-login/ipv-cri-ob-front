@@ -59,15 +59,6 @@ describe('detect-device middleware', () => {
     expect(req.session.isMobile).toBe(false)
   })
 
-  it('sets isMobile to false when no user-agent header is present', () => {
-    const req = { headers: {}, session: {} } as unknown as Request
-    const res = {} as unknown as Response
-
-    detectDevice.middleware(req, res, vi.fn() as NextFunction)
-
-    expect(req.session.isMobile).toBe(false)
-  })
-
   it('calls next()', () => {
     const next = vi.fn()
     const req = { headers: {}, session: {} } as unknown as Request

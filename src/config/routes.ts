@@ -19,7 +19,7 @@ const openBankingJourney = createWizard<SessionData>('ob-journey', {
     controller: steps.startController
   },
   [paths.steps.chooseBank]: {
-    next: [paths.steps.consent, paths.failureSteps.bankUnavailable],
+    next: [paths.steps.consent, paths.failureSteps.bankUnavailable, paths.steps.proveAnotherWay],
     controller: steps.chooseBankController
   },
   [paths.steps.consent]: {
