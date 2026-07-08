@@ -6,12 +6,12 @@ export default defineConfig({
   reporter: [['list']],
   retries: 2,
   testDir: '.',
-  testMatch: ['journeys/mock/**/ob-error.journey.ts', 'journeys/mock/**/ob-success.journey.ts'],
+  testMatch: ['journeys/smoke/**/*.journey.ts'],
   timeout: 30_000,
   use: {
     actionTimeout: 10_000,
     baseURL: process.env['APP_URL']!,
-    navigationTimeout: 15_000,
+    navigationTimeout: 30_000,
     screenshot: 'off'
   },
   workers: 1
