@@ -29,5 +29,5 @@ if [[ "${STACK_NAME}" != "local" ]]; then
   export CORE_STUB_URL
 fi
 
-cd /tests
+cd /app/test/browser
 npx playwright test --config playwright.smoke.config.ts
