@@ -10,14 +10,15 @@ RUN curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o awscliv2.
   && chmod +x /usr/local/bin/aws \
   && rm -rf awscliv2.zip awscliv2.sig aws
 
-WORKDIR /tests
+WORKDIR /app
 
 COPY package.json package-lock.json ./
 RUN npm ci
 
 # run-tests.sh must be in the container root and made executable
 COPY --chmod=+x test/browser/run-tests.sh /run-tests.sh
-COPY test/browser .
-COPY src/config/paths.ts /src/config/paths.ts
+COPY tsconfig.json ./
+COPY src/config/paths.ts ./src/config/paths.ts
+COPY test/browser ./test/browser
 
 ENTRYPOINT ["/run-tests.sh"]
