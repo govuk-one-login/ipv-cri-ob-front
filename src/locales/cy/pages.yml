@@ -51,3 +51,16 @@ chooseBank:
   errorMessage: Dewiswch fanc neu gymdeithas adeiladu
   notListedLinkText: Nid yw fy banc wedi'i restru
   primaryButton: Parhau
+
+bankProblem:
+  title: Mae'n ddrwg gen i, mae problem
+  content: Nid yw eich banc na'ch cymdeithas adeiladu ar gael.
+  radio:
+    legend: Beth hoffech chi ei wneud?
+    errorMessage: Dewiswch beth hoffech chi ei wneud
+    one:
+      title: Ceisiwch brofi pwy ydych chi eto gan ddefnyddio bancio ar-lein.
+      hint: Gallwch roi cynnig arall arni gan ddefnyddio'r un banc neu gymdeithas adeiladu, neu roi cynnig ar un gwahanol.
+    two:
+      title: Profi eich hunaniaeth mewn ffordd arall
+  primaryButton: Parhau

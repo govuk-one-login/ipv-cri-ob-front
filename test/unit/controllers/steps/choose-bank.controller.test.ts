@@ -1,22 +1,23 @@
-import type { Bank } from '@src/models/bank.class'
 import type { Request, Response } from 'express'
 
+import { Bank } from '@src/models/bank.class'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import paths from '@src/config/paths'
 
-const onlineBank: Bank = {
-  bankID: 'test-online-bank',
-  friendlyName: 'Test Online Bank',
-  sandbox: false,
-  status: 'Online'
-}
-const offlineBank: Bank = {
-  bankID: 'test-offline-bank',
-  friendlyName: 'Test Offline Bank',
-  sandbox: false,
-  status: 'Offline'
-}
+const onlineBank = Bank.fromData({
+  bank_id: 'test-online-bank',
+  friendly_name: 'Test Online Bank',
+  is_sandbox: false,
+  service_status: true
+})
+
+const offlineBank = Bank.fromData({
+  bank_id: 'test-offline-bank',
+  friendly_name: 'Test Offline Bank',
+  is_sandbox: false,
+  service_status: false
+})
 
 const mockGetBanks = vi.fn()
 
@@ -39,7 +40,7 @@ describe('choose-bank controller', () => {
     it('renders the page with the banks list', async () => {
       mockGetBanks.mockResolvedValue([onlineBank, offlineBank])
       const render = vi.fn()
-      const req = { axios: {} } as unknown as Request
+      const req = { axios: {} } as Request
 
       await get(req, { render } as unknown as Response)
 
@@ -59,7 +60,7 @@ describe('choose-bank controller', () => {
     it('renders the page when there is only one online bank', async () => {
       mockGetBanks.mockResolvedValue([onlineBank])
       const render = vi.fn()
-      const req = { axios: {} } as unknown as Request
+      const req = { axios: {} } as Request
 
       await get(req, { render } as unknown as Response)
 
@@ -71,50 +72,42 @@ describe('choose-bank controller', () => {
       )
     })
 
-    it('redirects to prove-another-way when all banks are offline', async () => {
-      const anotherOfflineBank = {
-        ...offlineBank,
-        bankID: 'another-offline-bank',
-        friendlyName: 'Another Test Offline Bank'
-      }
-      mockGetBanks.mockResolvedValue([offlineBank, anotherOfflineBank])
+    describe('redirect behaviour', () => {
       const redirect = vi.fn()
       const render = vi.fn()
-      const req = { axios: {} } as unknown as Request
+      const req = { axios: {} } as Request
 
-      await get(req, { redirect, render } as unknown as Response)
+      it('redirects to prove-another-way when all banks are offline', async () => {
+        const anotherOfflineBank = Bank.fromData({
+          bank_id: 'another-offline-bank',
+          friendly_name: 'Another Test Offline Bank',
+          is_sandbox: false,
+          service_status: false
+        })
+        mockGetBanks.mockResolvedValue([offlineBank, anotherOfflineBank])
+        await get(req, { redirect, render } as unknown as Response)
+        expect(redirect).toHaveBeenCalledWith(paths.steps.proveAnotherWay)
+        expect(render).not.toHaveBeenCalled()
+      })
 
-      expect(redirect).toHaveBeenCalledWith(paths.steps.proveAnotherWay)
-      expect(render).not.toHaveBeenCalled()
-    })
+      it('redirects to prove-another-way when only one bank exists and it is offline', async () => {
+        mockGetBanks.mockResolvedValue([offlineBank])
+        await get(req, { redirect, render } as unknown as Response)
+        expect(redirect).toHaveBeenCalledWith(paths.steps.proveAnotherWay)
+        expect(render).not.toHaveBeenCalled()
+      })
 
-    it('redirects to prove-another-way when only one bank exists and it is offline', async () => {
-      mockGetBanks.mockResolvedValue([offlineBank])
-      const redirect = vi.fn()
-      const render = vi.fn()
-      const req = { axios: {} } as unknown as Request
-
-      await get(req, { redirect, render } as unknown as Response)
-
-      expect(redirect).toHaveBeenCalledWith(paths.steps.proveAnotherWay)
-      expect(render).not.toHaveBeenCalled()
-    })
-
-    it('redirects to prove-another-way when banks list is empty', async () => {
-      mockGetBanks.mockResolvedValue([])
-      const redirect = vi.fn()
-      const render = vi.fn()
-      const req = { axios: {} } as unknown as Request
-
-      await get(req, { redirect, render } as unknown as Response)
-
-      expect(redirect).toHaveBeenCalledWith(paths.steps.proveAnotherWay)
-      expect(render).not.toHaveBeenCalled()
+      it('redirects to prove-another-way when banks list is empty', async () => {
+        mockGetBanks.mockResolvedValue([])
+        await get(req, { redirect, render } as unknown as Response)
+        expect(redirect).toHaveBeenCalledWith(paths.steps.proveAnotherWay)
+        expect(render).not.toHaveBeenCalled()
+      })
     })
 
     it('lets the error propagate when getBanks rejects on page load', async () => {
       mockGetBanks.mockRejectedValue(new Error('DynamoDB timeout'))
-      const req = { axios: {} } as unknown as Request
+      const req = { axios: {} } as Request
       const res = { redirect: vi.fn(), render: vi.fn() } as unknown as Response
 
       await expect(get(req, res)).rejects.toThrow('DynamoDB timeout')
@@ -129,7 +122,7 @@ describe('choose-bank controller', () => {
         axios: {},
         body: { bankSelect: 'test-online-bank' },
         session: {}
-      } as unknown as Request
+      } as Request
 
       await post(req, { redirect } as unknown as Response)
 
@@ -145,13 +138,13 @@ describe('choose-bank controller', () => {
         axios: {},
         body: { bankSelect: 'test-offline-bank' },
         session: {}
-      } as unknown as Request
+      } as Request
 
       await post(req, { redirect } as unknown as Response)
 
       expect(req.session.bankID).toBe('test-offline-bank')
       expect(req.session.bankName).toBe('Test Offline Bank')
-      expect(redirect).toHaveBeenCalledWith(paths.failureSteps.bankUnavailable)
+      expect(redirect).toHaveBeenCalledWith(paths.failureSteps.bankProblem)
     })
 
     it('re-renders with errors when no bank is selected', async () => {
@@ -161,7 +154,7 @@ describe('choose-bank controller', () => {
         axios: {},
         body: { bankSelect: '' },
         session: {}
-      } as unknown as Request
+      } as Request
       const res = {
         locals: { translate: (key: string) => key },
         render
@@ -185,7 +178,7 @@ describe('choose-bank controller', () => {
         axios: {},
         body: { bankSelect: 'tampered-bank-value' },
         session: {}
-      } as unknown as Request
+      } as Request
       const res = {
         locals: { translate: (key: string) => key },
         render
@@ -208,7 +201,7 @@ describe('choose-bank controller', () => {
         axios: {},
         body: { bankSelect: 'test-online-bank' },
         session: {}
-      } as unknown as Request
+      } as Request
       const res = { redirect: vi.fn(), render: vi.fn() } as unknown as Response
 
       await expect(post(req, res)).rejects.toThrow('DynamoDB timeout')

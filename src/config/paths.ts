@@ -1,6 +1,6 @@
 const paths = {
   failureSteps: {
-    bankUnavailable: '/sorry-problem-bank',
+    bankProblem: '/sorry-problem-bank',
     couldNotConfirmIdentity: '/banking-no-match',
     useACurrentAccount: '/use-current-account'
   },

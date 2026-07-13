@@ -17,7 +17,7 @@ export interface WizardStepConfig<S extends WizardSessionSlice> {
   controller?: WizardStepController
 
   /**
-   * Mark step as a valid first stop when the wizard history is empty. At least one step in the wizard must be an entry point.
+   * Mark step as always accessible, regardless of history. At least one step in the wizard must be an entry point.
    */
   entryPoint?: boolean
 
@@ -59,7 +59,8 @@ export interface WizardStepConfig<S extends WizardSessionSlice> {
   prereq?: WizardPrereq<S>
 
   /**
-   * Clears the `history` when the user visits this step. Combine with `entryPoint: true` to restart the journey from this step.
+   * Clears the `history` after the user is admitted to this step. Combine with `entryPoint: true` if the step should also
+   * be reachable from a cold start.
    */
   reset?: boolean
 }
@@ -126,7 +127,8 @@ const createWizard = <S extends WizardSessionSlice>(
   //   - step is already in history, is not behind a noReturn barrier, and is not itself a noReturn step that has been left behind
   const isAccessible = (path: string, history: string[]): boolean => {
     if (!steps[path]) return false
-    if (history.length === 0) return steps[path].entryPoint === true
+    if (steps[path].entryPoint) return true
+    if (history.length === 0) return false
 
     const head = history.at(-1)!
     if (toArray(steps[head]?.next).includes(path)) return true
@@ -151,12 +153,14 @@ const createWizard = <S extends WizardSessionSlice>(
     const prereq = steps[path]?.prereq ?? null
 
     return (req: Request, res: Response, next: NextFunction) => {
-      let history = steps[path]?.reset ? [] : getHistory(req)
+      let history = getHistory(req)
 
       if (!isAccessible(path, history)) {
         res.redirect(fallback(history))
         return
       }
+
+      if (steps[path]?.reset) history = []
 
       if (prereq) {
         const session = req.session as unknown as Record<string, unknown>

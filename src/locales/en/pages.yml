@@ -51,3 +51,16 @@ chooseBank:
   errorMessage: Select a bank or building society
   notListedLinkText: My bank is not listed
   primaryButton: Continue
+
+bankProblem:
+  title: Sorry, there is a problem
+  content: Your bank or building society is unavailable.
+  radio:
+    legend: What would you like to do?
+    errorMessage: Select what you would like to do
+    one:
+      title: Try again to prove your identity using online banking
+      hint: You can try again using the same bank or building society or try a different one.
+    two:
+      title: Prove your identity another way
+  primaryButton: Continue
