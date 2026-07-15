@@ -40,7 +40,7 @@
     "type-check": "tsc --noEmit"
   },
   "devDependencies": {
-    "@aws-sdk/credential-provider-node": "3.972.45",
+    "@aws-sdk/credential-provider-node": "3.972.68",
     "@axe-core/playwright": "4.11.3",
     "@eslint/js": "10.0.1",
     "@playwright/test": "1.60.0",
