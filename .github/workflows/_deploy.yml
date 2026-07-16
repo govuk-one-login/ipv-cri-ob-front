@@ -22,10 +22,10 @@ permissions:
 
 jobs:
   test-image-build-and-push:
-    name: Build and push test image
+    name: Test image build and push
     runs-on: ubuntu-latest
     steps:
-      - uses: govuk-one-login/devplatform-upload-action-ecr@156ca69f253c67f2f71488d0d81f7a3d97657e43 # v1.6.1
+      - uses: govuk-one-login/devplatform-upload-action-ecr@d839fc3ead8c9d9f18f7a8cceb7ab4a3eab18a58 # v1.7.0
         with:
           role-to-assume-arn: ${{ secrets.role_arn }}
           build-and-push-image-only: true
@@ -33,14 +33,15 @@ jobs:
           dockerfile: test/browser/smoke.Dockerfile
           push-latest-tag: true
           container-sign-kms-key-arn: ${{ secrets.container_sign_kms_key }}
+          artifact-bucket-name: ''
 
   app-image-build-and-push:
-    name: Build and push app image
+    name: App image build and push
     needs: test-image-build-and-push
     runs-on: ubuntu-latest
     steps:
       - name: Push to ECR and upload SAM template to S3
-        uses: govuk-one-login/devplatform-upload-action-ecr@156ca69f253c67f2f71488d0d81f7a3d97657e43 # v1.6.1
+        uses: govuk-one-login/devplatform-upload-action-ecr@d839fc3ead8c9d9f18f7a8cceb7ab4a3eab18a58 # v1.7.0
         with:
           private-docker-registry: khw46367.live.dynatrace.com
           private-docker-login-username: khw46367
