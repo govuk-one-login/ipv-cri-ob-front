@@ -40,6 +40,9 @@
         ]
       })
     }}
+    {% if isMobile %}
+      {% set progressButtonTextOverride = "Continue to your bank’s app or website" %}
+    {% endif %}
     {% include "includes/progress-button.njk" %}
     <p class="govuk-body">
       <a href="#" class="govuk-link govuk-link--no-visited-state"

@@ -1,7 +1,7 @@
 import type { Router } from 'express'
 import type { SessionData } from 'express-session'
 
-import { steps, stubs } from '@src/controllers'
+import { failureSteps, steps, stubs } from '@src/controllers'
 import { detectDevice } from '@src/middleware'
 import { walkWizard } from '@src/utils/dev-tooling/wizard-diagram'
 import { alarmBadge, LOGGER } from '@src/utils/logger'
@@ -19,13 +19,13 @@ const openBankingJourney = createWizard<SessionData>('ob-journey', {
     controller: steps.startController
   },
   [paths.steps.chooseBank]: {
-    next: [paths.steps.consent, paths.failureSteps.bankUnavailable, paths.steps.proveAnotherWay],
+    next: [paths.steps.consent, paths.failureSteps.bankProblem, paths.steps.proveAnotherWay],
     controller: steps.chooseBankController
   },
   [paths.steps.consent]: {
-    next: [paths.steps.selectSignInMethod, paths.failureSteps.bankUnavailable, paths.stubs.webhook],
-    noReturn: true,
+    next: [paths.steps.selectSignInMethod, paths.failureSteps.bankProblem, paths.stubs.webhook],
     prereq: { keys: ['bankID'], redirectTo: paths.steps.chooseBank },
+    middleware: [detectDevice.middleware],
     controller: steps.consentController
   },
   [paths.steps.selectSignInMethod]: {
@@ -45,8 +45,10 @@ const openBankingJourney = createWizard<SessionData>('ob-journey', {
     entryPoint: true,
     noReturn: true
   },
-  [paths.failureSteps.bankUnavailable]: {
-    next: [paths.steps.chooseBank],
+  [paths.failureSteps.bankProblem]: {
+    next: [paths.steps.chooseBank, paths.steps.proveAnotherWay],
+    controller: failureSteps.bankProblemController,
+    reset: true,
     noReturn: true
   },
   [paths.failureSteps.useACurrentAccount]: {
@@ -76,7 +78,7 @@ const configure = (router: Router) => {
   if (appConfig.STUBS.ENABLED) LOGGER.warn(`${alarmBadge} stubs are enabled`)
   if (LOGGER.isLevelEnabled('debug')) walkWizard(openBankingJourney, LOGGER)
   router.use(paths.oauth2.index, commonExpress.routes.oauth2)
-  router.get(paths.index, detectDevice.middleware, (_req, res) => {
+  router.get(paths.index, (_req, res) => {
     res.redirect(paths.steps.start)
   })
   openBankingJourney.register(router)

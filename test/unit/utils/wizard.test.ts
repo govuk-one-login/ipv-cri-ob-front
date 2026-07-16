@@ -43,6 +43,11 @@ const buildJourney = (): WizardSteps<TestSession> => ({
     next: ['/choose'],
     noReturn: true,
     controller: { get: noop }
+  },
+  '/recover': {
+    next: ['/choose'],
+    reset: true,
+    controller: { get: noop }
   }
 })
 
@@ -102,6 +107,13 @@ describe('wizard', () => {
       expect(result.proceeded).toBe(false)
       expect(result.redirectedTo).toBe('/start')
     })
+
+    it('allows entryPoint steps even when history has stale content the step is not part of', () => {
+      const wizard = createWizard<TestSession>('the-great-journey', buildJourney())
+      const result = visit(wizard, '/start', sessionWithHistory(wizard, '/recover', '/choose'))
+      expect(result.proceeded).toBe(true)
+      expect(result.history).toEqual(['/start'])
+    })
   })
 
   describe('forward navigation', () => {
@@ -143,14 +155,22 @@ describe('wizard', () => {
       expect(result.history).toEqual(['/start', '/choose'])
     })
 
-    it('wipes history when visiting a reset step', () => {
+    it('wipes history when visiting a reset step from an accessible position', () => {
+      const wizard = createWizard<TestSession>('the-great-journey', buildJourney())
+      const result = visit(wizard, '/start', sessionWithHistory(wizard, '/start', '/choose'))
+      expect(result.proceeded).toBe(true)
+      expect(result.history).toEqual(['/start'])
+    })
+
+    it('rejects a non-entryPoint reset step that is blocked by a noReturn barrier', () => {
       const wizard = createWizard<TestSession>('the-great-journey', buildJourney())
       const result = visit(
         wizard,
-        '/start',
-        sessionWithHistory(wizard, '/start', '/choose', '/consent')
+        '/recover',
+        sessionWithHistory(wizard, '/recover', '/choose', '/consent')
       )
-      expect(result.history).toEqual(['/start'])
+      expect(result.proceeded).toBe(false)
+      expect(result.redirectedTo).toBe('/consent')
     })
   })
 

@@ -13,6 +13,10 @@ export class Bank {
   sandbox: boolean
   status: BankStatus
 
+  get isOffline(): boolean {
+    return this.status === 'Offline'
+  }
+
   constructor(
     bank_id: string,
     friendly_name: string,

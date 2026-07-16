@@ -10,6 +10,7 @@ import paths from '@src/config/paths'
 
 const renderPage = (req: Request, res: Response, context: Record<string, unknown> = {}) => {
   res.locals['selectedBankName'] = req.session.bankName
+  res.locals['isMobile'] = req.session.isMobile
   res.render('pages/steps/consent', {
     ...context
   })

@@ -1,0 +1,46 @@
+{% extends "layouts/base.njk" %}
+{% from "govuk/components/radios/macro.njk" import govukRadios %}
+{% from "govuk/components/button/macro.njk" import govukButton %}
+
+{% set pageTitle = translate("pages.bankProblem.title") %}
+
+{% block mainContent %}
+  <form method="post">
+    <input type="hidden" name="_csrf" value="{{ csrfToken }}" />
+    <h1 class="govuk-heading-l">{{ pageTitle }}</h1>
+    <p class="govuk-body">{{ translate("pages.bankProblem.content") }}</p>
+
+    {{
+      govukRadios({
+        idPrefix: "bank-problem",
+        name: "bankProblem",
+        fieldset: {
+          legend: {
+            text: translate("pages.bankProblem.radio.legend"),
+            isPageHeading: false,
+            classes: "govuk-fieldset__legend--m"
+          }
+        },
+        errorMessage: { text: formErrors["bankProblem"] } if formErrors["bankProblem"] else false,
+        items: [
+          {
+            value: "try-again",
+            text: translate("pages.bankProblem.radio.one.title"),
+            hint: {
+              text: translate("pages.bankProblem.radio.one.hint")
+            }
+          },
+          {
+            value: "prove-another-way",
+            text: translate("pages.bankProblem.radio.two.title")
+          }
+        ]
+      })
+    }}
+    {{
+      govukButton({
+        text: translate("pages.bankProblem.primaryButton")
+      })
+    }}
+  </form>
+{% endblock %}

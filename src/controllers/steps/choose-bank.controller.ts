@@ -60,8 +60,8 @@ const post = async (req: Request, res: Response) => {
   req.session.bankID = bankSelect
   req.session.bankName = selectedBank.friendlyName
 
-  if (selectedBank.status === 'Offline') {
-    res.redirect(paths.failureSteps.bankUnavailable)
+  if (selectedBank.isOffline) {
+    res.redirect(paths.failureSteps.bankProblem)
     return
   }
   res.redirect(paths.steps.consent)
