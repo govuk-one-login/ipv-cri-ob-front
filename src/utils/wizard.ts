@@ -6,8 +6,22 @@ export interface Wizard<S extends WizardSessionSlice> {
   steps: Readonly<WizardSteps<S>>
 }
 
+export interface WizardLogger {
+  warn: (msg: string) => void
+}
+
+export interface WizardOptions {
+  logger?: WizardLogger
+}
+
 export interface WizardSessionSlice {
   wizard?: Record<string, { history: string[] }>
+}
+
+const NOOP_LOGGER: WizardLogger = {
+  warn: () => {
+    /* if the consumer does not configure a logger, do nothing */
+  }
 }
 
 export interface WizardStepConfig<S extends WizardSessionSlice> {
@@ -96,16 +110,22 @@ const toArray = (next: string | string[] | undefined): string[] => {
 
 const isAbsoluteUrl = (url: string): boolean => /^https?:\/\//i.test(url)
 
+type Redirect = (...args: RedirectArgs) => void
+type RedirectArgs = [status: number, url: string] | [url: string]
+const ORIGINAL_REDIRECT = Symbol('originalRedirect') // symbol because this is going on res which we don't own
+type StashedResponse = Response & { [ORIGINAL_REDIRECT]?: Redirect }
+
 const createWizard = <S extends WizardSessionSlice>(
   name: string,
-  steps: WizardSteps<S>
+  steps: WizardSteps<S>,
+  { logger = NOOP_LOGGER }: WizardOptions = {}
 ): Wizard<S> => {
   const entryPoints = Object.entries(steps)
     .filter(([, config]) => config.entryPoint)
     .map(([path]) => path)
 
   if (entryPoints.length === 0) {
-    throw new Error(`Wizard "${name}" must declare at least one entryPoint step`)
+    throw new Error(`"${name}" must declare at least one entryPoint step`)
   }
 
   const getHistory = (req: Request): string[] => {
@@ -140,6 +160,14 @@ const createWizard = <S extends WizardSessionSlice>(
     return !history.slice(idx + 1).some((p) => steps[p]?.noReturn === true)
   }
 
+  // prevent steps with forward navigation to steps that are marked no return from surfacing a back link
+  const canReturnTo = (path: string, history: string[]): boolean => {
+    const idx = history.lastIndexOf(path)
+    if (idx === -1 || idx === history.length - 1) return false
+    if (steps[path]?.noReturn) return false
+    return !history.slice(idx + 1).some((p) => steps[p]?.noReturn === true)
+  }
+
   // navigating to a step already in history rewinds to it, navigating to a new step pushes it on
   const recordVisit = (path: string, history: string[]): string[] => {
     const idx = history.lastIndexOf(path)
@@ -156,17 +184,26 @@ const createWizard = <S extends WizardSessionSlice>(
       let history = getHistory(req)
 
       if (!isAccessible(path, history)) {
-        res.redirect(fallback(history))
+        const target = fallback(history)
+        logger.warn(
+          `[wizard:${name}] step "${path}" is not accessible from history [${history.join(' -> ') || '<empty>'}], redirecting to "${target}"`
+        )
+        res.redirect(target)
         return
       }
 
       if (steps[path]?.reset) history = []
 
       if (prereq) {
+        // TS can't relate the generic S to express-session's globally-merged SessionData, hence the unknown bridge
         const session = req.session as unknown as Record<string, unknown>
         for (const sessionKey of toArray(prereq.keys)) {
           if (!session[sessionKey]) {
-            res.redirect(prereq.redirectTo ?? fallback(history))
+            const target = prereq.redirectTo ?? fallback(history)
+            logger.warn(
+              `[wizard:${name}] step "${path}" prereq missing required session key "${sessionKey}", redirecting to "${target}"`
+            )
+            res.redirect(target)
             return
           }
         }
@@ -177,44 +214,68 @@ const createWizard = <S extends WizardSessionSlice>(
 
       const allowedNext = new Set(toArray(steps[path]?.next))
       const exitAllowed = steps[path]?.exit === true
-      type RedirectArgs = [status: number, url: string] | [url: string]
-      const originalRedirect = res.redirect.bind(res) as (...args: RedirectArgs) => void
-      const interceptable = res as { redirect: (...args: RedirectArgs) => void }
+      const originalRedirect = res.redirect.bind(res) as Redirect
+      const stashed = res as StashedResponse
+      stashed[ORIGINAL_REDIRECT] = originalRedirect
+      const interceptable = res as { redirect: Redirect }
       interceptable.redirect = (...args: RedirectArgs) => {
         const url = args.length === 1 ? args[0] : args[1]
         if (isAbsoluteUrl(url)) {
           if (!exitAllowed) {
-            throw new Error(
-              `Wizard step "${path}" attempted to redirect to absolute URL "${url}" but is not declared as exit: true`
+            next(
+              new Error(
+                `Step "${path}" attempted to redirect to absolute URL "${url}" but is not declared as exit: true`
+              )
             )
+            return
           }
         } else {
           const pathname = url.split('?')[0]
           if (!pathname || !allowedNext.has(pathname)) {
-            throw new Error(
-              `Wizard step "${path}" attempted to redirect to "${url}" but it is not in next`
+            next(
+              new Error(`Step "${path}" attempted to redirect to "${url}" but it is not in next`)
             )
+            return
           }
         }
         originalRedirect(...args)
       }
 
       const previousStep = history.length >= 2 ? history.at(-2) : null
-      const previousStepAccessible = !!(previousStep && isAccessible(previousStep, history))
-      res.locals['backLink'] = previousStepAccessible ? previousStep : null
+      res.locals['backLink'] =
+        previousStep && canReturnTo(previousStep, history) ? previousStep : null
       next()
     }
   }
+
+  // express 4 doesn't forward promise rejections to error middleware on its own
+  const forwardRejections =
+    (handler: RequestHandler): RequestHandler =>
+    (req, res, next) => {
+      Promise.resolve(handler(req, res, next)).catch(next)
+    }
 
   const register = (router: Router) => {
     for (const [stepPath, config] of Object.entries(steps)) {
       if (!config.controller) continue
       const middleware = config.middleware ?? []
-      router.get(stepPath, ...middleware, guard(stepPath), config.controller.get)
+      router.get(stepPath, ...middleware, guard(stepPath), forwardRejections(config.controller.get))
       if (config.controller.post) {
-        router.post(stepPath, ...middleware, guard(stepPath), config.controller.post)
+        router.post(
+          stepPath,
+          ...middleware,
+          guard(stepPath),
+          forwardRejections(config.controller.post)
+        )
       }
     }
+
+    // restore the unpatched res.redirect before delegating to downstream error handlers
+    router.use((err: unknown, _req: Request, res: Response, next: NextFunction) => {
+      const original = (res as StashedResponse)[ORIGINAL_REDIRECT]
+      if (original) (res as { redirect: Redirect }).redirect = original
+      next(err)
+    })
   }
 
   return { name, register, steps: steps }

@@ -32,16 +32,16 @@ export class ConsentRequest {
 
 export class ConsentResponse {
   // TODO: incomplete
-  bankConsentUrl: URL // where to send the user after consent has been granted on the CRI
+  bankConsentURL: URL // where to send the user after consent has been granted on the CRI
   bankID: string
   consentID: string
-  redirectUrl: URL // where to send the user back to after they have completed the online banking journey
+  redirectURL: URL // where to send the user back to after they have completed the online banking journey
 
   constructor(bank_consent_url: string, bank_id: string, consent_id: string, redirect_url: string) {
-    this.bankConsentUrl = new URL(bank_consent_url)
+    this.bankConsentURL = new URL(bank_consent_url)
     this.bankID = bank_id
     this.consentID = consent_id
-    this.redirectUrl = new URL(redirect_url)
+    this.redirectURL = new URL(redirect_url)
   }
 
   static fromData(data: ConsentResponseData) {

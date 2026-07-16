@@ -4,22 +4,35 @@ import type { TOptions } from 'i18next'
 
 export {}
 
-declare module 'express-session' {
-  interface SessionData {
-    bankID?: string
-    bankName?: string
-    consentID?: string
-    flash?: {
-      message: {
-        content?: string
-        header: string
-      }
-      type: 'error' | 'info' | 'success'
-    }[]
-    isMobile?: boolean
-    webhooksSent?: Record<string, { accountAssessment?: string; consent?: string }>
-    wizard: Record<string, { history: string[] }>
+interface AppSessionData {
+  bankConsentURL?: string
+  bankID?: string
+  bankName?: string
+  consentID?: string
+  flash?: {
+    message: {
+      content?: string
+      header: string
+    }
+    type: 'error' | 'info' | 'success'
+  }[]
+  isMobile?: boolean
+  webhooksSent?: Record<string, { accountAssessment?: string; consent?: string }>
+  wizard: Record<string, { history: string[] }>
+}
+
+interface OauthSessionData {
+  authParams?: {
+    authorization_code?: string
+    client_id?: string
+    redirect_uri?: string
+    state?: string
   }
+  tokenId?: string
+}
+
+declare module 'express-session' {
+  interface SessionData extends AppSessionData, OauthSessionData {}
 }
 
 declare global {

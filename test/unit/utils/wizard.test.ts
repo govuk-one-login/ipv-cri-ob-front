@@ -67,7 +67,7 @@ const visit = (wizard: Wizard<TestSession>, path: string, session: TestSession =
   const res = { locals, redirect: redirectMock } as unknown as Response
   const next = vi.fn()
 
-  const mockRouter = { get: vi.fn(), post: vi.fn() }
+  const mockRouter = { get: vi.fn(), post: vi.fn(), use: vi.fn() }
   wizard.register(mockRouter as unknown as Router)
 
   const chain = mockRouter.get.mock.calls.find((call) => call[0] === path)
@@ -81,7 +81,8 @@ const visit = (wizard: Wizard<TestSession>, path: string, session: TestSession =
     history: req.session.wizard?.[wizard.name]?.history,
     backLink: locals['backLink'] as null | string,
     res,
-    redirectMock
+    redirectMock,
+    nextMock: next
   }
 }
 
@@ -314,10 +315,14 @@ describe('wizard', () => {
       expect(result.redirectMock).toHaveBeenCalledWith('/consent')
     })
 
-    it('throws when a controller redirects to a path not declared as a next-step', () => {
+    it('passes an error to next when a controller redirects to a path not declared as a next-step', () => {
       const wizard = createWizard<TestSession>('the-great-journey', buildJourney())
       const result = visit(wizard, '/choose', sessionWithHistory(wizard, '/start'))
-      expect(() => result.res.redirect('/sign-in')).toThrow(/not in next/)
+      result.res.redirect('/sign-in')
+      expect(result.nextMock).toHaveBeenLastCalledWith(
+        expect.objectContaining({ message: expect.stringMatching(/not in next/) as string })
+      )
+      expect(result.redirectMock).not.toHaveBeenCalled()
     })
 
     it('allows redirects with a query string when the pathname matches', () => {
@@ -334,18 +339,26 @@ describe('wizard', () => {
       expect(result.redirectMock).toHaveBeenCalledWith(301, '/consent')
     })
 
-    it('throws on the (status, url) overload when the url is not a declared next-step', () => {
+    it('passes an error to next on the (status, url) overload when the url is not a declared next-step', () => {
       const wizard = createWizard<TestSession>('the-great-journey', buildJourney())
       const result = visit(wizard, '/choose', sessionWithHistory(wizard, '/start'))
-      expect(() => result.res.redirect(302, '/sign-in')).toThrow(/not in next/)
+      result.res.redirect(302, '/sign-in')
+      expect(result.nextMock).toHaveBeenLastCalledWith(
+        expect.objectContaining({ message: expect.stringMatching(/not in next/) as string })
+      )
+      expect(result.redirectMock).not.toHaveBeenCalled()
     })
 
-    it('throws when a step without `exit` redirects to an absolute URL', () => {
+    it('passes an error to next when a step without `exit` redirects to an absolute URL', () => {
       const wizard = createWizard<TestSession>('the-great-journey', buildJourney())
       const result = visit(wizard, '/choose', sessionWithHistory(wizard, '/start'))
-      expect(() => result.res.redirect('https://bank.example.com/auth')).toThrow(
-        /is not declared as exit: true/
+      result.res.redirect('https://bank.example.com/auth')
+      expect(result.nextMock).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          message: expect.stringMatching(/is not declared as exit: true/) as string
+        })
       )
+      expect(result.redirectMock).not.toHaveBeenCalled()
     })
   })
 
@@ -381,10 +394,14 @@ describe('wizard', () => {
       expect(result.redirectMock).toHaveBeenCalledWith('/unavailable')
     })
 
-    it('throws when an exit step redirects to a relative path not in `next`', () => {
+    it('passes an error to next when an exit step redirects to a relative path not in `next`', () => {
       const wizard = createWizard<TestSession>('the-great-journey', buildExitJourney())
       const result = visit(wizard, '/handoff', sessionWithHistory(wizard, '/start'))
-      expect(() => result.res.redirect('/some-other-step')).toThrow(/not in next/)
+      result.res.redirect('/some-other-step')
+      expect(result.nextMock).toHaveBeenLastCalledWith(
+        expect.objectContaining({ message: expect.stringMatching(/not in next/) as string })
+      )
+      expect(result.redirectMock).not.toHaveBeenCalled()
     })
 
     it('supports the (status, url) overload for an absolute URL', () => {
@@ -423,12 +440,18 @@ describe('wizard', () => {
       )
       expect(result.backLink).toBeNull()
     })
+
+    it('is null when the previous step is noReturn, even if the current step lists it as a forward next', () => {
+      const wizard = createWizard<TestSession>('the-great-journey', buildJourney())
+      const result = visit(wizard, '/choose', sessionWithHistory(wizard, '/unavailable'))
+      expect(result.backLink).toBeNull()
+    })
   })
 
   describe('router registration', () => {
     it('registers GET and POST handlers only for steps that declare them', () => {
       const wizard = createWizard<TestSession>('the-great-journey', buildJourney())
-      const router = { get: vi.fn(), post: vi.fn() }
+      const router = { get: vi.fn(), post: vi.fn(), use: vi.fn() }
       wizard.register(router as unknown as Router)
 
       const getCalls = router.get.mock.calls.map((calls) => calls[0] as string)
@@ -457,7 +480,7 @@ describe('wizard', () => {
         '/next': { next: '/middleware-only' },
         '/middleware-only': { middleware: [] }
       })
-      const router = { get: vi.fn(), post: vi.fn() }
+      const router = { get: vi.fn(), post: vi.fn(), use: vi.fn() }
       wizard.register(router as unknown as Router)
       const registered = router.get.mock.calls.map((c) => c[0] as string)
       expect(registered).toEqual(['/start'])
@@ -474,7 +497,7 @@ describe('wizard', () => {
         },
         '/forward-only': { controller: { get: noop } }
       })
-      const router = { get: vi.fn(), post: vi.fn() }
+      const router = { get: vi.fn(), post: vi.fn(), use: vi.fn() }
       wizard.register(router as unknown as Router)
       const call = router.get.mock.calls.find((calls) => calls[0] === '/gated')!
       expect(call[1]).toBe(stepMiddleware)
@@ -493,7 +516,7 @@ describe('wizard', () => {
         },
         '/forward-only': { controller: { get: noop } }
       })
-      const router = { get: vi.fn(), post: vi.fn() }
+      const router = { get: vi.fn(), post: vi.fn(), use: vi.fn() }
       wizard.register(router as unknown as Router)
       // chain shape: [path, ...middleware, guard, controller]
       const [middleware] = router.get.mock.calls
@@ -505,6 +528,31 @@ describe('wizard', () => {
       const res = { locals: {}, redirect } as unknown as Response
       middleware!(req, res, vi.fn() as NextFunction)
       expect(redirect).toHaveBeenCalledWith('/narnia')
+    })
+
+    it('lets downstream error handlers redirect outside the declared next-step set', () => {
+      const wizard = createWizard<TestSession>('the-great-journey', buildJourney())
+      const router = { get: vi.fn(), post: vi.fn(), use: vi.fn() }
+      wizard.register(router as unknown as Router)
+
+      const chain = router.get.mock.calls.find((c) => c[0] === '/choose')!
+      const guard = chain[chain.length - 2] as RequestHandler
+      // the wizard's contribution to the express error chain restores res.redirect and passes the error on
+      const [wizardErrorPrep] = router.use.mock.calls[0] as [
+        (err: unknown, req: Request, res: Response, next: NextFunction) => void
+      ]
+
+      const redirect = vi.fn()
+      const req = { session: sessionWithHistory(wizard, '/start') } as unknown as Request
+      const res = { locals: {}, redirect } as unknown as Response
+      const errorHandler: NextFunction = () => {
+        res.redirect('https://rp.example/cb?error=access_denied')
+      }
+
+      guard(req, res, vi.fn() as NextFunction)
+      wizardErrorPrep(new Error('oh no'), req, res, errorHandler)
+
+      expect(redirect).toHaveBeenCalledWith('https://rp.example/cb?error=access_denied')
     })
   })
 })
