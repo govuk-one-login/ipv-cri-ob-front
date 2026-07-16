@@ -64,3 +64,22 @@ bankProblem:
     two:
       title: Profi eich hunaniaeth mewn ffordd arall
   primaryButton: Parhau
+
+selectSignInMethod:
+  title: Sut rydych chi am fewngofnodi i'ch bancio ar-lein?
+  radio:
+    legend: Sut rydych chi am fewngofnodi i'ch bancio ar-lein?
+    errorMessage: Dewiswch sut rydych chi am fewngofnodi i'ch bancio ar-lein
+    one:
+      title: Defnyddiwch eich ffôn neu dabled i sganio cod QR
+      hint: Gallwch ddefnyddio ap neu wefan symudol eich banc i brofi pwy ydych chi.
+    two:
+      title: Arhoswch ar y ddyfais hon a defnyddiwch wefan eich banc
+      hint: Wrth i chi barhau, cewch eich anfon i wefan eich banc.
+  primaryButton: Parhau
+
+checkDetails:
+  title: Mae angen i ni gadarnhau eich manylion
+  content:
+    - Byddwn yn gwirio bod y manylion a roddoch i ni yn cyfateb i'r wybodaeth gan eich banc.
+    - Gall gymryd hyd at 10 eiliad i symud ymlaen i'r dudalen nesaf. Peidiwch ag ail-lwytho na chau'r dudalen hon.

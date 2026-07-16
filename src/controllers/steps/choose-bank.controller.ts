@@ -23,7 +23,7 @@ const renderPage = (
   })
 
 const get = async (req: Request, res: Response) => {
-  const banksList = await banksClient(req.axios).getBanks()
+  const banksList = await banksClient(req).getBanks()
   // This also covers empty banksList
   if (banksList.every((b) => b.status === 'Offline')) {
     res.redirect(paths.steps.proveAnotherWay)
@@ -44,7 +44,7 @@ const chooseBankSchema = (banksList: Bank[]) =>
 
 const post = async (req: Request, res: Response) => {
   // Second getBanks handles race condition where selected bank has changed status or been removed between page load and submission
-  const banksList = await banksClient(req.axios).getBanks()
+  const banksList = await banksClient(req).getBanks()
   const result = chooseBankSchema(banksList).safeParse(req.body)
   if (!result.success) {
     renderPage(

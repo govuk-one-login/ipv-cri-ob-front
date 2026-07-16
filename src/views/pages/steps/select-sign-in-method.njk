@@ -1,0 +1,49 @@
+{% extends "layouts/base.njk" %}
+{% from "govuk/components/radios/macro.njk" import govukRadios %}
+{% from "govuk/components/button/macro.njk" import govukButton %}
+
+{% set pageTitle = translate("pages.selectSignInMethod.title") %}
+
+{% block mainContent %}
+  <form method="post">
+    <input type="hidden" name="_csrf" value="{{ csrfToken }}" />
+
+    {{
+      govukRadios({
+        idPrefix: "select-sign-in-method",
+        name: "selectSignInMethod",
+        fieldset: {
+          legend: {
+            text: translate("pages.selectSignInMethod.radio.legend"),
+            isPageHeading: true,
+            classes: "govuk-fieldset__legend--l"
+          }
+        },
+        errorMessage: { text: formErrors["selectSignInMethod"] } if formErrors["selectSignInMethod"] else false,
+        items: [
+          {
+            value: "use-different-device",
+            text: translate("pages.selectSignInMethod.radio.one.title"),
+            hint: {
+              text: translate("pages.selectSignInMethod.radio.one.hint")
+            }
+          },
+          {
+            value: "stay-on-current-device",
+            text: translate("pages.selectSignInMethod.radio.two.title"),
+            hint: {
+              text: translate("pages.selectSignInMethod.radio.two.hint")
+            }
+          }
+        ]
+      })
+    }}
+    <div class="govuk-button-group">
+      {{
+        govukButton({
+          text: translate("pages.selectSignInMethod.primaryButton")
+        })
+      }}
+    </div>
+  </form>
+{% endblock %}

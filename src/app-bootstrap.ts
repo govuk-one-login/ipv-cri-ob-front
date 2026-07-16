@@ -8,7 +8,7 @@ import {
   setFrontendUiTranslations
 } from '@govuk-one-login/frontend-ui'
 import { frontendVitalSignsInitFromApp } from '@govuk-one-login/frontend-vital-signs'
-import { errorHandler, flash } from '@src/middleware'
+import { flash } from '@src/middleware'
 import { createViteServer, setupDevServer } from '@src/utils/dev-tooling/dev-server'
 
 import commonExpress from '@govuk-one-login/di-ipv-cri-common-express'
@@ -88,9 +88,7 @@ export const createApp = async (): Promise<{ app: Express; router: Router }> => 
 
   router.use(flash.middleware)
   routes.configure(router)
-  // error handling must be last
   router.use(commonExpress.lib.errorHandling.redirectAsErrorToCallback)
-  router.use(errorHandler.middleware)
 
   return { app, router }
 }

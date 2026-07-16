@@ -5,13 +5,12 @@ import { describe, expect, it, vi } from 'vitest'
 
 import paths from '@src/config/paths'
 
-vi.mock('@src/config/app', () => ({
-  default: { STUBS: { ENABLED: false } }
-}))
+const BANK_CONSENT_URL = new URL('https://bank.example/consent/abc')
 
 vi.mock('@src/clients/consents.client', () => ({
   consentsClient: () => ({
     createConsent: vi.fn().mockResolvedValue({
+      bankConsentURL: BANK_CONSENT_URL,
       bankID: '1337-bank-id',
       consentID: '0451-consent-id'
     } satisfies Partial<ConsentResponse>)
@@ -19,6 +18,14 @@ vi.mock('@src/clients/consents.client', () => ({
 }))
 
 const { get, post } = await import('@src/controllers/steps/consent.controller')
+
+const buildReq = (overrides: Partial<Request['session']> = {}): Request =>
+  ({
+    axios: vi.fn(),
+    body: { consent: 'consent' },
+    session: { bankID: 'test-bank-1', ...overrides },
+    sessionID: 'test-session-id'
+  }) as unknown as Request
 
 describe('consent controller', () => {
   describe('get', () => {
@@ -30,26 +37,21 @@ describe('consent controller', () => {
       get(req, res, vi.fn() as NextFunction)
 
       expect(res.locals['selectedBankName']).toBe('Test Bank One')
-      expect(render).toHaveBeenCalledWith('pages/steps/consent', expect.anything())
+      expect(render).toHaveBeenCalledWith('pages/steps/consent', {
+        proveAnotherWay: paths.steps.proveAnotherWay
+      })
     })
   })
 
   describe('post', () => {
-    it('stores the consentID from the API response on the session', async () => {
-      const req = {
-        axios: vi.fn(),
-        body: { consent: 'consent' },
-        session: { bankID: 'test-bank-1' },
-        sessionID: 'test-session-id'
-      } as unknown as Request
-      const res = {
-        redirect: vi.fn(),
-        status: vi.fn().mockReturnValue({ json: vi.fn() })
-      } as unknown as Response
+    it('stores the consentID and bankConsentURL from the API response on the session', async () => {
+      const req = buildReq()
+      const res = { redirect: vi.fn() } as unknown as Response
 
       await post(req, res)
 
       expect(req.session.consentID).toBe('0451-consent-id')
+      expect(req.session.bankConsentURL).toBe(BANK_CONSENT_URL.toString())
     })
 
     it('re-renders with errors when consent is not given', async () => {
@@ -76,42 +78,34 @@ describe('consent controller', () => {
       )
     })
 
-    it('redirects to the webhook stub when stubs are enabled', async () => {
-      vi.resetModules()
-      vi.doMock('@src/config/app', () => ({ default: { STUBS: { ENABLED: true } } }))
-
-      const { post } = await import('@src/controllers/steps/consent.controller')
+    it('redirects to the bank consent url when the session is flagged as mobile', async () => {
+      const req = buildReq({ isMobile: true })
       const redirect = vi.fn()
-      const req = {
-        axios: {},
-        body: { consent: 'consent' },
-        session: { bankID: 'test-bank-1' },
-        sessionID: 'test-session-id'
-      } as unknown as Request
-      const res = {
-        redirect
-      } as unknown as Response
+      const res = { redirect } as unknown as Response
 
       await post(req, res)
 
-      expect(redirect).toHaveBeenCalledWith(paths.stubs.webhook)
+      expect(redirect).toHaveBeenCalledWith(BANK_CONSENT_URL.toString())
     })
 
-    it('returns 501 when stubs are not enabled', async () => {
-      const status = vi.fn().mockReturnValue({ json: vi.fn() })
-      const req = {
-        axios: vi.fn(),
-        body: { consent: 'consent' },
-        session: { bankID: 'test-bank-1' },
-        sessionID: 'test-session-id'
-      } as unknown as Request
-      const res = {
-        status
-      } as unknown as Response
+    it('redirects to the select sign-in method step when the session is not flagged as mobile', async () => {
+      const req = buildReq({ isMobile: false })
+      const redirect = vi.fn()
+      const res = { redirect } as unknown as Response
 
       await post(req, res)
 
-      expect(status).toHaveBeenCalledWith(501)
+      expect(redirect).toHaveBeenCalledWith(paths.steps.selectSignInMethod)
+    })
+
+    it('redirects to the select sign-in method step when isMobile is not set on the session', async () => {
+      const req = buildReq()
+      const redirect = vi.fn()
+      const res = { redirect } as unknown as Response
+
+      await post(req, res)
+
+      expect(redirect).toHaveBeenCalledWith(paths.steps.selectSignInMethod)
     })
   })
 })

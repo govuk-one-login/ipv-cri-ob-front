@@ -18,7 +18,7 @@
         },
         errorMessage: { text: formErrors["bankSelect"] } if formErrors["bankSelect"] else false,
         items: banksList,
-        classes: "govuk-!-width-one-half"
+        classes: "govuk-!-width-two-thirds"
       })
     }}
     <p class="govuk-body">
@@ -29,6 +29,6 @@
         >{{ translate("pages.chooseBank.notListedLinkText") }}
       </a>
     </p>
-    {% include "includes/progress-button.njk" %}
+    <div class="govuk-button-group">{% include "includes/progress-button.njk" %}</div>
   </form>
 {% endblock %}

@@ -21,8 +21,8 @@ describe('ConsentResponse', () => {
 
       expect(response.bankID).toBe('test-bank-1')
       expect(response.consentID).toBe('test-consent-id')
-      expect(response.bankConsentUrl).toEqual(new URL('https://bank.example/consent'))
-      expect(response.redirectUrl).toEqual(new URL('https://redirect.example/return'))
+      expect(response.bankConsentURL).toEqual(new URL('https://bank.example/consent'))
+      expect(response.redirectURL).toEqual(new URL('https://redirect.example/return'))
     })
   })
 })

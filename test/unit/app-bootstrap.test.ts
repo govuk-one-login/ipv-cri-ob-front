@@ -33,7 +33,6 @@ vi.mock('@govuk-one-login/frontend-ui', () => ({
 }))
 vi.mock('@govuk-one-login/frontend-vital-signs', () => ({ frontendVitalSignsInitFromApp: vi.fn() }))
 vi.mock('@src/middleware', () => ({
-  errorHandler: { middleware: vi.fn() },
   flash: { middleware: vi.fn() }
 }))
 vi.mock('@src/utils/session', () => ({ default: vi.fn().mockResolvedValue({}) }))
@@ -72,7 +71,7 @@ describe('createApp', () => {
 
   it('configures the router in the correct order', async () => {
     const { default: commonExpress } = await import('@govuk-one-login/di-ipv-cri-common-express')
-    const { errorHandler, flash } = await import('@src/middleware')
+    const { flash } = await import('@src/middleware')
     const routes = await import('@src/config/routes')
     const { createApp } = await import('@src/app-bootstrap')
     await createApp()
@@ -86,8 +85,7 @@ describe('createApp', () => {
       2,
       commonExpress.lib.errorHandling.redirectAsErrorToCallback
     )
-    expect(router.use).toHaveBeenNthCalledWith(3, errorHandler.middleware)
-    expect(router.use).toHaveBeenCalledTimes(3)
+    expect(router.use).toHaveBeenCalledTimes(2)
 
     const flashCallOrder = vi.mocked(router.use).mock.invocationCallOrder[0]!
     const routeConfigurationCallOrder = vi.mocked(routes.configure).mock.invocationCallOrder[0]!
@@ -95,6 +93,20 @@ describe('createApp', () => {
 
     expect(flashCallOrder).toBeLessThan(routeConfigurationCallOrder)
     expect(redirectAsErrorCallOrder).toBeGreaterThan(routeConfigurationCallOrder)
+  })
+
+  it('registers redirectAsErrorToCallback as the final router middleware', async () => {
+    const { default: commonExpress } = await import('@govuk-one-login/di-ipv-cri-common-express')
+    const { createApp } = await import('@src/app-bootstrap')
+    await createApp()
+
+    const { router } = vi.mocked(commonExpress.bootstrap.setup).mock.results[0]!.value as {
+      router: { use: ReturnType<typeof vi.fn> }
+    }
+
+    expect(router.use).toHaveBeenLastCalledWith(
+      commonExpress.lib.errorHandling.redirectAsErrorToCallback
+    )
   })
 
   it('passes the csrf secret from app config to bootstrap setup', async () => {

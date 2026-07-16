@@ -92,21 +92,23 @@ describe('webhook stub controller', () => {
 
       await post(req, { redirect } as unknown as Response, vi.fn() as NextFunction)
 
-      expect(redirect).toHaveBeenCalledWith(paths.index)
+      expect(redirect).toHaveBeenCalledWith(paths.steps.checkDetailsHolding)
     })
 
     it.each([
       {
         body: { consent: 'Authorized' },
-        expectedRedirect: `${paths.stubs.webhook}?consent=Authorized`
+        expectedRedirect: `${paths.stubs.webhook}?consent=Authorized`,
+        webhookType: 'Consent'
       },
       {
         body: { accountAssessment: 'Valid' },
-        expectedRedirect: `${paths.stubs.webhook}?accountAssessment=Valid`
+        expectedRedirect: `${paths.stubs.webhook}?accountAssessment=Valid`,
+        webhookType: 'AccountAssessment'
       }
     ])(
       'sends the webhook and redirects with the outcome as a query param',
-      async ({ body, expectedRedirect }) => {
+      async ({ body, expectedRedirect, webhookType }) => {
         const redirect = vi.fn()
         const req = {
           axios: vi.fn(),
@@ -119,7 +121,11 @@ describe('webhook stub controller', () => {
 
         expect(mockSend).toHaveBeenCalled()
         expect(mockLogger.child).toHaveBeenCalledWith(
-          expect.objectContaining({ component: 'webhook-stub', consent_id: 'test-consent-id' })
+          expect.objectContaining({
+            component: 'ecospend-webhook-stub',
+            consent_id: 'test-consent-id',
+            webhook_type: webhookType
+          })
         )
         expect(mockChildLogger.info).toHaveBeenCalledWith('webhook send success')
         expect(redirect).toHaveBeenCalledWith(expectedRedirect)
