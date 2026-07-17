@@ -14,6 +14,7 @@ const stepTags = (path: string, config: WizardStepConfig<WizardSessionSlice>): s
   if (config.entryPoint) tags.push('\x1b[92mentry\x1b[0m')
   if (config.reset) tags.push('\x1b[95mreset\x1b[0m')
   if (config.noReturn) tags.push('no-return')
+  if (config.exit) tags.push('\x1b[93mexit\x1b[0m')
   if (config.prereq) {
     const keys = Array.isArray(config.prereq.keys) ? config.prereq.keys : [config.prereq.keys]
     tags.push(`\x1b[38;5;208mprereq:${keys.join(',')}\x1b[0m`)
@@ -60,7 +61,7 @@ const walkWizard = <S extends WizardSessionSlice>(
   logger: { debug: (message: string) => void }
 ) => {
   const lines = buildView(wizard.steps as WizardSteps<WizardSessionSlice>)
-  logger.debug(`${wizard.name} wizard:\n\x1b[0m${lines.join('\n')}`)
+  logger.debug(`[wizard:${wizard.name}]\n\x1b[0m${lines.join('\n')}`)
 }
 
 export { walkWizard }

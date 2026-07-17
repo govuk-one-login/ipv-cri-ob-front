@@ -13,10 +13,10 @@ Frontend code for the Open Banking CRI
 - DynamoDB
 - Vite/Vitest
 - Playwright
-- Prettier/Eslint
+- Oxfmt/Oxlint
 
 This project uses `perfectionist` and makes a number of opinionated choices on how code should be formatted and
-organised. See the `eslint.config.ts` for more details.
+organised. See the `oxlint.config.ts` for more details.
 
 DynamoDB is required in all environments for session storage.
 
@@ -33,7 +33,7 @@ npm ci
 
 Vite handles all static asset bundling for you so there is no additional build step.
 
-Copy the `.env.example`, some env vars are pre-configured for you (`REBRAND_ENABLED`, `DEPLOYMENT_ENV`, `LOG_LEVEL`, `USE_PINO_LOGGER` and
+Copy the `.env.example`, some env vars are pre-configured for you (`API_BASE_URL`,`MAY_2025_REBRAND_ENABLED`, `DEPLOYMENT_ENV`, `LOG_LEVEL`, `USE_PINO_LOGGER` and
 `LOCAL_DYNAMO_ENDPOINT_OVERRIDE`).
 
 ```shell
@@ -47,6 +47,8 @@ npm run dev
 ```
 
 Vite will also spawn the required local dev containers defined in the project root `docker-compose.yml`.
+
+The default behaviour for local dev is to spawn a WireMock container with a stubbed backend so that you can interact with the CRI without needing a real API available.
 
 > [!IMPORTANT]
 > A running Docker socket must be available on your system.

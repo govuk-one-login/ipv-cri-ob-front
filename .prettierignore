@@ -1,6 +1,0 @@
-*.md
-dist
-deploy
-node_modules
-.features-gen
-playwright-report-mobile

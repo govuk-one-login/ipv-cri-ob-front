@@ -43,7 +43,7 @@ const accountAssessmentOutcomeOptions = toOptions(accountAssessmentOutcomeText)
 const withSelected = <T>(
   options: OutcomeOption<T>[],
   selected: unknown
-): (OutcomeOption<T> & { selected: boolean })[] =>
+): ({ selected: boolean } & OutcomeOption<T>)[] =>
   options.map((o) => ({ ...o, selected: o.value === selected }))
 
 const get = (req: Request, res: Response, _next: NextFunction) => {
@@ -77,7 +77,7 @@ const post = async (req: Request, res: Response, _next: NextFunction) => {
   const consentResult = ConsentBodySchema.safeParse(req.body)
   const accountAssessmentResult = AccountAssessmentBodySchema.safeParse(req.body)
 
-  let formVals: undefined | { eventValue: EventValue; recordType: RecordType }
+  let formVals: { eventValue: EventValue; recordType: RecordType } | undefined
   if (consentResult.success) {
     formVals = { eventValue: consentResult.data.consent, recordType: RecordType.CONSENT }
   } else if (accountAssessmentResult.success) {

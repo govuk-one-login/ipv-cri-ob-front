@@ -18,7 +18,7 @@ const createViteServer = async (): Promise<ViteDevServer> => {
   })
 }
 
-const setupDevServer = (app: Express, vite: ViteDevServer): void => {
+const setupDevServer = (app: Express): void => {
   const sessionId = crypto.randomUUID()
 
   app.locals['devServer'] = true
@@ -32,20 +32,27 @@ const setupDevServer = (app: Express, vite: ViteDevServer): void => {
     })
   })
 
-  app.use(vite.middlewares)
-  LOGGER.info(`[vite] local dev middlewares loaded`)
+  let viteInstance: null | ViteDevServer = null
+  const vitePromise = createViteServer().then((vite) => {
+    vite.watcher.add('src/**/*.{njk,yml,json}')
+    vite.watcher.on('change', async (file) => {
+      if (file.endsWith('.yml') && commonExpress.lib.i18n.i18next.isInitialized) {
+        await commonExpress.lib.i18n.i18next.reloadResources(['en', 'cy'])
+      }
+      if (file.endsWith('.njk') || file.endsWith('.yml') || file.endsWith('.json')) {
+        LOGGER.debug(`[vite] reloading: ${file}`)
+        vite.hot.send({ path: '*', type: 'full-reload' })
+      }
+    })
+    viteInstance = vite
+    LOGGER.info('[vite] ready')
+    return vite
+  })
 
-  vite.watcher.add('src/**/*.{njk,yml,json}')
-  // eslint-disable-next-line @typescript-eslint/no-misused-promises
-  vite.watcher.on('change', async (file) => {
-    if (file.endsWith('.yml') && commonExpress.lib.i18n.i18next.isInitialized) {
-      await commonExpress.lib.i18n.i18next.reloadResources(['en', 'cy'])
-    }
-    if (file.endsWith('.njk') || file.endsWith('.yml') || file.endsWith('.json')) {
-      LOGGER.debug(`[vite] reloading: ${file}`)
-      vite.hot.send({ path: '*', type: 'full-reload' })
-    }
+  app.use((req, res, next) => {
+    if (viteInstance) return viteInstance.middlewares(req, res, next)
+    void vitePromise.then((vite) => vite.middlewares(req, res, next))
   })
 }
 
-export { createViteServer, setupDevServer }
+export { setupDevServer }

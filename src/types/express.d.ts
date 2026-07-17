@@ -38,7 +38,7 @@ declare module 'express-session' {
 declare global {
   namespace Express {
     interface Locals {
-      translate: (key: string, options?: TOptions & { default?: string }) => string
+      translate: (key: string, options?: { default?: string } & TOptions) => string
     }
     interface Request {
       axios: AxiosInstance

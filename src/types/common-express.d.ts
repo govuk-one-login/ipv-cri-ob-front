@@ -35,7 +35,6 @@ declare module '@govuk-one-login/di-ipv-cri-common-express' {
      * configures both the 404 and generic error handlers.
      */
     errors?:
-      | false
       | {
           /** template for unhandled errors. default: 'errors/error' */
           defaultErrorView?: string
@@ -44,6 +43,7 @@ declare module '@govuk-one-login/di-ipv-cri-common-express' {
           /** URL to redirect to for MISSING_PREREQ errors. default: '/' */
           startUrl?: ((err: Error, req: Express.Request, res: Express.Response) => string) | string
         }
+      | false
     /** helmet security headers config */
     helmet?: HelmetOptions
     host?: false
@@ -70,7 +70,6 @@ declare module '@govuk-one-login/di-ipv-cri-common-express' {
      * default: { maxAge: 86400000 } (1 day)
      */
     public?:
-      | false
       | {
           /** dotfile handling: 'allow', 'deny', or 'ignore'. default: 'ignore' */
           dotfiles?: 'allow' | 'deny' | 'ignore'
@@ -81,6 +80,7 @@ declare module '@govuk-one-login/di-ipv-cri-common-express' {
           /** browser cache max-age in milliseconds or a string accepted by the ms module. default: 86400000 (1 day) */
           maxAge?: number | string
         }
+      | false
     /** directories to serve as static files under urls.public */
     publicDirs?: string[]
     /** directories to serve as static files under urls.publicImages */
@@ -89,13 +89,13 @@ declare module '@govuk-one-login/di-ipv-cri-common-express' {
     /** enable request/response logging middleware. default: true */
     requestLogging?: boolean
     session?:
-      | false
       | {
           cookieName: string
           cookieOptions: { maxAge: number }
           secret: string
           sessionStore: DynamoDBStore
         }
+      | false
     /** trust the X-Forwarded-For proxy header. default: true */
     trustProxy?: boolean
     /** URL path prefixes used throughout the app */
