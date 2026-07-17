@@ -44,7 +44,7 @@ export const createApp = async (): Promise<{ app: Express; router: Router }> => 
       if (appConfig.APP.NODE_ENV === 'production')
         frontendVitalSignsInitFromApp(app, vitalSignsConfig)
       app.use(commonExpress.lib.headers)
-      app.use(commonExpress.lib.axios)
+      app.use(commonExpress.lib.customFetch.customFetchMiddleware)
     },
     overloadProtection: overloadProtectionConfig,
     publicDirs: [path.resolve(import.meta.dirname, 'public')],

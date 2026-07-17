@@ -1,7 +1,6 @@
 declare module '@govuk-one-login/di-ipv-cri-common-express' {
   import type { OverloadProtectionConfig } from '@src/config/overload-protection'
   import type { DynamoDBStore } from 'connect-dynamodb'
-  import type { Request, Response } from 'express'
   import type { ErrorRequestHandler, Express, RequestHandler, Router } from 'express'
   import type { HelmetOptions } from 'helmet'
   import type { i18n } from 'i18next'
@@ -113,6 +112,20 @@ declare module '@govuk-one-login/di-ipv-cri-common-express' {
     views?: string[]
   }
 
+  /** path must start with '/'. resolves to the raw Response; rejects with CustomFetchHttpError on non-2xx. */
+  export type CustomFetch = (path: string, options?: CustomFetchOptions) => Promise<Response>
+
+  /**
+   * fetch(2)-compatible options with two extras handled by customFetch:
+   * - `jsonBody` is JSON-stringified into `body` with Content-Type: application/json
+   * - `timeoutMs` becomes an AbortSignal.timeout
+   */
+  export interface CustomFetchOptions extends Omit<RequestInit, 'body'> {
+    body?: RequestInit['body']
+    jsonBody?: unknown
+    timeoutMs?: number
+  }
+
   interface BootstrapSetupResult {
     app: Express
     /** router mounted after session, wrapped in overload protection */
@@ -129,7 +142,11 @@ declare module '@govuk-one-login/di-ipv-cri-common-express' {
       setup: (options: BootstrapSetupOptions) => BootstrapSetupResult
     }
     lib: {
-      axios: RequestHandler // attaches a configured axios instance to req.axios, using API.BASE_URL from app settings
+      customFetch: {
+        CustomFetchHttpError: typeof CustomFetchHttpError
+        /** attaches a configured fetch instance to req.customFetch, using API.BASE_URL from app settings */
+        customFetchMiddleware: RequestHandler
+      }
       errorHandling: {
         redirectAsErrorToCallback: ErrorRequestHandler
       }
@@ -151,6 +168,13 @@ declare module '@govuk-one-login/di-ipv-cri-common-express' {
     routes: {
       oauth2: Router
     }
+  }
+
+  export class CustomFetchHttpError extends Error {
+    body: string
+    code: number
+    headers: Response['headers']
+    constructor(response: Response, bodyString: string)
   }
 
   const commonExpress: CommonExpress

@@ -1,4 +1,3 @@
-import type { AxiosError } from 'axios'
 import type { NextFunction, Request, Response } from 'express'
 import type { ZodSafeParseResult } from 'zod'
 
@@ -15,7 +14,10 @@ import { LOGGER } from '@src/utils/logger'
 import { randomUUID } from 'node:crypto'
 import { z } from 'zod'
 
+import commonExpress from '@govuk-one-login/di-ipv-cri-common-express'
 import paths from '@src/config/paths'
+
+const { CustomFetchHttpError } = commonExpress.lib.customFetch
 
 interface OutcomeOption<T = never> {
   text: string
@@ -123,10 +125,14 @@ const post = async (req: Request, res: Response, _next: NextFunction) => {
         type: 'success'
       })
     })
-    .catch((err: AxiosError) => {
-      WEBHOOK_LOGGER.error({ code: err.code }, 'webhook send failure')
+    .catch((err: Error) => {
+      const status = err instanceof CustomFetchHttpError ? err.code : undefined
+      WEBHOOK_LOGGER.error({ status }, 'webhook send failure')
       addFlash(req, {
-        message: { content: err.code ?? err.message, header: 'Webhook send failure' },
+        message: {
+          content: status ? `HTTP ${status}` : err.message,
+          header: 'Webhook send failure'
+        },
         type: 'error'
       })
     })
