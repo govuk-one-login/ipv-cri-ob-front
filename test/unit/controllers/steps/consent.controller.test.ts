@@ -1,29 +1,35 @@
 import type { ConsentResponse } from '@src/models/consent.class'
 import type { NextFunction, Request, Response } from 'express'
 
-import { describe, expect, it, vi } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import paths from '@src/config/paths'
 
 const BANK_CONSENT_URL = new URL('https://bank.example/consent/abc')
 
+const createConsent = vi.hoisted(() => vi.fn())
+
 vi.mock('@src/clients/consents.client', () => ({
-  consentsClient: () => ({
-    createConsent: vi.fn().mockResolvedValue({
-      bankConsentURL: BANK_CONSENT_URL,
-      bankID: '1337-bank-id',
-      consentID: '0451-consent-id'
-    } satisfies Partial<ConsentResponse>)
-  })
+  consentsClient: () => ({ createConsent })
 }))
+
+beforeEach(() => {
+  createConsent.mockReset().mockResolvedValue({
+    bankConsentURL: BANK_CONSENT_URL,
+    bankID: '1337-bank-id',
+    consentID: '0451-consent-id'
+  } satisfies Partial<ConsentResponse>)
+})
 
 const { get, post } = await import('@src/controllers/steps/consent.controller')
 
-const buildReq = (overrides: Partial<Request['session']> = {}): Request =>
+const buildReq = (
+  overrides: { body?: Record<string, unknown>; session?: Partial<Request['session']> } = {}
+): Request =>
   ({
     axios: vi.fn(),
-    body: { consent: 'consent' },
-    session: { bankID: 'test-bank-1', ...overrides },
+    body: overrides.body ?? { consent: 'consent' },
+    session: { bankID: 'test-bank-1', ...overrides.session },
     sessionID: 'test-session-id'
   }) as unknown as Request
 
@@ -56,12 +62,9 @@ describe('consent controller', () => {
 
     it('re-renders with errors when consent is not given', async () => {
       const render = vi.fn()
-      const req = {
-        axios: vi.fn(),
-        body: {},
-        session: { bankID: 'test-bank-1' },
-        sessionID: 'test-session-id'
-      } as unknown as Request
+      const req = buildReq({
+        body: {}
+      })
       const res = {
         locals: { translate: (key: string) => key },
         render
@@ -79,7 +82,7 @@ describe('consent controller', () => {
     })
 
     it('redirects to the bank consent url when the session is flagged as mobile', async () => {
-      const req = buildReq({ isMobile: true })
+      const req = buildReq({ session: { isMobile: true } })
       const redirect = vi.fn()
       const res = { redirect } as unknown as Response
 
@@ -89,7 +92,7 @@ describe('consent controller', () => {
     })
 
     it('redirects to the select sign-in method step when the session is not flagged as mobile', async () => {
-      const req = buildReq({ isMobile: false })
+      const req = buildReq({ session: { isMobile: false } })
       const redirect = vi.fn()
       const res = { redirect } as unknown as Response
 
@@ -106,6 +109,16 @@ describe('consent controller', () => {
       await post(req, res)
 
       expect(redirect).toHaveBeenCalledWith(paths.steps.selectSignInMethod)
+    })
+
+    it('propagates errors from the consents client', async () => {
+      createConsent.mockRejectedValueOnce(new Error('consent client problemo'))
+      const req = buildReq()
+      const redirect = vi.fn()
+      const res = { redirect } as unknown as Response
+
+      await expect(post(req, res)).rejects.toThrow('consent client problemo')
+      expect(redirect).not.toHaveBeenCalled()
     })
   })
 })

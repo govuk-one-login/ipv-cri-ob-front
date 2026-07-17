@@ -44,6 +44,7 @@ consent:
     itemText: I agree to my bank account information being shared with Ecospend
     errorMessage: You must agree to share your bank account information to continue
   primaryButton: Continue
+  primaryButtonAlt: Continue to your bank’s app or website
   secondaryLink: Prove your identity another way
 
 chooseBank:
