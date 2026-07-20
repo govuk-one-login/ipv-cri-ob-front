@@ -40,7 +40,7 @@ describe('choose-bank controller', () => {
     it('renders the page with the banks list', async () => {
       mockGetBanks.mockResolvedValue([onlineBank, offlineBank])
       const render = vi.fn()
-      const req = { axios: {} } as Request
+      const req = { customFetch: {} } as Request
 
       await get(req, { render } as unknown as Response)
 
@@ -60,7 +60,7 @@ describe('choose-bank controller', () => {
     it('renders the page when there is only one online bank', async () => {
       mockGetBanks.mockResolvedValue([onlineBank])
       const render = vi.fn()
-      const req = { axios: {} } as Request
+      const req = { customFetch: {} } as Request
 
       await get(req, { render } as unknown as Response)
 
@@ -75,7 +75,7 @@ describe('choose-bank controller', () => {
     describe('redirect behaviour', () => {
       const redirect = vi.fn()
       const render = vi.fn()
-      const req = { axios: {} } as Request
+      const req = { customFetch: {} } as Request
 
       it('redirects to prove-another-way when all banks are offline', async () => {
         const anotherOfflineBank = Bank.fromData({
@@ -107,7 +107,7 @@ describe('choose-bank controller', () => {
 
     it('lets the error propagate when getBanks rejects on page load', async () => {
       mockGetBanks.mockRejectedValue(new Error('DynamoDB timeout'))
-      const req = { axios: {} } as Request
+      const req = { customFetch: {} } as Request
       const res = { redirect: vi.fn(), render: vi.fn() } as unknown as Response
 
       await expect(get(req, res)).rejects.toThrow('DynamoDB timeout')
@@ -119,7 +119,7 @@ describe('choose-bank controller', () => {
       mockGetBanks.mockResolvedValue([onlineBank, offlineBank])
       const redirect = vi.fn()
       const req = {
-        axios: {},
+        customFetch: {},
         body: { bankSelect: 'test-online-bank' },
         session: {}
       } as Request
@@ -135,7 +135,7 @@ describe('choose-bank controller', () => {
       mockGetBanks.mockResolvedValue([onlineBank, offlineBank])
       const redirect = vi.fn()
       const req = {
-        axios: {},
+        customFetch: {},
         body: { bankSelect: 'test-offline-bank' },
         session: {}
       } as Request
@@ -151,7 +151,7 @@ describe('choose-bank controller', () => {
       mockGetBanks.mockResolvedValue([onlineBank, offlineBank])
       const render = vi.fn()
       const req = {
-        axios: {},
+        customFetch: {},
         body: { bankSelect: '' },
         session: {}
       } as Request
@@ -175,7 +175,7 @@ describe('choose-bank controller', () => {
       mockGetBanks.mockResolvedValue([onlineBank, offlineBank])
       const render = vi.fn()
       const req = {
-        axios: {},
+        customFetch: {},
         body: { bankSelect: 'tampered-bank-value' },
         session: {}
       } as Request
@@ -198,7 +198,7 @@ describe('choose-bank controller', () => {
     it('lets the error propagate when getBanks rejects on submission', async () => {
       mockGetBanks.mockRejectedValue(new Error('DynamoDB timeout'))
       const req = {
-        axios: {},
+        customFetch: {},
         body: { bankSelect: 'test-online-bank' },
         session: {}
       } as Request

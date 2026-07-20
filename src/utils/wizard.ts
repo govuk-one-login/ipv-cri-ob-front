@@ -113,7 +113,7 @@ const isAbsoluteUrl = (url: string): boolean => /^https?:\/\//i.test(url)
 type Redirect = (...args: RedirectArgs) => void
 type RedirectArgs = [status: number, url: string] | [url: string]
 const ORIGINAL_REDIRECT = Symbol('originalRedirect') // symbol because this is going on res which we don't own
-type StashedResponse = Response & { [ORIGINAL_REDIRECT]?: Redirect }
+type StashedResponse = { [ORIGINAL_REDIRECT]?: Redirect } & Response
 
 const createWizard = <S extends WizardSessionSlice>(
   name: string,

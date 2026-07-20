@@ -16,7 +16,7 @@ vi.mock('@govuk-one-login/di-ipv-cri-common-express', () => ({
         )
     },
     lib: {
-      axios: vi.fn(),
+      customFetch: { customFetchMiddleware: vi.fn() },
       errorHandling: { redirectAsErrorToCallback: vi.fn() },
       headers: vi.fn(),
       i18n: { setI18n: vi.fn() }
@@ -31,7 +31,9 @@ vi.mock('@govuk-one-login/frontend-ui', () => ({
   setFrontendUiTranslations: vi.fn(),
   settings: { setDeviceIntelligence: vi.fn(), setGTM: vi.fn(), setLanguageToggle: vi.fn() }
 }))
-vi.mock('@govuk-one-login/frontend-vital-signs', () => ({ frontendVitalSignsInitFromApp: vi.fn() }))
+vi.mock('@govuk-one-login/frontend-vital-signs', () => ({
+  frontendVitalSignsInitFromApp: vi.fn()
+}))
 vi.mock('@src/middleware', () => ({
   flash: { middleware: vi.fn() }
 }))
@@ -40,8 +42,10 @@ vi.mock('@src/config/routes', () => ({ configure: vi.fn() }))
 vi.mock('@src/config/helmet', () => ({ default: {} }))
 
 vi.mock('@src/utils/dev-tooling/dev-server', () => ({
-  createViteServer: vi.fn().mockResolvedValue({}),
   setupDevServer: vi.fn()
+}))
+vi.mock('@src/utils/dev-tooling/debug-menu', () => ({
+  debugMenu: { register: vi.fn(), viewsDir: '/debug-views' }
 }))
 
 afterEach(() => {
@@ -51,22 +55,22 @@ afterEach(() => {
 })
 
 describe('createApp', () => {
-  it('does not create a vite server when node env is production', async () => {
+  it('does not set up the vite dev server when node env is production', async () => {
     vi.stubEnv('NODE_ENV', 'production')
-    const { createViteServer } = await import('@src/utils/dev-tooling/dev-server')
+    const { setupDevServer } = await import('@src/utils/dev-tooling/dev-server')
     const { createApp } = await import('@src/app-bootstrap')
     await createApp()
 
-    expect(createViteServer).not.toHaveBeenCalled()
+    expect(setupDevServer).not.toHaveBeenCalled()
   })
 
-  it('creates a vite server when node env is development', async () => {
+  it('sets up the vite dev server when node env is development', async () => {
     vi.stubEnv('NODE_ENV', 'development')
-    const { createViteServer } = await import('@src/utils/dev-tooling/dev-server')
+    const { setupDevServer } = await import('@src/utils/dev-tooling/dev-server')
     const { createApp } = await import('@src/app-bootstrap')
-    await createApp()
+    const { app } = await createApp()
 
-    expect(createViteServer).toHaveBeenCalled()
+    expect(setupDevServer).toHaveBeenCalledWith(app)
   })
 
   it('configures the router in the correct order', async () => {
@@ -150,6 +154,6 @@ describe('createApp', () => {
     expect(app.use).toHaveBeenNthCalledWith(3, frontendUiLocals.getLanguageToggle)
     expect(app.use).toHaveBeenNthCalledWith(4, frontendUiLocals.getDeviceIntelligence)
     expect(app.use).toHaveBeenNthCalledWith(5, commonExpress.lib.headers)
-    expect(app.use).toHaveBeenNthCalledWith(6, commonExpress.lib.axios)
+    expect(app.use).toHaveBeenNthCalledWith(6, commonExpress.lib.customFetch.customFetchMiddleware)
   })
 })

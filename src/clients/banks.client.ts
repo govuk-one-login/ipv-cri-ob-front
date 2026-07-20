@@ -1,4 +1,3 @@
-import type { RawAxiosRequestHeaders } from 'axios'
 import type { Request } from 'express'
 
 import { createBaseClient } from './base.client'
@@ -9,9 +8,10 @@ import appConfig from '@src/config/app'
 const banksClient = (req: Request) => {
   const client = createBaseClient(req)
   return {
-    getBanks: async (headers: RawAxiosRequestHeaders = {}): Promise<Bank[]> => {
-      const data = await client.get<BankData[]>(appConfig.API.PATHS.BANKS, headers)
-      return data.map((data) => Bank.fromData(data))
+    getBanks: async (headers: Record<string, string> = {}): Promise<Bank[]> => {
+      const res = await client.get(appConfig.API.PATHS.BANKS, headers)
+      const data = (await res.json()) as BankData[]
+      return data.map((entry) => Bank.fromData(entry))
     }
   }
 }

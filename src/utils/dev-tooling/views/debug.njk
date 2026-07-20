@@ -1,0 +1,162 @@
+{% from "govuk/components/button/macro.njk" import govukButton %}
+
+{% macro identityBaseDebug(params) %}
+  {% macro row(key, value) %}
+    <tr>
+      <td
+        style="padding:2px 8px;width:50%;font-family:monospace;word-break:break-all;vertical-align:top"
+      >
+        {{ key }}
+      </td>
+      <td style="padding:2px 8px;font-family:monospace;word-break:break-all;vertical-align:top">
+        {% if value is not defined or value === null %}
+          <span style="color:#d4351c">undefined</span>
+        {% elif value is mapping %}
+          <pre style="margin:0;white-space:pre-wrap;word-break:break-all">
+{{ value | dump(2) }}</pre
+          >
+        {% else %}
+          {{ value }}
+        {% endif %}
+      </td>
+    </tr>
+  {% endmacro %}
+
+  {% macro section(title) %}
+    <tr>
+      <td
+        colspan="2"
+        style="padding:8px 8px 2px;font-family:'GDS Transport',arial,sans-serif;font-weight:bold;background:#f3f2f1"
+      >
+        {{ title }}
+      </td>
+    </tr>
+  {% endmacro %}
+
+  <div
+    style="margin-top:50px;width:100%;max-width:100%;overflow-wrap:anywhere;box-sizing:border-box"
+  >
+    <div
+      style="background:repeating-linear-gradient(45deg,#fd0,#fd0 10px,#0b0c0c 10px,#0b0c0c 20px);padding:12px 8px"
+    >
+      <h2
+        style="display:inline-block;margin:0;padding:4px 12px;font-family:'GDS Transport',arial,sans-serif;font-size:1.2em;color:white;background-color:black"
+      >
+        dev console
+      </h2>
+    </div>
+    <table style="width:100%;table-layout:fixed;border-collapse:collapse;font-size:0.875em">
+      {{ section("Actions") }}
+      <tr>
+        <td colspan="2">
+          <div class="govuk-button-group" style="margin-top:10px;margin-bottom:0px;">
+            {{
+              govukButton({
+                text: "start oauth flow",
+                classes: "govuk-button",
+                href: "/oauth2/authorize?client_id=test-client&request=test-jwt-success"
+              })
+            }}
+            {{
+              govukButton({
+                text: "reset journey",
+                classes: "govuk-button--warning",
+                href: "/"
+              })
+            }}
+          </div>
+          <div class="govuk-button-group" style="margin-top:0;margin-bottom:0px;">
+            {{
+              govukButton({
+                text: "view wiremock requests",
+                classes: "govuk-button--secondary",
+                href: "http://localhost:8080/__admin/requests"
+              })
+            }}
+            {{
+              govukButton({
+                text: "reload wiremock mappings",
+                classes: "govuk-button--secondary",
+                id: "debug-reload-wiremock"
+              })
+            }}
+            <script nonce="{{ params.cspNonce }}">
+              document
+                .getElementById('debug-reload-wiremock')
+                .addEventListener('click', async (e) => {
+                  const btn = e.currentTarget
+                  const original = btn.textContent
+                  btn.textContent = 'reloading...'
+                  btn.disabled = true
+                  try {
+                    await fetch('http://localhost:8080/__admin/mappings/reset', {
+                      method: 'POST',
+                      mode: 'no-cors'
+                    })
+                    btn.textContent = 'reloaded'
+                  } catch {
+                    btn.textContent = 'failed'
+                  }
+                  setTimeout(() => {
+                    btn.textContent = original
+                    btn.disabled = false
+                  }, 1500)
+                })
+            </script>
+          </div>
+        </td>
+      </tr>
+
+      {{ section("Page state") }}
+      {{ row("sessionId (dynamo)",    params.sessionId) }}
+      {{ row("pageTitle",             params.pageTitle) }}
+      {{ row("pageErrorState",        params.pageErrorState) }}
+      {{ row("isPageDataSensitive",   params.isPageDataSensitive) }}
+      {{ row("backLink",              params.backLink) }}
+      {{ row("cspNonce",              params.cspNonce) }}
+      {{ row("csrfToken",             params.csrfToken) }}
+
+      {{ section("OAuth session") }}
+      {{ row("tokenId",                       params.oauthSession.tokenId) }}
+      {{ row("authParams.client_id",          params.oauthSession.authParams.client_id) }}
+      {{ row("authParams.state",              params.oauthSession.authParams.state) }}
+      {{ row("authParams.redirect_uri",       params.oauthSession.authParams.redirect_uri) }}
+      {{ row("authParams.authorization_code", params.oauthSession.authParams.authorization_code) }}
+
+      {{ section("Language") }}
+      {{ row("htmlLang",           params.htmlLang) }}
+      {{ row("showLanguageToggle", params.showLanguageToggle) }}
+      {{ row("currentUrl",         params.currentUrl) }}
+
+      {{ section("Analytics") }}
+      {{ row("ga4ContainerId",          params.ga4ContainerId) }}
+      {{ row("ga4Enabled",              params.ga4Enabled) }}
+      {{ row("ga4PageViewEnabled",      params.ga4PageViewEnabled) }}
+      {{ row("ga4FormResponseEnabled",  params.ga4FormResponseEnabled) }}
+      {{ row("ga4FormErrorEnabled",     params.ga4FormErrorEnabled) }}
+      {{ row("ga4FormChangeEnabled",    params.ga4FormChangeEnabled) }}
+      {{ row("ga4NavigationEnabled",    params.ga4NavigationEnabled) }}
+      {{ row("ga4SelectContentEnabled", params.ga4SelectContentEnabled) }}
+      {{ row("analyticsCookieDomain",   params.analyticsCookieDomain) }}
+      {{ row("analyticsDataSensitive",  params.analyticsDataSensitive) }}
+
+      {{ section("GA4 on page load") }}
+      {{ row("statusCode",     params.statusCode) }}
+      {{ row("isPageDynamic",  params.isPageDynamic) }}
+      {{ row("contentID",      params.contentID) }}
+      {{ row("loggedInStatus", params.loggedInStatus) }}
+      {{ row("taxLevel1",      params.taxLevel1) }}
+      {{ row("taxLevel2",      params.taxLevel2) }}
+      {{ row("taxLevel3",      params.taxLevel3) }}
+      {{ row("taxLevel4",      params.taxLevel4) }}
+      {{ row("taxLevel5",      params.taxLevel5) }}
+
+      {{ section("Device intelligence") }}
+      {{ row("deviceIntelligenceEnabled", params.deviceIntelligenceEnabled) }}
+      {{ row("deviceIntelligenceDomain",  params.deviceIntelligenceDomain) }}
+
+      {{ section("Feature flags") }}
+      {{ row("MAY_2025_REBRAND_ENABLED", params.MAY_2025_REBRAND_ENABLED) }}
+    </table>
+  </div>
+{% endmacro %}

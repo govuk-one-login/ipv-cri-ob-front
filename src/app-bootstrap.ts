@@ -1,5 +1,4 @@
 import type { Express, Router } from 'express'
-import type { ViteDevServer } from 'vite'
 
 import {
   locals as frontendUiLocals,
@@ -9,7 +8,8 @@ import {
 } from '@govuk-one-login/frontend-ui'
 import { frontendVitalSignsInitFromApp } from '@govuk-one-login/frontend-vital-signs'
 import { flash } from '@src/middleware'
-import { createViteServer, setupDevServer } from '@src/utils/dev-tooling/dev-server'
+import { debugMenu } from '@src/utils/dev-tooling/debug-menu'
+import { setupDevServer } from '@src/utils/dev-tooling/dev-server'
 
 import commonExpress from '@govuk-one-login/di-ipv-cri-common-express'
 import appConfig from '@src/config/app'
@@ -22,14 +22,13 @@ import path from 'node:path'
 import * as routes from '@src/config/routes'
 
 export const createApp = async (): Promise<{ app: Express; router: Router }> => {
-  const vite: null | ViteDevServer =
-    appConfig.APP.NODE_ENV === 'development' ? await createViteServer() : null
+  const session = await initSessionStore()
 
   const { app, router } = commonExpress.bootstrap.setup({
     env: appConfig.APP.NODE_ENV,
     helmet: helmetConfig,
     middlewareSetupFn: (app: Express) => {
-      if (vite) setupDevServer(app, vite)
+      if (appConfig.APP.NODE_ENV === 'development') setupDevServer(app)
       commonExpress.lib.i18n.setI18n({
         config: {
           additionalNamespaces: ['translation', 'errors'], // 'translation' is the namespace frontend-ui provides for common components (cookie banner, progress button etc)
@@ -45,14 +44,14 @@ export const createApp = async (): Promise<{ app: Express; router: Router }> => 
       if (appConfig.APP.NODE_ENV === 'production')
         frontendVitalSignsInitFromApp(app, vitalSignsConfig)
       app.use(commonExpress.lib.headers)
-      app.use(commonExpress.lib.axios)
+      app.use(commonExpress.lib.customFetch.customFetchMiddleware)
     },
     overloadProtection: overloadProtectionConfig,
     publicDirs: [path.resolve(import.meta.dirname, 'public')],
     requestLogging: appConfig.APP.NODE_ENV === 'production',
-    session: await initSessionStore(),
+    session,
     csrf: { secret: appConfig.APP.CSRF_SECRET },
-    views: [path.resolve(import.meta.dirname, 'views')]
+    views: [path.resolve(import.meta.dirname, 'views'), debugMenu.viewsDir]
   })
 
   app.set('view engine', 'njk')
@@ -85,6 +84,8 @@ export const createApp = async (): Promise<{ app: Express; router: Router }> => 
     deviceIntelligenceDomain: appConfig.APP.DEVICE_INTELLIGENCE_DOMAIN,
     deviceIntelligenceEnabled: appConfig.APP.DEVICE_INTELLIGENCE_ENABLED
   })
+
+  if (appConfig.APP.NODE_ENV === 'development') debugMenu.register(router)
 
   router.use(flash.middleware)
   routes.configure(router)

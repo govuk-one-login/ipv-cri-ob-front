@@ -3,7 +3,6 @@
 
 {% block head %}
   {% if devServer %}
-    <script type="module" src="/@vite/client"></script>
     <link rel="stylesheet" href="/src/assets/scss/application.scss" />
   {% else %}
     <link rel="stylesheet" href="/public/stylesheets/application.css" />
@@ -24,11 +23,16 @@
   {% endif %}
   {% block mainContent %}
   {% endblock %}
+
+  {% if debug %}
+    {% include "debug-include.njk" %}
+  {% endif %}
 {% endblock %}
 
 {% block bodyEnd %}
   {{ super() }}
   {% if devServer %}
+    <script type="module" src="/@vite/client"></script>
     <script type="module" src="/src/assets/js/application.ts"></script>
   {% else %}
     <script type="module" src="/public/javascripts/application.js"></script>

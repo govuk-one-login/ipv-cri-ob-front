@@ -109,7 +109,7 @@ export default async function mockSetup() {
   const appProcess = spawn('node', ['dist/index.js'], {
     env: {
       ...process.env,
-      API_BASE_URL: `${wiremockEndpoint}/`,
+      API_BASE_URL: `${wiremockEndpoint}`,
       DEPLOYMENT_ENV: 'local',
       LOCAL_DYNAMO_ENDPOINT_OVERRIDE: dynamoEndpoint,
       LOG_LEVEL: 'debug',
