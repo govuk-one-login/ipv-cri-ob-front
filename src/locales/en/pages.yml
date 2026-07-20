@@ -44,6 +44,7 @@ consent:
     itemText: I agree to my bank account information being shared with Ecospend
     errorMessage: You must agree to share your bank account information to continue
   primaryButton: Continue
+  primaryButtonAlt: Continue to your bank’s app or website
   secondaryLink: Prove your identity another way
 
 chooseBank:
@@ -64,3 +65,22 @@ bankProblem:
     two:
       title: Prove your identity another way
   primaryButton: Continue
+
+selectSignInMethod:
+  title: How do you want to sign in to your online banking?
+  radio:
+    legend: How do you want to sign in to your online banking?
+    errorMessage: Select how you want to sign in to your online banking
+    one:
+      title: Use your phone or tablet and scan a QR code
+      hint: You can use your bank’s app or mobile website to prove your identity.
+    two:
+      title: Stay on this device and use your bank’s website
+      hint: When you continue, you’ll be sent to your bank’s website.
+  primaryButton: Continue
+
+checkDetails:
+  title: We need to confirm your details
+  content:
+    - We’ll check that the details you gave us match the information from your bank.
+    - It can take up to 10 seconds to continue to the next page. Do not reload or close this page.

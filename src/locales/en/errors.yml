@@ -1,5 +1,11 @@
 genericError:
-  title: Sorry, there is a problem with the service
+  title: Sorry, there is a problem
+  content:
+    - <p class="govuk-body">We cannot prove your identity right now.</p>
+    - <h2 class="govuk-heading-m">What you can do</h2>
+    - <p class="govuk-body">Go back to the service you were trying to use and start again. You can look for the service using your search engine or find it from the GOV.UK homepage.</p>
+  primaryButton: Go to the GOV.UK homepage
+  secondaryButton: Contact the GOV.UK One Login team (opens in a new tab)
 
 notFoundError:
   title: Page not found

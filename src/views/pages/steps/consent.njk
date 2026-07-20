@@ -40,14 +40,16 @@
         ]
       })
     }}
-    {% if isMobile %}
-      {% set progressButtonTextOverride = "Continue to your bank’s app or website" %}
-    {% endif %}
-    {% include "includes/progress-button.njk" %}
+    <div class="govuk-button-group">
+      {% if isMobile %}
+        {% set progressButtonTextOverride = translate("pages.consent.primaryButtonAlt") %}
+      {% endif %}
+      {% include "includes/progress-button.njk" %}
+    </div>
     <p class="govuk-body">
-      <a href="#" class="govuk-link govuk-link--no-visited-state"
-        >{{ translate("pages.start.secondaryLink") }}</a
-      >
+      <a href="{{ proveAnotherWay }}" class="govuk-link govuk-link--no-visited-state">
+        {{ translate("pages.consent.secondaryLink") }}
+      </a>
     </p>
   </form>
 {% endblock %}

@@ -5,14 +5,14 @@ import { ConsentRequest } from '@src/models/consent.class'
 import { zodErrorsForView } from '@src/utils/zod-form-errors'
 import { z } from 'zod'
 
-import appConfig from '@src/config/app'
 import paths from '@src/config/paths'
 
 const renderPage = (req: Request, res: Response, context: Record<string, unknown> = {}) => {
   res.locals['selectedBankName'] = req.session.bankName
   res.locals['isMobile'] = req.session.isMobile
   res.render('pages/steps/consent', {
-    ...context
+    ...context,
+    proveAnotherWay: paths.steps.proveAnotherWay
   })
 }
 
@@ -32,15 +32,17 @@ const post = async (req: Request, res: Response) => {
     return
   }
   const bankID = req.session.bankID!
-  const consentResponse = await consentsClient(req.axios).createConsent(
+  const consentResponse = await consentsClient(req).createConsent(
     new ConsentRequest(req.sessionID, bankID).toData()
   )
   req.session.consentID = consentResponse.consentID
-  if (appConfig.STUBS.ENABLED) {
-    res.redirect(paths.stubs.webhook)
-  } else {
-    res.status(501).json({ message: 'Not implemented' }) // TODO
+  req.session.bankConsentURL = consentResponse.bankConsentURL.toString()
+
+  if (req.session.isMobile) {
+    res.redirect(req.session.bankConsentURL)
+    return
   }
+  res.redirect(paths.steps.selectSignInMethod)
 }
 
 export { get, post }

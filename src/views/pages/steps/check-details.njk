@@ -1,0 +1,22 @@
+{% extends "layouts/base.njk" %}
+{% from "frontend-ui/build/components/progress-button/macro.njk" import frontendUiProgressButton %}
+{% from "govuk/components/button/macro.njk" import govukButton %}
+
+{% set pageTitle = translate("pages.checkDetails.title") %}
+
+{% block mainContent %}
+  <h1 class="govuk-heading-l">{{ pageTitle }}</h1>
+  {% for item in translate("pages.checkDetails.content") %}
+    <p class="govuk-body">{{ item }}</p>
+  {% endfor %}
+
+  <div class="govuk-button-group">
+    {{
+      frontendUiProgressButton({
+        text: translate("translation.progressButton.waitingText"),
+        disabled: true,
+        classes: "govuk-button--progress-loading govuk-progress-button--disabled"
+      })
+    }}
+  </div>
+{% endblock %}

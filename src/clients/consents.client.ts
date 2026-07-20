@@ -1,20 +1,29 @@
-import type { ConsentRequestData, ConsentResponse } from '@src/models/consent.class'
-import type { AxiosInstance } from 'axios'
+import type { RawAxiosRequestHeaders } from 'axios'
+import type { Request } from 'express'
 
 import { createBaseClient } from './base.client'
-import { randomUUID } from 'node:crypto'
+import {
+  type ConsentRequestData,
+  ConsentResponse,
+  type ConsentResponseData
+} from '@src/models/consent.class'
 
-const consentsClient = (axios: AxiosInstance) => {
-  const client = createBaseClient(axios)
+import appConfig from '@src/config/app'
+
+const consentsClient = (req: Request) => {
+  const client = createBaseClient(req)
   return {
-    createConsent: (body: ConsentRequestData): Promise<ConsentResponse> =>
-      // client.post(appConfig.API.PATHS.CONSENT, body) // TODO: use the consents api instead of returning dummy data
-      client.stub<ConsentResponse>({
-        bankConsentUrl: new URL('https://localhost:1337/consent'),
-        bankID: body.bank_id,
-        consentID: randomUUID(),
-        redirectUrl: new URL('https://localhost:1337/redirect')
-      })
+    createConsent: async (
+      body: ConsentRequestData,
+      headers: RawAxiosRequestHeaders = {}
+    ): Promise<ConsentResponse> => {
+      const data = await client.post<ConsentRequestData, ConsentResponseData>(
+        appConfig.API.PATHS.CONSENT,
+        body,
+        headers
+      )
+      return ConsentResponse.fromData(data)
+    }
   }
 }
 

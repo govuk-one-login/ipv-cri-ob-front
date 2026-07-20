@@ -30,8 +30,8 @@ const consentOutcomeText: Record<ConsentJourneyCompleteEventValue, string> = {
 }
 
 const accountAssessmentOutcomeText: Record<AccountAssessmentCompleteEventValue, string> = {
-  NotValid: 'Not valid',
-  Valid: 'Valid'
+  Valid: 'Valid',
+  NotValid: 'Not valid'
 }
 
 const toOptions = <T extends string>(text: Record<T, string>): OutcomeOption<T>[] =>
@@ -88,7 +88,7 @@ const post = async (req: Request, res: Response, _next: NextFunction) => {
   }
 
   if (!formVals) {
-    res.redirect(paths.index) // TODO: continue CRI journey rather than returning to the index
+    res.redirect(paths.steps.checkDetailsHolding)
     return
   }
 
@@ -102,7 +102,7 @@ const post = async (req: Request, res: Response, _next: NextFunction) => {
     .build()
 
   const WEBHOOK_LOGGER = LOGGER.child({
-    component: 'webhook-stub',
+    component: 'ecospend-webhook-stub',
     consent_id: consentID,
     webhook_type: webhook.record_type
   })
@@ -112,7 +112,7 @@ const post = async (req: Request, res: Response, _next: NextFunction) => {
     type: 'info'
   })
 
-  await webhookClient(req.axios)
+  await webhookClient(req)
     .send(webhook)
     .then(() => {
       storeWebhookHistoryOnSession(req, consentID, consentResult)

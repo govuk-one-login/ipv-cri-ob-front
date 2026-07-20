@@ -80,7 +80,7 @@ export const appConfig = AppConfigSchema.parse({
     }
   },
   APP: {
-    BIND_HOST: process.env['BIND_HOST'] || '127.0.0.1',
+    BIND_HOST: process.env['BIND_HOST'] || 'localhost',
     CSRF_SECRET: process.env['CSRF_SECRET']!,
     DEPLOYMENT_ENV: (process.env['DEPLOYMENT_ENV'] || 'production') as z.infer<
       typeof DeploymentEnvSchema

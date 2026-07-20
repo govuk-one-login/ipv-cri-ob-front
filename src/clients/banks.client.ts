@@ -1,53 +1,18 @@
-import type { AxiosInstance } from 'axios'
+import type { RawAxiosRequestHeaders } from 'axios'
+import type { Request } from 'express'
 
 import { createBaseClient } from './base.client'
 import { Bank, type BankData } from '@src/models/bank.class'
 
-const DUMMY_BANKS_RESPONSE: BankData[] = [
-  {
-    bank_id: 'ironforge-vault',
-    friendly_name: 'Vault of Ironforge',
-    is_sandbox: false,
-    service_status: true
-  },
-  {
-    bank_id: 'org-counting-house',
-    friendly_name: 'Orgrimmar Counting House',
-    is_sandbox: false,
-    service_status: true
-  },
-  {
-    bank_id: 'royal-bank-sw',
-    friendly_name: 'Royal Bank of Stormwind',
-    is_sandbox: false,
-    service_status: true
-  },
-  {
-    bank_id: 'stranglethorn-trust-bank',
-    friendly_name: 'Stranglethorn Trust Bank',
-    is_sandbox: false,
-    service_status: true
-  },
-  {
-    bank_id: 'dalaran-merchant-bank',
-    friendly_name: 'Dalaran Merchant Bank',
-    is_sandbox: false,
-    service_status: true
-  },
-  {
-    bank_id: 'forgotten-uldaman-vault',
-    friendly_name: 'Forgotten Vault of Uldaman',
-    is_sandbox: false,
-    service_status: false
-  }
-]
+import appConfig from '@src/config/app'
 
-const banksClient = (axios: AxiosInstance) => {
-  const client = createBaseClient(axios)
+const banksClient = (req: Request) => {
+  const client = createBaseClient(req)
   return {
-    getBanks: (): Promise<Bank[]> =>
-      // client.get<BankData[]>(appConfig.API.PATHS.BANKS) TODO: use the banks api instead of returning dummy data
-      client.stub<Bank[]>(DUMMY_BANKS_RESPONSE.map((bankData) => Bank.fromData(bankData)))
+    getBanks: async (headers: RawAxiosRequestHeaders = {}): Promise<Bank[]> => {
+      const data = await client.get<BankData[]>(appConfig.API.PATHS.BANKS, headers)
+      return data.map((data) => Bank.fromData(data))
+    }
   }
 }
 
