@@ -18,7 +18,7 @@ test/browser/
 │   ├── consent.page.ts
 │   ├── authorise.page.ts
 │   └── callback.page.ts
-├── specs/                   # Local/CI specs (playwright.local.config.ts)
+├── specs/                   # Page-focused specs run under playwright.mock.config.ts
 ├── journeys/
 │   ├── mock/                # End-to-end journeys run against WireMock (playwright.mock.config.ts)
 │   └── smoke/               # Journeys run against a deployed environment (playwright.smoke.config.ts)
@@ -92,32 +92,32 @@ The `wiremock/admin.ts` client exposes: `addMapping`, `getRequest`, `getRequests
 
 ## Configurations
 
-| Config | Command(s) | Devices | Test files | Base URL |
+| Config | Command | Devices (projects) | Test files | Base URL |
 |---|---|---|---|---|
-| `playwright.mock.config.ts` | `npm run test:browser` / `test:browser:ui` | Desktop Chrome, Pixel 5, iPad Pro | `journeys/mock/**/ob-*.journey.ts` | `localhost:5091` (managed by `mock-setup.ts`) |
-| `playwright.mobile.config.ts` | `npm run test:browser:mobile` / `test:browser:mobile:ui` | iPhone 13 (`slowMo: 100`) | `specs/mobile-responsiveness.spec.ts` | `localhost:5091` (managed by `mock-setup.ts`) |
-| `playwright.local.config.ts` | `npm run test:browser:local` / `:firefox` / `:edge` / `:all` | Chromium (default), Firefox, Edge via `BROWSER` env var | `specs/**/*.spec.ts` | `localhost:5090` (requires `npm run dev`) |
+| `playwright.mock.config.ts` | `npm run test:browser` / `test:browser:ui` | `chromium-desktop`, `chromium-mobile` (Pixel 5), `chromium-tablet` (iPad Pro) | `journeys/mock/**/*.journey.ts`, `specs/**/*.spec.ts` | `localhost:5091` (managed by `mock-setup.ts`) |
 | `playwright.smoke.config.ts` | `APP_URL=https://... npx playwright test --config playwright.smoke.config.ts` | Desktop Chrome | `journeys/smoke/**/*.journey.ts` | `APP_URL` env var |
 
-> Local config requires a running dev server (`npm run dev`). Mock and mobile configs manage their own containers via `mock-setup.ts` — no dev server needed.
+> To scope a run to one device, pass `--project=chromium-mobile` (etc.). Mobile-only specs gate themselves with `test.skip(({ isMobile }) => !isMobile, 'mobile only')`.
 
 ## Spec Coverage
 
-| Spec | Config | What it covers |
-|---|---|---|
-| `start.spec.ts` | local | Start page content, continue navigation, prove another way link |
-| `choose-bank.spec.ts` | local | Bank selection, validation, Welsh language |
-| `consent.spec.ts` | local | Consent checkbox, error states, prove another way |
-| `prove-another-way.spec.ts` | local | Prove another way page |
-| `error-failure-pages.spec.ts` | local | 404 and error page rendering |
-| `layout.spec.ts` | local | Common layout elements (header, footer) |
-| `cookie-banner.spec.ts` | local | Cookie banner accept/reject behaviour |
-| `language.spec.ts` | local | English/Welsh language switching |
-| `keyboard-navigation.spec.ts` | local | Tab order, keyboard activation |
-| `security-validation.spec.ts` | local | CSRF, session, input validation, security headers |
-| `mobile-responsiveness.spec.ts` | mobile | Touch interactions, viewport, responsive layout |
-| `cross-browser-compatibility.spec.ts` | local | Form/CSS/JS consistency across browsers |
-| `performance.spec.ts` | local | Page load and interaction timing |
+All specs run under `playwright.mock.config.ts`. Specs that only make sense on a mobile viewport gate themselves with `test.skip(({ isMobile }) => !isMobile, 'mobile only')`.
+
+| Spec | What it covers |
+|---|---|
+| `start.spec.ts` | Start page content, continue navigation, prove another way link |
+| `choose-bank.spec.ts` | Bank selection, validation, Welsh language |
+| `consent.spec.ts` | Consent checkbox, error states, prove another way |
+| `prove-another-way.spec.ts` | Prove another way page |
+| `error-failure-pages.spec.ts` | 404 and error page rendering |
+| `layout.spec.ts` | Common layout elements (header, footer) |
+| `cookie-banner.spec.ts` | Cookie banner accept/reject behaviour |
+| `language.spec.ts` | English/Welsh language switching |
+| `keyboard-navigation.spec.ts` | Tab order, keyboard activation |
+| `security-validation.spec.ts` | CSRF, session, input validation, security headers |
+| `mobile-responsiveness.spec.ts` | Touch interactions, viewport, responsive layout (mobile project only) |
+| `cross-browser-compatibility.spec.ts` | Form/CSS/JS consistency |
+| `performance.spec.ts` | Page load and interaction timing |
 
 ## Journey Coverage
 

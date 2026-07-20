@@ -12,7 +12,7 @@ export default defineConfig({
   reporter: [['list'], ['html', { open: 'never' }]],
   retries: process.env['CI'] ? 3 : 1, // Added retry for local dev
   testDir: '.',
-  testMatch: ['journeys/mock/**/ob-error.journey.ts', 'journeys/mock/**/ob-success.journey.ts'],
+  testMatch: ['journeys/mock/**/*.journey.ts', 'specs/**/*.spec.ts'],
   timeout: 60_000, // Increased from 30s
   use: {
     actionTimeout: 15_000, // Increased from 10s
