@@ -1,4 +1,3 @@
-import type { RawAxiosRequestHeaders } from 'axios'
 import type { Request } from 'express'
 
 import { createBaseClient } from './base.client'
@@ -15,13 +14,10 @@ const consentsClient = (req: Request) => {
   return {
     createConsent: async (
       body: ConsentRequestData,
-      headers: RawAxiosRequestHeaders = {}
+      headers: Record<string, string> = {}
     ): Promise<ConsentResponse> => {
-      const data = await client.post<ConsentRequestData, ConsentResponseData>(
-        appConfig.API.PATHS.CONSENT,
-        body,
-        headers
-      )
+      const res = await client.post(appConfig.API.PATHS.CONSENT, JSON.stringify(body), headers)
+      const data = (await res.json()) as ConsentResponseData
       return ConsentResponse.fromData(data)
     }
   }

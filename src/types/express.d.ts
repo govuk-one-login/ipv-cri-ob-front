@@ -1,4 +1,4 @@
-import type { AxiosInstance } from 'axios'
+import type { CustomFetch } from '@govuk-one-login/di-ipv-cri-common-express'
 import type { i18n } from 'i18next'
 import type { TOptions } from 'i18next'
 
@@ -38,10 +38,10 @@ declare module 'express-session' {
 declare global {
   namespace Express {
     interface Locals {
-      translate: (key: string, options?: TOptions & { default?: string }) => string
+      translate: (key: string, options?: { default?: string } & TOptions) => string
     }
     interface Request {
-      axios: AxiosInstance
+      customFetch: CustomFetch
       i18n: i18n
     }
   }

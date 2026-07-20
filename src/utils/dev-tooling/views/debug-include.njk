@@ -1,0 +1,38 @@
+{% from "debug.njk" import identityBaseDebug %}
+{{
+  identityBaseDebug({
+    pageTitle: pageTitle,
+    pageErrorState: errorList | dump,
+    isPageDataSensitive: isPageDataSensitive,
+    backLink: backLink,
+    cspNonce: cspNonce,
+    csrfToken: csrfToken,
+    htmlLang: htmlLang,
+    showLanguageToggle: showLanguageToggle,
+    currentUrl: currentUrl,
+    ga4ContainerId: ga4ContainerId,
+    ga4Enabled: ga4Enabled,
+    ga4PageViewEnabled: ga4PageViewEnabled,
+    ga4FormResponseEnabled: ga4FormResponseEnabled,
+    ga4FormErrorEnabled: ga4FormErrorEnabled,
+    ga4FormChangeEnabled: ga4FormChangeEnabled,
+    ga4NavigationEnabled: ga4NavigationEnabled,
+    ga4SelectContentEnabled: ga4SelectContentEnabled,
+    analyticsCookieDomain: analyticsCookieDomain,
+    analyticsDataSensitive: analyticsDataSensitive,
+    statusCode: statusCode,
+    isPageDynamic: isPageDynamic,
+    contentID: contentID,
+    loggedInStatus: loggedInStatus,
+    taxLevel1: taxLevel1,
+    taxLevel2: taxLevel2,
+    taxLevel3: taxLevel3,
+    taxLevel4: taxLevel4,
+    taxLevel5: taxLevel5,
+    deviceIntelligenceEnabled: deviceIntelligenceEnabled,
+    deviceIntelligenceDomain: deviceIntelligenceDomain,
+    sessionId: sessionId,
+    oauthSession: oauthSession,
+    MAY_2025_REBRAND_ENABLED: MAY_2025_REBRAND_ENABLED
+  })
+}}

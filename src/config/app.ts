@@ -72,11 +72,11 @@ export const appConfig = AppConfigSchema.parse({
   API: {
     BASE_URL: process.env['API_BASE_URL']!,
     PATHS: {
-      AUTHORIZATION: 'authorization',
-      BANKS: 'banks',
-      CONSENT: 'consent',
-      SESSION: 'session',
-      WEBHOOK: 'webhook'
+      AUTHORIZATION: '/authorization',
+      BANKS: '/banks',
+      CONSENT: '/consent',
+      SESSION: '/session',
+      WEBHOOK: '/webhook'
     }
   },
   APP: {

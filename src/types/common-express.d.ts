@@ -1,7 +1,6 @@
 declare module '@govuk-one-login/di-ipv-cri-common-express' {
   import type { OverloadProtectionConfig } from '@src/config/overload-protection'
   import type { DynamoDBStore } from 'connect-dynamodb'
-  import type { Request, Response } from 'express'
   import type { ErrorRequestHandler, Express, RequestHandler, Router } from 'express'
   import type { HelmetOptions } from 'helmet'
   import type { i18n } from 'i18next'
@@ -35,7 +34,6 @@ declare module '@govuk-one-login/di-ipv-cri-common-express' {
      * configures both the 404 and generic error handlers.
      */
     errors?:
-      | false
       | {
           /** template for unhandled errors. default: 'errors/error' */
           defaultErrorView?: string
@@ -44,6 +42,7 @@ declare module '@govuk-one-login/di-ipv-cri-common-express' {
           /** URL to redirect to for MISSING_PREREQ errors. default: '/' */
           startUrl?: ((err: Error, req: Express.Request, res: Express.Response) => string) | string
         }
+      | false
     /** helmet security headers config */
     helmet?: HelmetOptions
     host?: false
@@ -70,7 +69,6 @@ declare module '@govuk-one-login/di-ipv-cri-common-express' {
      * default: { maxAge: 86400000 } (1 day)
      */
     public?:
-      | false
       | {
           /** dotfile handling: 'allow', 'deny', or 'ignore'. default: 'ignore' */
           dotfiles?: 'allow' | 'deny' | 'ignore'
@@ -81,6 +79,7 @@ declare module '@govuk-one-login/di-ipv-cri-common-express' {
           /** browser cache max-age in milliseconds or a string accepted by the ms module. default: 86400000 (1 day) */
           maxAge?: number | string
         }
+      | false
     /** directories to serve as static files under urls.public */
     publicDirs?: string[]
     /** directories to serve as static files under urls.publicImages */
@@ -89,13 +88,13 @@ declare module '@govuk-one-login/di-ipv-cri-common-express' {
     /** enable request/response logging middleware. default: true */
     requestLogging?: boolean
     session?:
-      | false
       | {
           cookieName: string
           cookieOptions: { maxAge: number }
           secret: string
           sessionStore: DynamoDBStore
         }
+      | false
     /** trust the X-Forwarded-For proxy header. default: true */
     trustProxy?: boolean
     /** URL path prefixes used throughout the app */
@@ -111,6 +110,15 @@ declare module '@govuk-one-login/di-ipv-cri-common-express' {
     }
     /** nunjucks template directories */
     views?: string[]
+  }
+
+  /** path must start with '/'. rejects with CustomFetchHttpError on non-2xx. */
+  export type CustomFetch = (path: string, options?: CustomFetchOptions) => Promise<Response>
+
+  export interface CustomFetchOptions extends Omit<RequestInit, 'body'> {
+    body?: RequestInit['body']
+    jsonBody?: unknown // JSON-stringified into `body` with Content-Type: application/json
+    timeoutMs?: number // AbortSignal.timeout
   }
 
   interface BootstrapSetupResult {
@@ -129,7 +137,11 @@ declare module '@govuk-one-login/di-ipv-cri-common-express' {
       setup: (options: BootstrapSetupOptions) => BootstrapSetupResult
     }
     lib: {
-      axios: RequestHandler // attaches a configured axios instance to req.axios, using API.BASE_URL from app settings
+      customFetch: {
+        CustomFetchHttpError: typeof CustomFetchHttpError
+        /** attaches a configured fetch instance to req.customFetch, using API.BASE_URL from app settings */
+        customFetchMiddleware: RequestHandler
+      }
       errorHandling: {
         redirectAsErrorToCallback: ErrorRequestHandler
       }
@@ -151,6 +163,13 @@ declare module '@govuk-one-login/di-ipv-cri-common-express' {
     routes: {
       oauth2: Router
     }
+  }
+
+  export class CustomFetchHttpError extends Error {
+    body: string
+    code: number
+    headers: Response['headers']
+    constructor(response: Response, bodyString: string)
   }
 
   const commonExpress: CommonExpress

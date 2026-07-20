@@ -2,7 +2,10 @@ import type { NextFunction, Request, Response } from 'express'
 
 import { describe, expect, it, vi } from 'vitest'
 
+import commonExpress from '@govuk-one-login/di-ipv-cri-common-express'
 import paths from '@src/config/paths'
+
+const { CustomFetchHttpError } = commonExpress.lib.customFetch
 
 const { mockSend } = vi.hoisted(() => ({ mockSend: vi.fn().mockResolvedValue(undefined) }))
 const { mockAddFlash } = vi.hoisted(() => ({ mockAddFlash: vi.fn() }))
@@ -155,11 +158,10 @@ describe('webhook stub controller', () => {
 
     it('adds an error flash when the webhook send fails', async () => {
       mockSend.mockRejectedValueOnce(
-        Object.assign(new Error('connection refused'), { code: 'ECONNREFUSED' })
+        new CustomFetchHttpError(new Response(null, { status: 500 }), '')
       )
 
       const req = {
-        axios: vi.fn(),
         body: { consent: 'Authorized' },
         query: {},
         session: { consentID: 'test-consent-id' }
@@ -168,10 +170,16 @@ describe('webhook stub controller', () => {
       await post(req, { redirect: vi.fn() } as unknown as Response, vi.fn() as NextFunction)
 
       expect(mockChildLogger.error).toHaveBeenCalledWith(
-        expect.objectContaining({ code: 'ECONNREFUSED' }),
+        expect.objectContaining({ status: 500 }),
         'webhook send failure'
       )
-      expect(mockAddFlash).toHaveBeenCalledWith(req, expect.objectContaining({ type: 'error' }))
+      expect(mockAddFlash).toHaveBeenCalledWith(
+        req,
+        expect.objectContaining({
+          message: expect.objectContaining({ content: 'HTTP 500' }),
+          type: 'error'
+        })
+      )
     })
   })
 })

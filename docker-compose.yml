@@ -29,6 +29,26 @@ services:
     networks:
       - lime-local-dev
 
+  ob-backend:
+    image: wiremock/wiremock:3.13.1
+    container_name: ob-backend
+    ports:
+      - '8080:8080'
+    environment:
+      CRI_BIND_HOST: ${BIND_HOST:-localhost}
+      CRI_PORT: ${PORT:-3001}
+    command: ['--permitted-system-keys=CRI_.*']
+    volumes:
+      - ./src/utils/dev-tooling/wiremock/mappings:/home/wiremock/mappings:ro
+    healthcheck:
+      test: ['CMD-SHELL', "timeout 1 bash -c 'echo > /dev/tcp/localhost/8080'"]
+      interval: 2s
+      timeout: 3s
+      retries: 15
+      start_period: 3s
+    networks:
+      - lime-local-dev
+
 networks:
   lime-local-dev:
     driver: bridge
