@@ -1,0 +1,43 @@
+name: Coverage checks
+
+on:
+  workflow_call:
+    secrets:
+      SONAR_TOKEN:
+        required: true
+
+jobs:
+  unit-tests:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v6
+      - name: Setup Node
+        uses: govuk-one-login/github-actions/node/install-dependencies@4c76410195b5fcb1804fc7c183ed20704252830f
+        with:
+          node-version-file: '.nvmrc'
+      - name: Unit tests
+        run: npm run test
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v7
+        with:
+          name: coverage
+          path: coverage/
+          retention-days: 1
+
+  sonar-scan:
+    runs-on: ubuntu-latest
+    needs: unit-tests
+    if: github.actor != 'dependabot[bot]'
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v6
+      - name: Run SonarCloud scan
+        uses: govuk-one-login/github-actions/code-quality/sonarcloud@9a6a12e591fecbc651ae646166c644748f442bb9
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          sonar-token: ${{ secrets.SONAR_TOKEN }}
+          coverage-artifact: coverage
+          coverage-run-id: ${{ github.run_id }}
