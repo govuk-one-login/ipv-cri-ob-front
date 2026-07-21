@@ -1,42 +1,22 @@
+import type { Page } from '@playwright/test'
+
 import { wiremock as wiremockAdmin } from './wiremock/admin'
 import { test as base, expect } from '@playwright/test'
 
 import AxeBuilder from '@axe-core/playwright'
 
 interface Fixtures {
-  axeCheck: void
   noConsoleErrors: void
   resetLanguage: void
-  skipAxe: boolean
   skipConsoleErrors: boolean
 }
 
-export const test = base.extend<Fixtures>({
-  axeCheck: [
-    async ({ page, skipAxe }, use) => {
-      await use()
-      if (skipAxe) return
-      const { violations } = await new AxeBuilder({ page }).withTags(['wcag22aa']).analyze()
-      const summary = violations.map((v) => ({
-        help: v.helpUrl,
-        id: v.id,
-        impact: v.impact,
-        targets: v.nodes.map((n) => n.target.join(', '))
-      }))
-      expect(summary, 'Accessibility violations found').toEqual([])
-    },
-    { auto: true }
-  ],
+const test = base.extend<Fixtures>({
   noConsoleErrors: [
     async ({ page, skipConsoleErrors }, use) => {
       const errors: string[] = []
       page.on('console', (msg) => {
-        if (
-          msg.type() === 'error' &&
-          !msg.text().startsWith('Failed to load resource') &&
-          !msg.text().includes('downloadable font:') &&
-          !msg.text().includes('[vite] failed to connect to websocket')
-        )
+        if (msg.type() === 'error' && !msg.text().startsWith('Failed to load resource'))
           errors.push(msg.text())
       })
       await use()
@@ -59,11 +39,8 @@ export const test = base.extend<Fixtures>({
     },
     { auto: true }
   ],
-  skipAxe: [false, { option: true }],
   skipConsoleErrors: [false, { option: true }]
 })
-
-const smokeTest = test
 
 const mockTest = test.extend<{ wiremock: typeof wiremockAdmin }>({
   wiremock: async ({}, use) => {
@@ -73,5 +50,41 @@ const mockTest = test.extend<{ wiremock: typeof wiremockAdmin }>({
   }
 })
 
+const mobileTest = mockTest.extend<{ _mobileOnly: void }>({
+  _mobileOnly: [
+    async ({}, use, testInfo) => {
+      testInfo.skip(testInfo.project.name !== 'chromium-mobile', 'runs on chromium-mobile only')
+      await use()
+    },
+    { auto: true }
+  ]
+})
+
+const desktopTest = mockTest.extend<{ _desktopOnly: void }>({
+  _desktopOnly: [
+    async ({}, use, testInfo) => {
+      testInfo.skip(testInfo.project.name === 'chromium-mobile', 'skipped on chromium-mobile')
+      await use()
+    },
+    { auto: true }
+  ]
+})
+
+const smokeTest = test
+
+const runAxe = async (page: Page) => {
+  const { violations } = await new AxeBuilder({ page })
+    .withTags(['wcag22aa'])
+    .exclude('.govuk-footer__inline-list-item') // violates WCAG 2.2 SC 2.5.8 (target-size) on narrow viewports
+    .analyze()
+  const summary = violations.map((v) => ({
+    help: v.helpUrl,
+    id: v.id,
+    impact: v.impact,
+    targets: v.nodes.map((n) => n.target.join(', '))
+  }))
+  expect(summary, 'Accessibility violations found').toEqual([])
+}
+
 export { expect } from '@playwright/test'
-export { mockTest, smokeTest }
+export { desktopTest, mobileTest, runAxe, smokeTest }

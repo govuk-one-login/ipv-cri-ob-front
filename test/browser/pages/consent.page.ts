@@ -3,8 +3,12 @@ import type { Page } from '@playwright/test'
 export class ConsentPage {
   constructor(private readonly page: Page) {}
 
+  backLink() {
+    return this.page.getByRole('link', { exact: true, name: 'Back' })
+  }
+
   checkConsent() {
-    return this.page.locator('#consent').check()
+    return this.consentCheckbox().check()
   }
 
   consentCheckbox() {
@@ -12,7 +16,11 @@ export class ConsentPage {
   }
 
   continue() {
-    return this.page.getByRole('button', { name: 'Continue' }).click()
+    return this.continueButton().click()
+  }
+
+  continueButton(text: string = 'Continue') {
+    return this.page.getByRole('button', { name: text })
   }
 
   errorMessage() {
@@ -23,14 +31,24 @@ export class ConsentPage {
     return this.page.locator('.govuk-error-summary')
   }
 
-  errorSummaryLink() {
-    return this.page.locator('.govuk-error-summary').getByRole('link', {
-      name: 'You must agree to share your bank account information to continue'
-    })
+  errorSummaryLink(name: string) {
+    return this.errorSummary().getByRole('link', { name })
+  }
+
+  heading() {
+    return this.page.locator('h1')
   }
 
   insetText() {
     return this.page.locator('.govuk-inset-text')
+  }
+
+  mainContent() {
+    return this.page.locator('main')
+  }
+
+  mobileContinueButton() {
+    return this.page.getByRole('button', { name: /Continue to your bank.s app or website/ })
   }
 
   proveAnotherWayLink() {

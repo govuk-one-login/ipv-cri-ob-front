@@ -1,0 +1,78 @@
+{
+  "mappings": [
+    {
+      "name": "create session (all banks offline)",
+      "request": {
+        "method": "POST",
+        "url": "/session",
+        "bodyPatterns": [{ "matchesJsonPath": "$[?(@.request == 'test-jwt-all-banks-offline')]" }]
+      },
+      "response": {
+        "status": 201,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "session_id": "DEADBA4D",
+          "state": "sT@t3",
+          "redirect_uri": "{{request.baseUrl}}/callback"
+        },
+        "transformers": ["response-template"]
+      }
+    },
+    {
+      "name": "get authorization code (all banks offline - no auth code, backend returns access_denied)",
+      "request": {
+        "method": "GET",
+        "urlPath": "/authorization",
+        "headers": {
+          "session_id": {
+            "equalTo": "DEADBA4D"
+          }
+        }
+      },
+      "response": {
+        "status": 403,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "message": "Authorization permission denied",
+          "code": "access_denied"
+        }
+      }
+    },
+    {
+      "name": "get banks (all banks offline)",
+      "request": {
+        "method": "GET",
+        "urlPath": "/banks",
+        "headers": {
+          "session_id": {
+            "equalTo": "DEADBA4D"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": [
+          {
+            "bank_id": "ironforge-vault",
+            "friendly_name": "Vault of Ironforge",
+            "is_sandbox": false,
+            "service_status": false
+          },
+          {
+            "bank_id": "org-counting-house",
+            "friendly_name": "Orgrimmar Counting House",
+            "is_sandbox": false,
+            "service_status": false
+          }
+        ]
+      }
+    }
+  ]
+}

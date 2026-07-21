@@ -7,7 +7,7 @@ import {
   setFrontendUiTranslations
 } from '@govuk-one-login/frontend-ui'
 import { frontendVitalSignsInitFromApp } from '@govuk-one-login/frontend-vital-signs'
-import { flash } from '@src/middleware'
+import { flash, saveSessionOnRedirect } from '@src/middleware'
 import { debugMenu } from '@src/utils/dev-tooling/debug-menu'
 import { setupDevServer } from '@src/utils/dev-tooling/dev-server'
 
@@ -87,6 +87,7 @@ export const createApp = async (): Promise<{ app: Express; router: Router }> => 
 
   if (appConfig.APP.NODE_ENV === 'development') debugMenu.register(router)
 
+  router.use(saveSessionOnRedirect.middleware)
   router.use(flash.middleware)
   routes.configure(router)
   router.use(commonExpress.lib.errorHandling.redirectAsErrorToCallback)

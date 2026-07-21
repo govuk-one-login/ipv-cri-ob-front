@@ -1,12 +1,14 @@
-import { expect, test } from '../fixtures'
+import { expect, runAxe, desktopTest as test } from '../fixtures'
 import { tabToElement } from '../helpers/keyboard'
-import { navigateToRoot } from '../helpers/navigation'
 
 test.describe('Cookie banner', () => {
-  test('accepting cookies sets the user preference cookie', async ({ page }) => {
-    await navigateToRoot(page)
+  test.beforeEach(async ({ page }) => {
+    await page.goto('/')
+  })
 
+  test('accepting cookies sets the user preference cookie', async ({ page }) => {
     await expect(page.locator('#cookies-banner-main')).toBeVisible()
+    await runAxe(page)
 
     await page.getByRole('button', { name: 'Accept additional cookies' }).click()
 
@@ -19,13 +21,12 @@ test.describe('Cookie banner', () => {
     await expect(page.locator('#cookies-accepted')).toContainText(
       "You've accepted additional cookies."
     )
+    await page.getByRole('button', { name: 'Hide this message' }).click()
+    await expect(page.locator('#cookies-accepted')).not.toBeVisible()
   })
 
   test('rejecting cookies sets the user preference cookie', async ({ page }) => {
-    await navigateToRoot(page)
-
     await expect(page.locator('#cookies-banner-main')).toBeVisible()
-
     await page.getByRole('button', { name: 'Reject additional cookies' }).click()
 
     const cookies = await page.context().cookies()
@@ -37,23 +38,7 @@ test.describe('Cookie banner', () => {
     await expect(page.locator('#cookies-rejected')).toContainText(
       "You've rejected additional cookies."
     )
-  })
-
-  test('user can hide the accepted cookies confirmation banner', async ({ page }) => {
-    await navigateToRoot(page)
-
-    await page.getByRole('button', { name: 'Accept additional cookies' }).click()
     await page.getByRole('button', { name: 'Hide this message' }).click()
-
-    await expect(page.locator('#cookies-accepted')).not.toBeVisible()
-  })
-
-  test('user can hide the rejected cookies confirmation banner', async ({ page }) => {
-    await navigateToRoot(page)
-
-    await page.getByRole('button', { name: 'Reject additional cookies' }).click()
-    await page.getByRole('button', { name: 'Hide this message' }).click()
-
     await expect(page.locator('#cookies-rejected')).not.toBeVisible()
   })
 
@@ -61,8 +46,6 @@ test.describe('Cookie banner', () => {
     test('user can tab to Accept additional cookies and activate it with Enter', async ({
       page
     }) => {
-      await navigateToRoot(page)
-
       await tabToElement(page, 'button[data-module="govuk-button"]')
       await page.keyboard.press('Enter')
 
@@ -72,8 +55,6 @@ test.describe('Cookie banner', () => {
     test('user can tab to Reject additional cookies and activate it with Enter', async ({
       page
     }) => {
-      await navigateToRoot(page)
-
       await tabToElement(page, 'button[data-module="govuk-button"]')
       await page.keyboard.press('Tab')
       await page.keyboard.press('Enter')
@@ -84,8 +65,6 @@ test.describe('Cookie banner', () => {
     test('user can tab to Hide this message and dismiss the banner with Enter', async ({
       page
     }) => {
-      await navigateToRoot(page)
-
       await page.getByRole('button', { name: 'Accept additional cookies' }).click()
       await page.locator('#cookies-accepted a.cookie-hide-button').focus()
       await page.keyboard.press('Enter')

@@ -6,7 +6,7 @@ Playwright-based browser tests for the Open Banking frontend.
 
 ### Mock (`@mock`)
 
-All specs and journeys run under this mode, locally and in CI. Backing APIs are stubbed by WireMock; the mappings live in `wiremock/mappings/`.
+All specs and mock journeys run under this mode, locally and in CI. APIs are stubbed by WireMock, mappings live in `wiremock/mappings/`.
 
 ```shell
 npm run build # must be re-run if changing the application `src` code, otherwise only needs to be run once
@@ -38,12 +38,21 @@ APP_URL=https://... npx playwright test --config playwright.smoke.config.ts
 
 ## Fixtures
 
-| Export      | Use for                                                                   |
-|-------------|---------------------------------------------------------------------------|
-| `test`      | Specs and general use — includes axe and console error checks             |
-| `mockTest`  | Journeys that need to verify WireMock calls (adds `wiremock` fixture and resets state before each test) |
-| `smokeTest` | Smoke journeys                                                            |
+| Export        | Use for                                                         |
+|---------------|-----------------------------------------------------------------|
+| `desktopTest` | Skips on `chromium-mobile` (covers desktop + tablet) (WireMock) |
+| `mobileTest`  | Runs on `chromium-mobile` only (WireMock)                       |
+| `smokeTest`   | Smoke journeys (AWS)                                            |
 
-## Coverage
+## Auto-fixtures (applied to every test automatically)
 
-For a full breakdown of test coverage, devices, and configurations see [COVERAGE.md](./COVERAGE.md).
+| Fixture           | Behaviour                                                                             |
+|-------------------|---------------------------------------------------------------------------------------|
+| `noConsoleErrors` | Fails if any `console.error` is emitted. Disable with `skipConsoleErrors: true`       |
+| `resetLanguage`   | Sets `lng=en` cookie before each test to prevent language state leaking between tests |
+
+## Opt-in helpers
+
+| Helper     | Behaviour                                                                                         |
+|------------|---------------------------------------------------------------------------------------------------|
+| `runAxe`   | Runs axe-core WCAG 2.2 AA scan on the current page. Call for one element-assertion test per spec. |

@@ -1,4 +1,6 @@
-import { expect, test } from '../fixtures'
+import paths from '../../../src/config/paths'
+import { expect, runAxe, desktopTest as test } from '../fixtures'
+import { tabToElement } from '../helpers/keyboard'
 import { StartPage } from '../pages/start.page'
 
 test.describe('Start page', () => {
@@ -9,38 +11,28 @@ test.describe('Start page', () => {
     await startPage.goto()
   })
 
-  test('user is directed to the Start Page with correct Title and Continue Button', async ({
-    page
-  }) => {
-    await expect(page.locator('h1')).toContainText(
+  test('renders the expected page elements', async ({ page }) => {
+    await expect(startPage.heading()).toContainText(
       'Finish proving your identity by signing in to your online banking'
     )
     await expect(page).toHaveTitle(
       /Finish proving your identity by signing in to your online banking/
     )
-    await expect(page.getByRole('button', { name: 'Continue' })).toBeVisible()
+    await expect(startPage.continueButton()).toBeVisible()
+    await expect(startPage.detailsToggle()).toBeVisible()
+    await expect(startPage.proveAnotherWayLink()).toBeVisible()
+
+    await runAxe(page)
   })
 
-  test('user is displayed with the How does online banking prove my identity? Drop down', async ({
-    page
-  }) => {
-    await expect(page.locator('details summary')).toBeVisible()
-  })
-
-  test('user clicks the How does online banking prove my identity? dropdown and additional information is displayed', async ({
-    page
-  }) => {
+  test('clicking the "How does online banking prove my identity?" toggle expands additional info', async () => {
     await startPage.openDetails()
 
-    await expect(page.locator('details')).toHaveAttribute('open')
-    await expect(page.locator('details .govuk-details__text')).toContainText(
-      /Banks have very strong security/
-    )
+    await expect(startPage.detailsWrapper()).toHaveAttribute('open')
+    await expect(startPage.detailsBody()).toContainText(/Banks have very strong security/)
   })
 
-  test('user clicks the Our privacy notice link and is directed to the correct page in a new tab', async ({
-    page
-  }) => {
+  test('privacy notice link opens in a new tab', async ({ page }) => {
     const [popup] = await Promise.all([
       page.waitForEvent('popup'),
       startPage.privacyNoticeLink().click()
@@ -51,15 +43,33 @@ test.describe('Start page', () => {
     )
   })
 
-  test('user clicks the Financial Conduct Authority link and is directed to the correct page in a new tab', async ({
-    page
-  }) => {
+  test('Financial Conduct Authority link opens in a new tab', async ({ page }) => {
     const [popup] = await Promise.all([page.waitForEvent('popup'), startPage.fcaLink().click()])
 
     await expect(popup).toHaveURL('https://register.fca.org.uk/s/firm?id=0010X00004KSo9HQAT')
   })
 
-  test('user is displayed with the the Prove your identity another way link', async () => {
-    await expect(startPage.proveAnotherWayLink()).toBeVisible()
+  test.describe('Keyboard navigation', () => {
+    test('user can toggle the details summary and tab to the Prove another way link', async ({
+      page
+    }) => {
+      await test.step('open the details summary with Enter', async () => {
+        await tabToElement(page, 'details summary')
+        await page.keyboard.press('Enter')
+        await expect(startPage.detailsWrapper()).toHaveAttribute('open', '')
+      })
+
+      await test.step('tab onwards to the Prove another way link', async () => {
+        await tabToElement(page, `a.govuk-link[href="${paths.steps.proveAnotherWay}"]`)
+        await expect(startPage.proveAnotherWayLink()).toBeFocused()
+      })
+    })
+
+    test('user can tab to the Continue link and activate it with Enter', async ({ page }) => {
+      await tabToElement(page, 'a.govuk-button')
+      await page.keyboard.press('Enter')
+
+      await expect(page).not.toHaveURL(/\/finish-proving-identity-online-banking/)
+    })
   })
 })

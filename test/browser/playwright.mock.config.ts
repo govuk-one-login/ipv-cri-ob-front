@@ -10,17 +10,15 @@ export default defineConfig({
     { name: 'chromium-tablet', use: { ...devices['iPad Pro'] } }
   ],
   reporter: [['list'], ['html', { open: 'never' }]],
-  retries: process.env['CI'] ? 3 : 1, // Added retry for local dev
+  retries: process.env['CI'] ? 3 : 1,
   testDir: '.',
   testMatch: ['journeys/mock/**/*.journey.ts', 'specs/**/*.spec.ts'],
-  timeout: 60_000, // Increased from 30s
+  timeout: 60_000,
   use: {
-    actionTimeout: 15_000, // Increased from 10s
+    actionTimeout: 15_000,
     baseURL: APP_URL.origin,
-    navigationTimeout: 30_000, // Increased from 15s
-    screenshot: 'only-on-failure', // Only capture on failures
-    trace: 'retry-with-trace', // Add trace for debugging retries
-    video: 'retain-on-failure' // Keep videos on failure
+    navigationTimeout: 30_000,
+    screenshot: 'on'
   },
   workers: 1
 })

@@ -1,0 +1,88 @@
+{
+  "mappings": [
+    {
+      "name": "create session (prove another way)",
+      "request": {
+        "method": "POST",
+        "url": "/session",
+        "bodyPatterns": [{ "matchesJsonPath": "$[?(@.request == 'test-jwt-prove-another-way')]" }]
+      },
+      "response": {
+        "status": 201,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "session_id": "ABAD1DEA",
+          "state": "sT@t3",
+          "redirect_uri": "{{request.baseUrl}}/callback"
+        },
+        "transformers": ["response-template"]
+      }
+    },
+    {
+      "name": "get banks (prove another way)",
+      "request": {
+        "method": "GET",
+        "urlPath": "/banks",
+        "headers": {
+          "session_id": {
+            "equalTo": "ABAD1DEA"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": [
+          {
+            "bank_id": "ironforge-vault",
+            "friendly_name": "Vault of Ironforge",
+            "is_sandbox": false,
+            "service_status": true
+          }
+        ]
+      }
+    },
+    {
+      "name": "get authorization code (prove another way - no auth code, backend returns access_denied)",
+      "request": {
+        "method": "GET",
+        "urlPath": "/authorization",
+        "headers": {
+          "session_id": {
+            "equalTo": "ABAD1DEA"
+          }
+        }
+      },
+      "response": {
+        "status": 403,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "message": "Authorization permission denied",
+          "code": "access_denied"
+        }
+      }
+    },
+    {
+      "name": "oauth callback (prove another way)",
+      "request": {
+        "method": "GET",
+        "urlPath": "/callback",
+        "queryParameters": {
+          "error": {
+            "equalTo": "access_denied"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "body": "OAuth callback received (prove another way)"
+      }
+    }
+  ]
+}

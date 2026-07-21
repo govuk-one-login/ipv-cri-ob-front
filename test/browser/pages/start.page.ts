@@ -1,12 +1,32 @@
 import type { Page } from '@playwright/test'
 
-import { start } from '../constants'
+import paths from '../../../src/config/paths'
 
 export class StartPage {
   constructor(private readonly page: Page) {}
 
+  backLink() {
+    return this.page.getByRole('link', { exact: true, name: 'Back' })
+  }
+
   continue() {
-    return this.page.getByRole('button', { name: 'Continue' }).click()
+    return this.continueButton().click()
+  }
+
+  continueButton() {
+    return this.page.getByRole('button', { name: 'Continue' })
+  }
+
+  detailsBody() {
+    return this.page.locator('details .govuk-details__text')
+  }
+
+  detailsToggle() {
+    return this.page.locator('details summary')
+  }
+
+  detailsWrapper() {
+    return this.page.locator('details')
   }
 
   fcaLink() {
@@ -16,11 +36,15 @@ export class StartPage {
   }
 
   goto() {
-    return this.page.goto(start)
+    return this.page.goto(paths.steps.start)
+  }
+
+  heading() {
+    return this.page.locator('h1')
   }
 
   openDetails() {
-    return this.page.locator('details summary').click()
+    return this.detailsToggle().click()
   }
 
   privacyNoticeLink() {
