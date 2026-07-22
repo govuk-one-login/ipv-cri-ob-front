@@ -31,7 +31,7 @@ export const createApp = async (): Promise<{ app: Express; router: Router }> => 
       if (appConfig.APP.NODE_ENV === 'development') setupDevServer(app)
       commonExpress.lib.i18n.setI18n({
         config: {
-          additionalNamespaces: ['translation', 'errors'], // 'translation' is the namespace frontend-ui provides for common components (cookie banner, progress button etc)
+          additionalNamespaces: ['translation', 'errors', 'pages'], // 'translation' is the namespace frontend-ui provides for common components (cookie banner, progress button etc)
           cookieDomain: appConfig.APP.GTM.ANALYTICS_COOKIE_DOMAIN
         },
         onInit: setFrontendUiTranslations,

@@ -1,12 +1,8 @@
-import type { Page } from '@playwright/test'
+import { BasePage } from './base.page'
 
-export class ConsentPage {
-  constructor(private readonly page: Page) {}
+import paths from '../../../src/config/paths'
 
-  backLink() {
-    return this.page.getByRole('link', { exact: true, name: 'Back' })
-  }
-
+export class ConsentPage extends BasePage {
   checkConsent() {
     return this.consentCheckbox().check()
   }
@@ -19,39 +15,15 @@ export class ConsentPage {
     return this.continueButton().click()
   }
 
-  continueButton(text: string = 'Continue') {
-    return this.page.getByRole('button', { name: text })
-  }
-
-  errorMessage() {
-    return this.page.locator('.govuk-error-message')
-  }
-
-  errorSummary() {
-    return this.page.locator('.govuk-error-summary')
-  }
-
-  errorSummaryLink(name: string) {
-    return this.errorSummary().getByRole('link', { name })
-  }
-
-  heading() {
-    return this.page.locator('h1')
+  continueButton() {
+    return this.page.locator('.govuk-button--progress')
   }
 
   insetText() {
     return this.page.locator('.govuk-inset-text')
   }
 
-  mainContent() {
-    return this.page.locator('main')
-  }
-
-  mobileContinueButton() {
-    return this.page.getByRole('button', { name: /Continue to your bank.s app or website/ })
-  }
-
   proveAnotherWayLink() {
-    return this.page.getByRole('link', { name: 'Prove your identity another way' })
+    return this.page.locator(`main a[href="${paths.steps.proveAnotherWay}"]`)
   }
 }

@@ -1,4 +1,5 @@
 import { expect, runAxe, test } from '../fixtures'
+import { switchToWelsh } from '../helpers/language'
 
 import paths from '../../../src/config/paths'
 
@@ -19,6 +20,12 @@ test.describe('Error and failure pages', { tag: '@desktop' }, () => {
     ).toHaveAttribute('href', 'https://home.account.gov.uk/contact-gov-uk-one-login')
 
     await runAxe(page)
+
+    await test.step('the 404 page has a Welsh translation', async () => {
+      await switchToWelsh(page)
+      await expect(page).toHaveTitle(/Tudalen heb ei darganfod/)
+      await expect(page.locator('h1')).toContainText('Tudalen heb ei darganfod')
+    })
   })
 
   test('accessing choose-bank without a session shows the generic error page', async ({ page }) => {
@@ -27,7 +34,14 @@ test.describe('Error and failure pages', { tag: '@desktop' }, () => {
 
     await expect(page.locator('h1')).toContainText('Sorry, there is a problem')
     await expect(page).toHaveTitle(/Sorry, there is a problem/)
+
     await runAxe(page)
+
+    await test.step('the generic error page has a Welsh translation', async () => {
+      await switchToWelsh(page)
+      await expect(page).toHaveTitle(/Mae'n ddrwg gennym, mae problem/)
+      await expect(page.locator('h1')).toContainText("Mae'n ddrwg gennym, mae problem")
+    })
   })
 
   test('accessing a page out of sequence redirects to the current page', async ({ page }) => {

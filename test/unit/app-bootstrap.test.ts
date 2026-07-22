@@ -128,6 +128,17 @@ describe('createApp', () => {
     )
   })
 
+  it('configures the helmet security policy', async () => {
+    const { default: commonExpress } = await import('@govuk-one-login/di-ipv-cri-common-express')
+    const { default: helmetConfig } = await import('@src/config/helmet')
+    const { createApp } = await import('@src/app-bootstrap')
+    await createApp()
+
+    expect(commonExpress.bootstrap.setup).toHaveBeenCalledWith(
+      expect.objectContaining({ helmet: helmetConfig })
+    )
+  })
+
   it('enables request logging in production', async () => {
     vi.stubEnv('NODE_ENV', 'production')
     const commonExpress = (await import('@govuk-one-login/di-ipv-cri-common-express')).default
@@ -151,7 +162,13 @@ describe('createApp', () => {
     const { app } = await createApp()
 
     expect(commonExpress.lib.i18n.setI18n).toHaveBeenCalledWith(
-      expect.objectContaining({ onInit: setFrontendUiTranslations, router: app })
+      expect.objectContaining({
+        config: expect.objectContaining({
+          additionalNamespaces: expect.arrayContaining(['translation', 'errors', 'pages'])
+        }),
+        onInit: setFrontendUiTranslations,
+        router: app
+      })
     )
     expect(app.use).toHaveBeenNthCalledWith(1, frontendUiMiddleware)
     expect(app.use).toHaveBeenNthCalledWith(2, frontendUiLocals.getGTM)

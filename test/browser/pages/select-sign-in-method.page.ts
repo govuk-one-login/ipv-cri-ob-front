@@ -1,8 +1,6 @@
-import type { Page } from '@playwright/test'
+import { BasePage } from './base.page'
 
-export class SelectSignInMethodPage {
-  constructor(private readonly page: Page) {}
-
+export class SelectSignInMethodPage extends BasePage {
   chooseStayOnThisDevice() {
     return this.stayOnThisDeviceRadio().check()
   }
@@ -16,22 +14,14 @@ export class SelectSignInMethodPage {
   }
 
   continueButton() {
-    return this.page.getByRole('button', { name: 'Continue' })
-  }
-
-  heading() {
-    return this.page.locator('h1')
+    return this.page.locator('main .govuk-button-group .govuk-button')
   }
 
   stayOnThisDeviceRadio() {
-    return this.page.getByRole('radio', {
-      name: /Stay on this device and use your bank.s website/
-    })
+    return this.page.locator('input[type="radio"][value="stay-on-current-device"]')
   }
 
   useDifferentDeviceRadio() {
-    return this.page.getByRole('radio', {
-      name: /Use your phone or tablet and scan a QR code/
-    })
+    return this.page.locator('input[type="radio"][value="use-different-device"]')
   }
 }

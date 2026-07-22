@@ -54,7 +54,7 @@ test.describe('Journey: Happy path (mobile)', { tag: ['@mock', '@mobile'] }, () 
     page
   }) => {
     const consentPage = await goToConsent(page)
-    await consentPage.mobileContinueButton().click()
+    await consentPage.continue()
 
     await transitStubAndAssertSpinner(page)
   })

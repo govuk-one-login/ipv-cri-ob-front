@@ -1,14 +1,10 @@
-import type { Page } from '@playwright/test'
+import { BasePage } from './base.page'
 
-export class ChooseBankPage {
-  constructor(private readonly page: Page) {}
+import paths from '../../../src/config/paths'
 
-  backLink() {
-    return this.page.getByRole('link', { exact: true, name: 'Back' })
-  }
-
+export class ChooseBankPage extends BasePage {
   bankNotListedLink() {
-    return this.page.getByRole('link', { name: 'My bank is not listed' })
+    return this.page.locator(`main a[href="${paths.steps.proveAnotherWay}"]`)
   }
 
   bankSelect() {
@@ -23,24 +19,8 @@ export class ChooseBankPage {
     return this.continueButton().click()
   }
 
-  continueButton(text: string = 'Continue') {
-    return this.page.getByRole('button', { name: text })
-  }
-
-  errorMessage() {
-    return this.page.locator('.govuk-error-message')
-  }
-
-  errorSummary() {
-    return this.page.locator('.govuk-error-summary')
-  }
-
-  errorSummaryLink(name: string) {
-    return this.errorSummary().getByRole('link', { name })
-  }
-
-  heading() {
-    return this.page.locator('h1')
+  continueButton() {
+    return this.page.locator('.govuk-button--progress')
   }
 
   selectBank(value: string) {

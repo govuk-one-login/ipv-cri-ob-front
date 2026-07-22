@@ -1,12 +1,6 @@
-import type { Page } from '@playwright/test'
+import { BasePage } from './base.page'
 
-export class CheckDetailsPage {
-  constructor(private readonly page: Page) {}
-
-  heading() {
-    return this.page.locator('h1')
-  }
-
+export class CheckDetailsPage extends BasePage {
   spinnerButton() {
     return this.page.locator('.govuk-button--progress-loading')
   }
