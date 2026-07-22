@@ -1,11 +1,11 @@
-import { expect, desktopTest as test } from '../../fixtures'
+import { expect, test } from '../../fixtures'
 import { AuthorisePage } from '../../pages/authorise.page'
 import { CallbackPage } from '../../pages/callback.page'
 import { StartPage } from '../../pages/start.page'
 
 test.describe.configure({ mode: 'serial' })
 
-test.describe('Journey: all banks offline', { tag: '@mock' }, () => {
+test.describe('Journey: all banks offline', { tag: ['@mock', '@desktop'] }, () => {
   test('user is diverted through prove-another-way and returned to the client callback', async ({
     page
   }) => {

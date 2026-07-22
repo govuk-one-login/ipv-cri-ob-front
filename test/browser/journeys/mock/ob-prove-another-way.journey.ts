@@ -1,4 +1,4 @@
-import { expect, desktopTest as test } from '../../fixtures'
+import { expect, test } from '../../fixtures'
 import { AuthorisePage } from '../../pages/authorise.page'
 import { CallbackPage } from '../../pages/callback.page'
 import { StartPage } from '../../pages/start.page'
@@ -7,7 +7,7 @@ test.describe.configure({ mode: 'serial' })
 
 test.describe(
   'Journey: prove your identity another way (abort from start page)',
-  { tag: '@mock' },
+  { tag: ['@mock', '@desktop'] },
   () => {
     test('user aborts the journey from the start page and is redirected to the callback', async ({
       page,

@@ -1,8 +1,8 @@
-import { expect, runAxe, desktopTest as test } from '../fixtures'
+import { expect, runAxe, test } from '../fixtures'
 
 import paths from '../../../src/config/paths'
 
-test.describe('Error and failure pages', () => {
+test.describe('Error and failure pages', { tag: '@desktop' }, () => {
   test.use({ skipConsoleErrors: true })
 
   test('navigating to a non-existent route shows the 404 page', async ({ page }) => {

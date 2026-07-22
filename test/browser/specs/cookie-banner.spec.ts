@@ -1,7 +1,7 @@
-import { expect, runAxe, desktopTest as test } from '../fixtures'
+import { expect, runAxe, test } from '../fixtures'
 import { tabToElement } from '../helpers/keyboard'
 
-test.describe('Cookie banner', () => {
+test.describe('Cookie banner', { tag: '@desktop' }, () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/')
   })

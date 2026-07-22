@@ -1,6 +1,6 @@
 import type { Page } from '@playwright/test'
 
-import { expect, runAxe, desktopTest as test } from '../fixtures'
+import { expect, runAxe, test } from '../fixtures'
 import { activateWithKeyboard, tabToElement } from '../helpers/keyboard'
 import { AuthorisePage } from '../pages/authorise.page'
 import { ChooseBankPage } from '../pages/choose-bank.page'
@@ -18,7 +18,7 @@ const navigate = async (page: Page, buttonText: string) => {
   await page.getByRole('button', { name: buttonText }).click()
 }
 
-test.describe('Choose bank', () => {
+test.describe('Choose bank', { tag: '@desktop' }, () => {
   let chooseBankPage: ChooseBankPage
 
   test.beforeEach(async ({ page }) => {

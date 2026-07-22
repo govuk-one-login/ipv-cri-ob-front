@@ -1,6 +1,6 @@
 import type { Page } from '@playwright/test'
 
-import { desktopTest, expect, mobileTest } from '../../fixtures'
+import { expect, test } from '../../fixtures'
 import { AuthorisePage } from '../../pages/authorise.page'
 import { CheckDetailsPage } from '../../pages/check-details.page'
 import { ChooseBankPage } from '../../pages/choose-bank.page'
@@ -34,30 +34,28 @@ const transitStubAndAssertSpinner = async (page: Page) => {
   await expect(checkDetails.spinnerButton()).toBeVisible()
 }
 
-desktopTest.describe('Journey: Happy path (desktop)', { tag: '@mock' }, () => {
-  desktopTest(
-    'user picks a bank, gives consent, chooses to stay on this device and lands on the check-details spinner',
-    async ({ page }) => {
-      const consentPage = await goToConsent(page)
-      await consentPage.continue()
+test.describe('Journey: Happy path (desktop)', { tag: ['@mock', '@desktop'] }, () => {
+  test('user picks a bank, gives consent, chooses to stay on this device and lands on the check-details spinner', async ({
+    page
+  }) => {
+    const consentPage = await goToConsent(page)
+    await consentPage.continue()
 
-      const signInMethod = new SelectSignInMethodPage(page)
-      await signInMethod.chooseStayOnThisDevice()
-      await signInMethod.continue()
+    const signInMethod = new SelectSignInMethodPage(page)
+    await signInMethod.chooseStayOnThisDevice()
+    await signInMethod.continue()
 
-      await transitStubAndAssertSpinner(page)
-    }
-  )
+    await transitStubAndAssertSpinner(page)
+  })
 })
 
-mobileTest.describe('Journey: Happy path (mobile)', { tag: '@mock' }, () => {
-  mobileTest(
-    'consent redirects directly to the bank stub, bypassing the select-sign-in-method screen',
-    async ({ page }) => {
-      const consentPage = await goToConsent(page)
-      await consentPage.mobileContinueButton().click()
+test.describe('Journey: Happy path (mobile)', { tag: ['@mock', '@mobile'] }, () => {
+  test('consent redirects directly to the bank stub, bypassing the select-sign-in-method screen', async ({
+    page
+  }) => {
+    const consentPage = await goToConsent(page)
+    await consentPage.mobileContinueButton().click()
 
-      await transitStubAndAssertSpinner(page)
-    }
-  )
+    await transitStubAndAssertSpinner(page)
+  })
 })

@@ -11,7 +11,7 @@ interface Fixtures {
   skipConsoleErrors: boolean
 }
 
-const test = base.extend<Fixtures>({
+const smokeTest = base.extend<Fixtures>({
   noConsoleErrors: [
     async ({ page, skipConsoleErrors }, use) => {
       const errors: string[] = []
@@ -42,35 +42,13 @@ const test = base.extend<Fixtures>({
   skipConsoleErrors: [false, { option: true }]
 })
 
-const mockTest = test.extend<{ wiremock: typeof wiremockAdmin }>({
+const test = smokeTest.extend<{ wiremock: typeof wiremockAdmin }>({
   wiremock: async ({}, use) => {
     await wiremockAdmin.resetScenarios()
     await wiremockAdmin.resetRequests()
     await use(wiremockAdmin)
   }
 })
-
-const mobileTest = mockTest.extend<{ _mobileOnly: void }>({
-  _mobileOnly: [
-    async ({}, use, testInfo) => {
-      testInfo.skip(testInfo.project.name !== 'chromium-mobile', 'runs on chromium-mobile only')
-      await use()
-    },
-    { auto: true }
-  ]
-})
-
-const desktopTest = mockTest.extend<{ _desktopOnly: void }>({
-  _desktopOnly: [
-    async ({}, use, testInfo) => {
-      testInfo.skip(testInfo.project.name === 'chromium-mobile', 'skipped on chromium-mobile')
-      await use()
-    },
-    { auto: true }
-  ]
-})
-
-const smokeTest = test
 
 const runAxe = async (page: Page) => {
   const { violations } = await new AxeBuilder({ page })
@@ -87,4 +65,4 @@ const runAxe = async (page: Page) => {
 }
 
 export { expect } from '@playwright/test'
-export { desktopTest, mobileTest, runAxe, smokeTest }
+export { runAxe, smokeTest, test }
