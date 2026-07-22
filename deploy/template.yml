@@ -811,7 +811,7 @@ Resources:
         MetricSpecifications:
           - PredefinedMetricPairSpecification:
               PredefinedMetricType: ECSServiceCPUUtilization
-            TargetValue: 60
+            TargetValue: 30
         Mode: ForecastOnly
         SchedulingBufferTime: 600
 
@@ -826,31 +826,17 @@ Resources:
       ServiceNamespace: ecs
       StepScalingPolicyConfiguration:
         AdjustmentType: PercentChangeInCapacity
-        Cooldown:
-          180 # The policy will continue to respond to additional alarm breaches,
-        # even while a scaling activity is in progress. This means Application
-        # Auto Scaling will evaluate all alarm breaches as they occur.
-        # A cooldown period is used to protect against over-scaling due to
-        # multiple alarm breaches occurring in rapid succession.
-        MinAdjustmentMagnitude: 1
-        StepAdjustments:
-          - MetricIntervalUpperBound: 0 # 60%
-            ScalingAdjustment: 100 # Scale by 100% of containers if the metric is breached
-            # with <60% utilisation
-          - MetricIntervalLowerBound: 0 # 60%
-            MetricIntervalUpperBound: 30 # 90%
-            ScalingAdjustment: 200 # Scale by 200% of containers if the metric is breached
-            # with 80-90% utilisation
-          - MetricIntervalLowerBound: 30 # 90%
-            MetricIntervalUpperBound: 35 # 95%
-            ScalingAdjustment: 300 # Scale by 300% of containers if the metric is breached
-            # with 90-95% utilisation
-          - MetricIntervalLowerBound: 35 # 95%
-            ScalingAdjustment:
-              500 # Scale by 500% of containers if the metric is breached
-            # with >95% utilisation
-            # Note: CPU can scale greater than 100% in a burst mode
-            # on Fargate, so leave the upper bound open
+        Cooldown: 60
+        MinAdjustmentMagnitude: 3
+        StepAdjustments: # These are tuned for a single-threaded node process using 1 of 2 vCPUs
+          - MetricIntervalUpperBound: 10 # 40% (80% of node process)
+            ScalingAdjustment: 100 # Scale up 100% of containers if 30-40% utilisation
+          - MetricIntervalLowerBound: 10 # 40% (80% of node process)
+            MetricIntervalUpperBound: 15 # 45% (90% of node process)
+            ScalingAdjustment: 200 # Scale up 200% of containers if 40-45% utilisation
+          - MetricIntervalLowerBound: 15 # 45% (90% of node process)
+            ScalingAdjustment: 500 # Scale up 500% of containers if over 45% utilisation
+            # Note: CPU can scale greater than 100% in a burst mode on Fargate, so leave the upper bound open
 
   EcsStepScaleInPolicy:
     DependsOn: ECSAutoScalingTarget
@@ -863,21 +849,13 @@ Resources:
       ServiceNamespace: ecs
       StepScalingPolicyConfiguration:
         AdjustmentType: PercentChangeInCapacity
-        Cooldown:
-          180 # The policy will continue to respond to additional alarm breaches,
-        # even while a scaling activity is in progress. This means Application
-        # Auto Scaling will evaluate all alarm breaches as they occur.
-        # A cooldown period is used to protect against under-scaling due to
-        # multiple alarm breaches occurring in rapid succession.
+        Cooldown: 300
         StepAdjustments:
-          - MetricIntervalUpperBound: -15 # 5%
-            ScalingAdjustment: -90 # Scale down by 90% of containers if the metric is breached
-            # with <5% utilisation
-          - MetricIntervalLowerBound: -15 # 5%
-            MetricIntervalUpperBound: 0 # 20%
-            ScalingAdjustment:
-              -50 # Scale down 50% of containers if the metric is breached
-            # with <20% utilisation
+          - MetricIntervalUpperBound: -15 # 5% (10% of node process)
+            ScalingAdjustment: -60 # Scale down 60% of containers if less than 5% utilisation
+          - MetricIntervalLowerBound: -15 # 5% (10% of node process)
+            MetricIntervalUpperBound: 0 # 20% (40% of node process)
+            ScalingAdjustment: -20 # Scale down 20% of containers if less than 20% utilisation
 
   ####################################################################
   #                                                                  #
@@ -893,7 +871,7 @@ Resources:
       ActionsEnabled: true
       AlarmActions:
         - !Ref EcsStepScaleOutPolicy
-      AlarmDescription: !Sub "Open Banking ${Environment} ECS service average CPU utilization has exceeded 60% for 1 consecutive minute. Triggers step scale-out policy."
+      AlarmDescription: !Sub "Open Banking ${Environment} ECS service average CPU utilization has exceeded 30% for 1 consecutive minute. Triggers step scale-out policy."
       ComparisonOperator: "GreaterThanThreshold"
       DatapointsToAlarm: "1"
       Dimensions:
@@ -907,7 +885,7 @@ Resources:
       Namespace: "AWS/ECS"
       Statistic: "Average"
       Period: "60"
-      Threshold: "60"
+      Threshold: "30"
 
   EcsScaleInAlarm:
     DependsOn: ECSAutoScalingTarget
