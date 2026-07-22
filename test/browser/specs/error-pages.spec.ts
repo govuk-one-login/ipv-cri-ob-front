@@ -1,5 +1,6 @@
-import paths from '../../../src/config/paths'
 import { expect, runAxe, desktopTest as test } from '../fixtures'
+
+import paths from '../../../src/config/paths'
 
 test.describe('Error and failure pages', () => {
   test.use({ skipConsoleErrors: true })

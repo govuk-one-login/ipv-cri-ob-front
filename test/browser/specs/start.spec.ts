@@ -1,7 +1,8 @@
-import paths from '../../../src/config/paths'
 import { expect, runAxe, desktopTest as test } from '../fixtures'
 import { tabToElement } from '../helpers/keyboard'
 import { StartPage } from '../pages/start.page'
+
+import paths from '../../../src/config/paths'
 
 test.describe('Start page', () => {
   let startPage: StartPage
