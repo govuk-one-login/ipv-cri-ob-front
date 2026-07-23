@@ -16,7 +16,7 @@ const DeploymentEnvSchema = z.enum([
 const AppConfigSchema = z
   .object({
     API: z.object({
-      BASE_URL: z.url(),
+      BASE_URL: z.url().nonempty(),
       PATHS: z.object({
         AUTHORIZATION: z.string().nonempty(),
         BANKS: z.string().nonempty(),

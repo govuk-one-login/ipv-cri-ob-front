@@ -33,6 +33,26 @@ export default defineConfig({
           include: ['test/infra/**/*.test.ts'],
           name: 'infra'
         }
+      },
+      {
+        resolve: {
+          alias: {
+            '@src': path.resolve(__dirname, 'src')
+          }
+        },
+        test: {
+          env: {
+            API_BASE_URL: 'http://api.ob.cri.gov.uk:1337',
+            CSRF_SECRET: 'not-a-real-csrf-secret', // pragma: allowlist secret
+            LOG_LEVEL: 'silent',
+            NODE_ENV: 'test',
+            SESSION_SECRET: 'not-a-real-secret', // pragma: allowlist secret
+            USE_PINO_LOGGER: 'true'
+          },
+          include: ['test/integration/**/*.integration.test.ts'],
+          name: 'integration',
+          setupFiles: ['test/integration/setup.ts']
+        }
       }
     ],
     silent: 'passed-only'
