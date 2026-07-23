@@ -54,7 +54,7 @@ describe('app-bootstrap', () => {
   })
 
   it('accepts a POST when a valid CSRF token is provided', async () => {
-    const banksApi = mockAgent.get('http://api.ob.cri.gov.uk:1337')
+    const banksApi = mockAgent.get(process.env['API_BASE_URL']!)
     banksApi
       .intercept({ path: '/banks', method: 'GET' })
       .reply(200, [
@@ -90,5 +90,7 @@ describe('app-bootstrap', () => {
 
     expect(res.status).toBe(200)
     expect(res.headers['content-security-policy']).toContain('default-src')
+    expect(res.headers['x-frame-options']).toBe('DENY')
+    expect(res.headers['x-content-type-options']).toBe('nosniff')
   })
 })
