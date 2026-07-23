@@ -10,24 +10,11 @@ ENVIRONMENT="${ENVIRONMENT:-${TEST_ENVIRONMENT:-build}}"
 echo "ENVIRONMENT: ${ENVIRONMENT}"
 echo "STACK_NAME: ${STACK_NAME}"
 
-if [[ "${STACK_NAME}" != "local" ]]; then
-  echo "Fetching test configuration from SSM..."
+APP_URL="https://review-ob.${ENVIRONMENT}.account.gov.uk"
+CORE_STUB_URL="https://test-resources.review-ob.${ENVIRONMENT}.account.gov.uk"
 
-  APP_URL=$(aws ssm get-parameter \
-    --name "/tests/${STACK_NAME}/appUrl" \
-    --region eu-west-2 \
-    --query "Parameter.Value" \
-    --output text)
-
-  CORE_STUB_URL=$(aws ssm get-parameter \
-    --name "/tests/${STACK_NAME}/coreStubUrl" \
-    --region eu-west-2 \
-    --query "Parameter.Value" \
-    --output text)
-
-  export APP_URL
-  export CORE_STUB_URL
-fi
+export APP_URL
+export CORE_STUB_URL
 
 cd /app/test/browser
 npx playwright test --config playwright.smoke.config.ts
