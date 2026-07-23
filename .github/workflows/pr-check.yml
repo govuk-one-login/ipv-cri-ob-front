@@ -50,6 +50,19 @@ jobs:
       - name: SAM lint
         run: sam validate --region eu-west-2 -t deploy/template.yml --lint
 
+  integration-tests:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    needs: static-checks
+    steps:
+      - name: Setup Node
+        uses: govuk-one-login/github-actions/node/install-dependencies@4c76410195b5fcb1804fc7c183ed20704252830f
+        with:
+          node-version-file: '.nvmrc'
+      - name: Integration tests
+        run: npm run test:integration
+
   infra-tests:
     runs-on: ubuntu-latest
     permissions:
@@ -131,7 +144,7 @@ jobs:
 
   merge-status:
     runs-on: ubuntu-latest
-    needs: [pre-commit, static-checks, infra-tests, unit-tests, browser-tests]
+    needs: [pre-commit, static-checks, infra-tests, unit-tests, browser-tests, integration-tests]
     if: always()
     steps:
       - run: |
@@ -141,6 +154,7 @@ jobs:
           [[ "${{ needs.infra-tests.result }}" != "success" ]] && failed+=("infra-tests")
           [[ "${{ needs.unit-tests.result }}" != "success" ]] && failed+=("unit-tests")
           [[ "${{ needs.browser-tests.result }}" != "success" ]] && failed+=("browser-tests")
+          [[ "${{ needs.integration-tests.result }}" != "success" ]] && failed+=("integration-tests")
 
           if [[ ${#failed[@]} -gt 0 ]]; then
             echo "The following jobs failed: ${failed[*]}"

@@ -81,6 +81,16 @@ Tests are organised in the `test` directory and further categorised as follows:
       you would create your test at `test/unit/controllers/index.controller.test.ts`
     - if you don't postfix your test file name with `test.ts` it won't be automatically picked up by the test runner
 
+### Integration tests
+
+- `test`/`integration`/`path`/`to`/`code.integration.test.ts`
+    - if you don't postfix your test file name with `integration.test.ts` it won't be automatically picked up by the test runner
+    - integration tests are focussed on maximising realism
+      - `undici.MockAgent` for wire calls
+      - `testcontainers` for providing realistic backing infra
+      - `supertest` for driving the app over HTTP in-process
+    - this makes them slower to run than unit tests, use when unit tests are not deep enough and browser tests are overkill
+
 #### Browser tests
 
 See [test/browser/README.md](test/browser/README.md) for full details on browser test modes and how to add new tests.

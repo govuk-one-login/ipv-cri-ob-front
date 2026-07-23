@@ -1,6 +1,5 @@
 import { APP_URL } from './playwright.mock.config'
 import { spawn } from 'child_process'
-import { existsSync } from 'node:fs'
 import { GenericContainer, Wait } from 'testcontainers'
 
 import path from 'node:path'
@@ -54,25 +53,7 @@ const initDynamoContainer = async () => {
   return { dynamoContainer, dynamoEndpoint }
 }
 
-const findAvailableDockerSockets = () => {
-  if (!process.env['DOCKER_HOST']) {
-    const dockerSockets = [
-      '/var/run/docker.sock',
-      `${process.env['HOME']}/.orbstack/run/docker.sock`,
-      `${process.env['HOME']}/.colima/default/docker.sock`,
-      `${process.env['HOME']}/.docker/run/docker.sock`
-    ]
-
-    const socket = dockerSockets.find(existsSync)
-    if (!socket) throw new Error('no socket found, is Docker running on your system?')
-    process.env['DOCKER_HOST'] = `unix://${socket}`
-    console.log(`[SYSTEM] using Docker socket: ${socket}`)
-  }
-}
-
 export default async function mockSetup() {
-  findAvailableDockerSockets()
-
   const [{ dynamoContainer, dynamoEndpoint }, { wiremockContainer, wiremockEndpoint }] =
     await Promise.all([initDynamoContainer(), initWiremockContainer()])
 

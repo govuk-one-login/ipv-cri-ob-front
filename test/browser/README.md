@@ -19,11 +19,9 @@ For help debugging you can also run the browser tests in UI mode (which will spa
 
 Browser tests use a 'built' version of the application which is a more accurate representation of the production image. `mock-setup.ts` spawns any required [TestContainers](https://node.testcontainers.org/) and ensures they are cleaned up after the test run.
 
-Mobile and tablet coverage is achieved via the `chromium-mobile` and `chromium-tablet` projects in `playwright.mock.config.ts`. To run a single project:
+Mobile and tablet coverage is managed via the `chromium-mobile` and `chromium-tablet` projects in `playwright.mock.config.ts`.
 
-```shell
-npm run test:browser -- --project=chromium-mobile
-```
+Apply the `@mobile` or `@desktop` tag to your test to determine what project(s) it will run on, `@desktop` runs on `chromium-tablet` and `chromium-desktop`.
 
 > [!TIP]
 > Browser tests can be run independently of any locally running dev server. They manage their own test container lifecycle and use a different port for the running application. E.g. a local dev server won't cross-contaminate any browser testing session storage and vice versa.
@@ -38,11 +36,10 @@ APP_URL=https://... npx playwright test --config playwright.smoke.config.ts
 
 ## Fixtures
 
-| Export        | Use for                                                         |
-|---------------|-----------------------------------------------------------------|
-| `desktopTest` | Skips on `chromium-mobile` (covers desktop + tablet) (WireMock) |
-| `mobileTest`  | Runs on `chromium-mobile` only (WireMock)                       |
-| `smokeTest`   | Smoke journeys (AWS)                                            |
+| Export        | Use for                  |
+|---------------|--------------------------|
+| `test`        | WireMock backed journeys |
+| `smokeTest`   | Smoke journeys (AWS)     |
 
 ## Auto-fixtures (applied to every test automatically)
 
