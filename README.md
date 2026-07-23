@@ -67,9 +67,10 @@ Locales (YML), JSON and Nunjucks files are also monitored and will trigger an au
 
 ### Tests
 
-There are two types of tests in the project:
+There are three types of test in this project:
 
 - unit tests (using the Vitest runner)
+- integration tests (using the Vitest runner)
 - browser tests (using Playwright)
 
 Tests are organised in the `test` directory and further categorised as follows:
@@ -81,7 +82,7 @@ Tests are organised in the `test` directory and further categorised as follows:
       you would create your test at `test/unit/controllers/index.controller.test.ts`
     - if you don't postfix your test file name with `test.ts` it won't be automatically picked up by the test runner
 
-### Integration tests
+#### Integration tests
 
 - `test`/`integration`/`path`/`to`/`code.integration.test.ts`
     - if you don't postfix your test file name with `integration.test.ts` it won't be automatically picked up by the test runner
