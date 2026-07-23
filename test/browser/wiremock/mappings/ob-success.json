@@ -80,6 +80,12 @@
             "friendly_name": "Royal Bank of Stormwind",
             "is_sandbox": false,
             "service_status": true
+          },
+          {
+            "bank_id": "forgotten-uldaman-vault",
+            "friendly_name": "Forgotten Vault of Uldaman",
+            "is_sandbox": false,
+            "service_status": false
           }
         ]
       }
@@ -101,10 +107,10 @@
           "Content-Type": "application/json"
         },
         "jsonBody": {
-          "bank_consent_url": "{{request.baseUrl}}/mock-bank/consent",
+          "bank_consent_url": "http://{{systemValue type='ENVIRONMENT' key='CRI_BIND_HOST'}}:{{systemValue type='ENVIRONMENT' key='CRI_PORT'}}/stubs/webhook",
           "bank_id": "ironforge-vault",
           "id": "CONSENT-SUCCESS-UUID",
-          "redirect_url": "{{request.baseUrl}}/return"
+          "redirect_url": "http://{{systemValue type='ENVIRONMENT' key='CRI_BIND_HOST'}}:{{systemValue type='ENVIRONMENT' key='CRI_PORT'}}/confirm-details-bank"
         },
         "transformers": ["response-template"]
       }

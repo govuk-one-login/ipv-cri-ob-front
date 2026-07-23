@@ -1,17 +1,33 @@
-import type { Page } from '@playwright/test'
+import { BasePage } from './base.page'
 
-export class ChooseBankPage {
-  constructor(private readonly page: Page) {}
+import paths from '../../../src/config/paths'
 
-  async continue() {
-    await this.page.getByRole('button', { name: 'Continue' }).click()
+export class ChooseBankPage extends BasePage {
+  bankNotListedLink() {
+    return this.page.locator(`main a[href="${paths.steps.proveAnotherWay}"]`)
   }
 
-  async continueWelsh() {
-    await this.page.getByRole('button', { name: 'Parhau' }).click()
+  bankSelect() {
+    return this.page.locator('#bank-select')
   }
 
-  async selectBank(label: string) {
-    await this.page.locator('#bank-select').selectOption({ label })
+  bankSelectOption(value: string) {
+    return this.bankSelect().locator(`option[value="${value}"]`)
+  }
+
+  continue() {
+    return this.continueButton().click()
+  }
+
+  continueButton() {
+    return this.page.locator('.govuk-button--progress')
+  }
+
+  selectBank(value: string) {
+    return this.bankSelect().selectOption(value)
+  }
+
+  selectBankByLabel(label: string) {
+    return this.bankSelect().selectOption({ label })
   }
 }

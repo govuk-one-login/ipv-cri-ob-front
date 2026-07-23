@@ -6,35 +6,26 @@ import { GenericContainer, Wait } from 'testcontainers'
 import path from 'node:path'
 import PinoPretty from 'pino-pretty'
 
-// give app 30 seconds to boot with more robust checking
-const appReady = async (exited: { value: boolean }, attempts = 60) => {
+// give app 20 seconds to boot
+const appReady = async (exited: { value: boolean }, attempts = 40) => {
   for (let i = 0; i < attempts; i++) {
     if (exited.value) throw new Error('app process exited before becoming ready')
-
-    try {
-      // Check both root endpoint and a simple health endpoint
-      const response = await fetch(APP_URL.origin, {
-        signal: AbortSignal.timeout(5000)
-      })
-
-      if (response.ok || response.status === 302) {
-        // Additional check to ensure the app is fully responsive
-        await new Promise((resolve) => setTimeout(resolve, 1000))
-        return
-      }
-    } catch {
-      // Network errors are expected while app is starting
-    }
-
+    if (
+      await fetch(APP_URL.origin)
+        .then(() => true)
+        .catch(() => false)
+    )
+      return
     await new Promise((resolve) => setTimeout(resolve, 500))
   }
-  throw new Error('app failed to start within timeout period')
+  throw new Error('app failed to start')
 }
 
 const initWiremockContainer = async () => {
   console.log('[SYSTEM] starting Wiremock container...')
   const wiremockContainer = await new GenericContainer('wiremock/wiremock:3.13.1')
-    .withCommand(['--local-response-templating'])
+    .withCommand(['--local-response-templating', '--permitted-system-keys=CRI_.*'])
+    .withEnvironment({ CRI_BIND_HOST: APP_URL.hostname, CRI_PORT: APP_URL.port })
     .withExposedPorts(8080)
     .withWaitStrategy(Wait.forHttp('/__admin/mappings', 8080).forStatusCode(200))
     .withStartupTimeout(60_000) // 60 second timeout
@@ -47,24 +38,6 @@ const initWiremockContainer = async () => {
     .start()
 
   const wiremockEndpoint = `http://localhost:${wiremockContainer.getMappedPort(8080)}`
-
-  // Verify wiremock is actually responding
-  let retries = 10
-  while (retries > 0) {
-    try {
-      const response = await fetch(`${wiremockEndpoint}/__admin/mappings`)
-      if (response.ok) break
-    } catch {
-      // Expected while service is starting
-    }
-    await new Promise((resolve) => setTimeout(resolve, 1000))
-    retries--
-  }
-
-  if (retries === 0) {
-    throw new Error('Wiremock failed to become responsive')
-  }
-
   console.log(`[SYSTEM] Wiremock ready at ${wiremockEndpoint}`)
   return { wiremockContainer, wiremockEndpoint }
 }

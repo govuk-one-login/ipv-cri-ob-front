@@ -1,33 +1,47 @@
-import type { Page } from '@playwright/test'
+import { BasePage } from './base.page'
 
-import { start } from '../constants'
+import paths from '../../../src/config/paths'
 
-export class StartPage {
-  constructor(private readonly page: Page) {}
-
+export class StartPage extends BasePage {
   continue() {
-    return this.page.getByRole('button', { name: 'Continue' }).click()
+    return this.continueButton().click()
+  }
+
+  continueButton() {
+    return this.page.locator('main .govuk-button-group .govuk-button')
+  }
+
+  detailsBody() {
+    return this.page.locator('details .govuk-details__text')
+  }
+
+  detailsToggle() {
+    return this.page.locator('details summary')
+  }
+
+  detailsWrapper() {
+    return this.page.locator('details')
   }
 
   fcaLink() {
-    return this.page.getByRole('link', {
-      name: 'Financial Conduct Authority (opens in a new tab)'
-    })
+    return this.page.locator('main a[href*="register.fca.org.uk"]')
   }
 
   goto() {
-    return this.page.goto(start)
+    return this.page.goto(paths.index)
   }
 
   openDetails() {
-    return this.page.locator('details summary').click()
+    return this.detailsToggle().click()
   }
 
   privacyNoticeLink() {
-    return this.page.getByRole('link', { name: 'Our privacy notice (opens in new tab)' })
+    return this.page.locator(
+      'main a[href="https://www.gov.uk/government/publications/govuk-one-login-privacy-notice"]'
+    )
   }
 
   proveAnotherWayLink() {
-    return this.page.getByRole('link', { name: 'Prove your identity another way' })
+    return this.page.locator(`main a[href="${paths.steps.proveAnotherWay}"]`)
   }
 }

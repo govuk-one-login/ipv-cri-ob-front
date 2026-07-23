@@ -1,10 +1,10 @@
-import type { Page } from '@playwright/test'
+import { BasePage } from './base.page'
 
-export class ConsentPage {
-  constructor(private readonly page: Page) {}
+import paths from '../../../src/config/paths'
 
+export class ConsentPage extends BasePage {
   checkConsent() {
-    return this.page.locator('#consent').check()
+    return this.consentCheckbox().check()
   }
 
   consentCheckbox() {
@@ -12,21 +12,11 @@ export class ConsentPage {
   }
 
   continue() {
-    return this.page.getByRole('button', { name: 'Continue' }).click()
+    return this.continueButton().click()
   }
 
-  errorMessage() {
-    return this.page.locator('.govuk-error-message')
-  }
-
-  errorSummary() {
-    return this.page.locator('.govuk-error-summary')
-  }
-
-  errorSummaryLink() {
-    return this.page.locator('.govuk-error-summary').getByRole('link', {
-      name: 'You must agree to share your bank account information to continue'
-    })
+  continueButton() {
+    return this.page.locator('.govuk-button--progress')
   }
 
   insetText() {
@@ -34,6 +24,6 @@ export class ConsentPage {
   }
 
   proveAnotherWayLink() {
-    return this.page.getByRole('link', { name: 'Prove your identity another way' })
+    return this.page.locator(`main a[href="${paths.steps.proveAnotherWay}"]`)
   }
 }

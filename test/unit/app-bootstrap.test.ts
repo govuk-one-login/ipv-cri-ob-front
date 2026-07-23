@@ -35,7 +35,8 @@ vi.mock('@govuk-one-login/frontend-vital-signs', () => ({
   frontendVitalSignsInitFromApp: vi.fn()
 }))
 vi.mock('@src/middleware', () => ({
-  flash: { middleware: vi.fn() }
+  flash: { middleware: vi.fn() },
+  saveSessionOnRedirect: { middleware: vi.fn() }
 }))
 vi.mock('@src/utils/session', () => ({ default: vi.fn().mockResolvedValue({}) }))
 vi.mock('@src/config/routes', () => ({ configure: vi.fn() }))
@@ -75,7 +76,7 @@ describe('createApp', () => {
 
   it('configures the router in the correct order', async () => {
     const { default: commonExpress } = await import('@govuk-one-login/di-ipv-cri-common-express')
-    const { flash } = await import('@src/middleware')
+    const { flash, saveSessionOnRedirect } = await import('@src/middleware')
     const routes = await import('@src/config/routes')
     const { createApp } = await import('@src/app-bootstrap')
     await createApp()
@@ -84,17 +85,20 @@ describe('createApp', () => {
       router: { use: ReturnType<typeof vi.fn> }
     }
 
-    expect(router.use).toHaveBeenNthCalledWith(1, flash.middleware)
+    expect(router.use).toHaveBeenNthCalledWith(1, saveSessionOnRedirect.middleware)
+    expect(router.use).toHaveBeenNthCalledWith(2, flash.middleware)
     expect(router.use).toHaveBeenNthCalledWith(
-      2,
+      3,
       commonExpress.lib.errorHandling.redirectAsErrorToCallback
     )
-    expect(router.use).toHaveBeenCalledTimes(2)
+    expect(router.use).toHaveBeenCalledTimes(3)
 
-    const flashCallOrder = vi.mocked(router.use).mock.invocationCallOrder[0]!
+    const saveSessionCallOrder = vi.mocked(router.use).mock.invocationCallOrder[0]!
+    const flashCallOrder = vi.mocked(router.use).mock.invocationCallOrder[1]!
     const routeConfigurationCallOrder = vi.mocked(routes.configure).mock.invocationCallOrder[0]!
-    const redirectAsErrorCallOrder = vi.mocked(router.use).mock.invocationCallOrder[1]!
+    const redirectAsErrorCallOrder = vi.mocked(router.use).mock.invocationCallOrder[2]!
 
+    expect(saveSessionCallOrder).toBeLessThan(flashCallOrder)
     expect(flashCallOrder).toBeLessThan(routeConfigurationCallOrder)
     expect(redirectAsErrorCallOrder).toBeGreaterThan(routeConfigurationCallOrder)
   })
@@ -124,6 +128,17 @@ describe('createApp', () => {
     )
   })
 
+  it('configures the helmet security policy', async () => {
+    const { default: commonExpress } = await import('@govuk-one-login/di-ipv-cri-common-express')
+    const { default: helmetConfig } = await import('@src/config/helmet')
+    const { createApp } = await import('@src/app-bootstrap')
+    await createApp()
+
+    expect(commonExpress.bootstrap.setup).toHaveBeenCalledWith(
+      expect.objectContaining({ helmet: helmetConfig })
+    )
+  })
+
   it('enables request logging in production', async () => {
     vi.stubEnv('NODE_ENV', 'production')
     const commonExpress = (await import('@govuk-one-login/di-ipv-cri-common-express')).default
@@ -147,7 +162,13 @@ describe('createApp', () => {
     const { app } = await createApp()
 
     expect(commonExpress.lib.i18n.setI18n).toHaveBeenCalledWith(
-      expect.objectContaining({ onInit: setFrontendUiTranslations, router: app })
+      expect.objectContaining({
+        config: expect.objectContaining({
+          additionalNamespaces: expect.arrayContaining(['translation', 'errors', 'pages'])
+        }),
+        onInit: setFrontendUiTranslations,
+        router: app
+      })
     )
     expect(app.use).toHaveBeenNthCalledWith(1, frontendUiMiddleware)
     expect(app.use).toHaveBeenNthCalledWith(2, frontendUiLocals.getGTM)

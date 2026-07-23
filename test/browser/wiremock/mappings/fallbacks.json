@@ -1,0 +1,25 @@
+{
+  "mappings": [
+    {
+      "name": "missing session_id fallback",
+      "priority": 10,
+      "request": {
+        "method": "ANY",
+        "urlPathPattern": ".*",
+        "headers": {
+          "session_id": { "absent": true }
+        }
+      },
+      "response": {
+        "status": 401,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "error": "unauthorized",
+          "message": "missing session_id"
+        }
+      }
+    }
+  ]
+}

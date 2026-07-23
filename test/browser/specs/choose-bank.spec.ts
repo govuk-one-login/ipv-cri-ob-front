@@ -1,114 +1,123 @@
-import { expect, test } from '../fixtures'
-import { navigateToChooseBank } from '../helpers/navigation'
-import { ChooseBankPage } from '../pages/choose-bank.page'
+import type { Page } from '@playwright/test'
 
-test.describe('Choose bank page', () => {
+import { expect, runAxe, test } from '../fixtures'
+import { activateWithKeyboard, tabToElement } from '../helpers/keyboard'
+import { type Language, switchToWelsh } from '../helpers/language'
+import { AuthorisePage } from '../pages/authorise.page'
+import { ChooseBankPage } from '../pages/choose-bank.page'
+import { StartPage } from '../pages/start.page'
+
+import paths from '../../../src/config/paths'
+
+const BANK_LABEL = 'Vault of Ironforge'
+const BANK_VALUE = 'ironforge-vault'
+const OFFLINE_BANK_LABEL = 'Forgotten Vault of Uldaman'
+const OFFLINE_BANK_VALUE = 'forgotten-uldaman-vault'
+
+const COPY = {
+  en: {
+    heading: 'Choose your bank or building society',
+    errorMessage: 'Select a bank or building society',
+    title: /Choose your bank or building society/
+  },
+  cy: {
+    heading: 'Lorem ipsum dolor sit amet consectetur',
+    errorMessage: 'Adipiscing elit sed do eiusmod',
+    title: /Lorem ipsum dolor sit amet consectetur/
+  }
+}
+
+const navigate = async (page: Page, lang: Language) => {
+  const authorise = new AuthorisePage(page)
+  const startPage = new StartPage(page)
+
+  await authorise.goto('test-jwt-success')
+  if (lang === 'cy') await switchToWelsh(page)
+  await startPage.continue()
+
+  return new ChooseBankPage(page)
+}
+
+const registerChooseBankTests = (lang: Language) => {
   let chooseBankPage: ChooseBankPage
 
   test.beforeEach(async ({ page }) => {
-    await navigateToChooseBank(page)
-    chooseBankPage = new ChooseBankPage(page)
+    chooseBankPage = await navigate(page, lang)
   })
 
-  test('user is directed to the Choose Bank page with correct title and Continue button', async ({
-    page
-  }) => {
-    await expect(page.locator('h1')).toContainText('Choose your bank or building society')
-    await expect(page).toHaveTitle(/Choose your bank or building society/)
-    await expect(page.getByRole('button', { name: 'Continue' })).toBeVisible()
-  })
-
-  test('user is displayed with the bank select dropdown', async ({ page }) => {
-    await expect(page.locator('#bank-select')).toBeVisible()
-  })
-
-  test('user can select a bank from the dropdown', async ({ page }) => {
-    await chooseBankPage.selectBank('Vault of Ironforge')
-
-    await expect(page.locator('#bank-select')).toHaveValue('ironforge-vault')
-  })
-
-  test('user is shown a validation error when submitting without selecting a bank', async ({
-    page
-  }) => {
-    await chooseBankPage.continue()
-
-    await expect(page.locator('.govuk-error-summary')).toBeVisible()
-    await expect(page.locator('.govuk-error-message')).toContainText(
-      'Select a bank or building society'
-    )
-  })
-
-  test('user clicks the error message link and is directed to the bank select dropdown', async ({
-    page
-  }) => {
-    await chooseBankPage.continue()
-
-    await page
-      .locator('.govuk-error-summary')
-      .getByRole('link', { name: 'Select a bank or building society' })
-      .click()
-
-    await expect(page.locator('#bank-select-error')).toBeVisible()
-    await expect(page.locator('#bank-select-error')).toContainText(
-      'Select a bank or building society'
-    )
-    await expect(page.locator('#bank-select')).toBeFocused()
-  })
-
-  test('user is displayed with the My bank is not listed link', async ({ page }) => {
-    await expect(page.getByRole('link', { name: 'My bank is not listed' })).toBeVisible()
-  })
-
-  test('user is displayed with a back link to the start page', async ({ page }) => {
-    await expect(page.getByRole('link', { exact: true, name: 'Back' })).toHaveAttribute(
+  test('renders the expected page elements', async ({ page }) => {
+    await expect(chooseBankPage.heading()).toContainText(COPY[lang].heading)
+    await expect(page).toHaveTitle(COPY[lang].title)
+    await expect(chooseBankPage.bankSelect()).toBeVisible()
+    await expect(chooseBankPage.continueButton()).toBeVisible()
+    await expect(chooseBankPage.bankSelectOption(BANK_VALUE)).toHaveText(BANK_LABEL)
+    await expect(chooseBankPage.bankSelectOption(OFFLINE_BANK_VALUE)).toHaveText(OFFLINE_BANK_LABEL)
+    await expect(chooseBankPage.bankNotListedLink()).toHaveAttribute(
       'href',
-      '/finish-proving-identity-online-banking'
+      paths.steps.proveAnotherWay
     )
+    await expect(chooseBankPage.backLink()).toHaveAttribute('href', paths.steps.start)
   })
 
-  test('dropdown contains all banks including the offline bank', async ({ page }) => {
-    const select = page.locator('#bank-select')
-    await expect(select.locator('option[value="ironforge-vault"]')).toHaveText('Vault of Ironforge')
-    await expect(select.locator('option[value="org-counting-house"]')).toHaveText(
-      'Orgrimmar Counting House'
-    )
-    await expect(select.locator('option[value="royal-bank-sw"]')).toHaveText(
-      'Royal Bank of Stormwind'
-    )
-    await expect(select.locator('option[value="stranglethorn-trust-bank"]')).toHaveText(
-      'Stranglethorn Trust Bank'
-    )
-    await expect(select.locator('option[value="dalaran-merchant-bank"]')).toHaveText(
-      'Dalaran Merchant Bank'
-    )
-    await expect(select.locator('option[value="forgotten-uldaman-vault"]')).toHaveText(
-      'Forgotten Vault of Uldaman'
-    )
-  })
-
-  test('user selecting a valid bank and continuing is navigated to the consent page', async ({
+  test('renders form validation errors and links error summary items to inputs', async ({
     page
   }) => {
-    await chooseBankPage.selectBank('Vault of Ironforge')
-    await chooseBankPage.continue()
+    await test.step('submitting without a selection returns to the page with an error', async () => {
+      await chooseBankPage.continue()
+      await expect(page).toHaveURL(/\/choose-bank/)
+      await expect(chooseBankPage.errorSummary()).toBeVisible()
+      await expect(chooseBankPage.errorMessage()).toContainText(COPY[lang].errorMessage)
+    })
 
-    await expect(page).toHaveURL(/\/agree-share-bank-information$/)
+    await test.step('clicking the error summary link focuses the bank select', async () => {
+      await chooseBankPage.errorSummaryLink(COPY[lang].errorMessage).click()
+      await expect(chooseBankPage.bankSelect()).toBeFocused()
+    })
+  })
+}
+
+test.describe('Choose bank (English)', { tag: '@desktop' }, () => {
+  registerChooseBankTests('en')
+})
+
+test.describe('Choose bank (Welsh)', { tag: '@desktop' }, () => {
+  registerChooseBankTests('cy')
+})
+
+test.describe('Choose bank extras', { tag: '@desktop' }, () => {
+  let chooseBankPage: ChooseBankPage
+
+  test.beforeEach(async ({ page }) => {
+    chooseBankPage = await navigate(page, 'en')
   })
 
-  test('user selecting an offline bank and continuing is redirected to the bank unavailable page', async ({
-    page
-  }) => {
-    await chooseBankPage.selectBank('Forgotten Vault of Uldaman')
-    await chooseBankPage.continue()
-
-    await expect(page).toHaveURL(/\/sorry-problem-bank$/)
+  test('passes accessibility checks', async ({ page }) => {
+    await runAxe(page)
   })
 
-  test('My bank is not listed link points to prove-another-way', async ({ page }) => {
-    await expect(page.getByRole('link', { name: 'My bank is not listed' })).toHaveAttribute(
-      'href',
-      '/prove-another-way'
-    )
+  test('selecting a valid bank navigates to the consent page', async ({ page }) => {
+    await chooseBankPage.selectBank(BANK_VALUE)
+    await chooseBankPage.continue()
+    await expect(page).toHaveURL(/\/agree-share-bank-information/)
+  })
+
+  test('selecting an offline bank redirects to the bank unavailable page', async ({ page }) => {
+    await chooseBankPage.selectBank(OFFLINE_BANK_VALUE)
+    await chooseBankPage.continue()
+    await expect(page).toHaveURL(/\/sorry-problem-bank/)
+  })
+
+  test('user can complete the form using the keyboard only', async ({ page }) => {
+    await test.step('tab to and pick a bank with the keyboard', async () => {
+      await tabToElement(page, '#bank-select')
+      await expect(chooseBankPage.bankSelect()).toBeFocused()
+      await chooseBankPage.selectBankByLabel(BANK_LABEL)
+      await expect(chooseBankPage.bankSelect()).toHaveValue(BANK_VALUE)
+    })
+
+    await test.step('tab to Continue and submit with Enter', async () => {
+      await activateWithKeyboard(page, '.govuk-button--progress')
+      await expect(page).toHaveURL(/\/agree-share-bank-information/)
+    })
   })
 })

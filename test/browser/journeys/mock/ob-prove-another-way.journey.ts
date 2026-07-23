@@ -1,19 +1,20 @@
-import { expect, mockTest as test } from '../../fixtures'
+import { expect, test } from '../../fixtures'
 import { AuthorisePage } from '../../pages/authorise.page'
 import { CallbackPage } from '../../pages/callback.page'
+import { StartPage } from '../../pages/start.page'
 
 test.describe.configure({ mode: 'serial' })
-test.use({ skipAxe: true })
 
 test.describe(
   'Journey: prove your identity another way (abort from start page)',
-  { tag: '@mock' },
+  { tag: ['@mock', '@desktop'] },
   () => {
     test('user aborts the journey from the start page and is redirected to the callback', async ({
       page,
       wiremock
     }) => {
       const authorise = new AuthorisePage(page)
+      const start = new StartPage(page)
       const callback = new CallbackPage(page)
 
       await test.step('Given the user initiates an authorisation request', async () => {
@@ -25,14 +26,15 @@ test.describe(
       })
 
       await test.step('When the user clicks Prove your identity another way', async () => {
-        await page.getByRole('link', { name: 'Prove your identity another way' }).click()
+        await start.proveAnotherWayLink().click()
       })
 
-      await test.step('Then the user is redirected to the OAuth2 callback', async () => {
-        await page.waitForURL('**/oauth2/callback**')
+      await test.step('Then the user is returned to the client callback with an access_denied error', async () => {
+        await callback.awaitCompletion()
         const params = callback.searchParams()
-        expect(params.get('code')).toBe('ABORT-CODE')
-        expect(params.get('state')).toBe('sT@t3')
+        expect(params.get('error')).toBe('access_denied')
+        expect(params.get('error_description')).toBe('Authorization permission denied')
+        expect(params.get('code')).toBeNull()
       })
 
       await test.step('And the correct API calls were made', async () => {
@@ -45,7 +47,7 @@ test.describe(
         )
 
         const authRequest = await wiremock.getRequest('/authorization', 'GET')
-        expect(authRequest.headers['session_id']).toBe('AB0RTAB0')
+        expect(authRequest.headers['session_id']).toBe('ABAD1DEA')
       })
     })
   }
