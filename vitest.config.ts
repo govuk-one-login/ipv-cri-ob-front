@@ -49,9 +49,10 @@ export default defineConfig({
             SESSION_SECRET: 'not-a-real-secret', // pragma: allowlist secret
             USE_PINO_LOGGER: 'true'
           },
+          globalSetup: ['test/integration/containers.ts'],
           include: ['test/integration/**/*.integration.test.ts'],
           name: 'integration',
-          setupFiles: ['test/integration/setup.ts']
+          setupFiles: ['test/integration/test-env.ts']
         }
       }
     ],
