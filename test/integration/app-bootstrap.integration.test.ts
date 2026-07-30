@@ -1,40 +1,19 @@
 import type { Express } from 'express'
 
-import { GenericContainer, type StartedTestContainer } from 'testcontainers'
-import { getGlobalDispatcher, MockAgent, setGlobalDispatcher } from 'undici'
-import { afterAll, beforeAll, describe, expect, it } from 'vitest'
+import { beforeAll, describe, expect, it } from 'vitest'
 
 import paths from '@src/config/paths'
+import nock from 'nock'
 import request from 'supertest'
 
-describe('app-bootstrap', () => {
+describe('open banking front', () => {
   let app: Express
-  let dynamo: StartedTestContainer
-  let mockAgent: MockAgent
-  let originalDispatcher: ReturnType<typeof getGlobalDispatcher>
 
   beforeAll(async () => {
-    originalDispatcher = getGlobalDispatcher()
-    mockAgent = new MockAgent()
-    setGlobalDispatcher(mockAgent)
-
-    dynamo = await new GenericContainer('amazon/dynamodb-local')
-      .withCommand(['-jar', 'DynamoDBLocal.jar', '-sharedDb', '-inMemory'])
-      .withExposedPorts(8000)
-      .start()
-
-    process.env['LOCAL_DYNAMO_ENDPOINT_OVERRIDE'] = `http://localhost:${dynamo.getMappedPort(8000)}`
-
     const { createApp } = await import('@src/app-bootstrap')
     const created = await createApp()
     app = created.app
-  }, 60_000)
-
-  afterAll(async () => {
-    await mockAgent.close()
-    setGlobalDispatcher(originalDispatcher)
-    await dynamo.stop()
-  })
+  }, 30_000)
 
   it('starts with a valid config', async () => {
     const res = await request(app).get('/')
@@ -54,9 +33,9 @@ describe('app-bootstrap', () => {
   })
 
   it('accepts a POST when a valid CSRF token is provided', async () => {
-    const banksApi = mockAgent.get(process.env['API_BASE_URL']!)
-    banksApi
-      .intercept({ path: '/banks', method: 'GET' })
+    nock('http://api.ob.cri.gov.uk:1337')
+      .get('/banks')
+      .times(2)
       .reply(200, [
         {
           bank_id: 'iron-bank',
@@ -65,7 +44,6 @@ describe('app-bootstrap', () => {
           service_status: true
         }
       ])
-      .times(2)
 
     const testAgent = request.agent(app)
     await testAgent.get(paths.steps.start)
@@ -85,7 +63,7 @@ describe('app-bootstrap', () => {
     expect(accepted.headers['location']).toBe(paths.steps.consent)
   })
 
-  it('sets a content-security-policy header via helmet', async () => {
+  it('sets required headers', async () => {
     const res = await request(app).get(paths.steps.start)
 
     expect(res.status).toBe(200)
