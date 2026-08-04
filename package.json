@@ -33,7 +33,7 @@
     "type-check": "tsc --noEmit && tsc --noEmit -p test"
   },
   "devDependencies": {
-    "@aws-sdk/credential-provider-node": "3.972.74",
+    "@aws-sdk/credential-provider-node": "3.972.76",
     "@axe-core/playwright": "4.12.1",
     "@playwright/test": "1.62.0",
     "@smithy/signature-v4": "5.6.11",
