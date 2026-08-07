@@ -2,10 +2,6 @@ import { defaultProvider } from '@aws-sdk/credential-provider-node'
 import { SignatureV4 } from '@smithy/signature-v4'
 import { createHash, createHmac } from 'node:crypto'
 
-import dotenv from 'dotenv'
-
-dotenv.config()
-
 const getCoreStubUrl = (): string => {
   const url = process.env['CORE_STUB_URL']
   if (!url) throw new Error('CORE_STUB_URL is not set')

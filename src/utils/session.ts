@@ -19,7 +19,7 @@ const createSessionStore = async () => {
     LOGGER.warn(`[local DynamoDB] endpoint override is set: ${dynamoDevOverrides.endpoint}`)
 
     await checkTableExists(dynamodbClient, table).catch((error) => {
-      LOGGER.error('[local DynamoDB] problem creating table:', error)
+      LOGGER.error({ err: error }, '[local DynamoDB] problem creating table')
     })
   }
 

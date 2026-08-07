@@ -12,7 +12,13 @@ const createViteServer = async (): Promise<ViteDevServer> => {
     server: {
       middlewareMode: true,
       watch: {
-        ignored: ['**/.github/**', '**/deploy/**', '**/playwright-report/**', '**/coverage/**']
+        ignored: [
+          '**/.env*',
+          '**/.github/**',
+          '**/deploy/**',
+          '**/playwright-report/**',
+          '**/coverage/**'
+        ]
       }
     }
   })

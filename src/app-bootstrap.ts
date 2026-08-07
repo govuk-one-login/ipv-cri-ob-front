@@ -22,8 +22,6 @@ import path from 'node:path'
 import * as routes from '@src/config/routes'
 
 export const createApp = async (): Promise<{ app: Express; router: Router }> => {
-  const session = await initSessionStore()
-
   const { app, router } = commonExpress.bootstrap.setup({
     env: appConfig.APP.NODE_ENV,
     helmet: helmetConfig,
@@ -49,7 +47,7 @@ export const createApp = async (): Promise<{ app: Express; router: Router }> => 
     overloadProtection: overloadProtectionConfig,
     publicDirs: [path.resolve(import.meta.dirname, 'public')],
     requestLogging: appConfig.APP.NODE_ENV === 'production',
-    session,
+    session: await initSessionStore(),
     csrf: { secret: appConfig.APP.CSRF_SECRET },
     views: [path.resolve(import.meta.dirname, 'views'), debugMenu.viewsDir]
   })

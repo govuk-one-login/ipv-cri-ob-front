@@ -48,7 +48,7 @@ const createTable = async (client: DynamoDBClient, tableName: string) => {
     if (error instanceof ResourceInUseException) {
       LOGGER.info(`[local DynamoDB] table '${tableName}' already exists`)
     } else {
-      LOGGER.error(`[local DynamoDB] problem creating table '${tableName}':`, error)
+      LOGGER.error({ err: error }, `[local DynamoDB] problem creating table '${tableName}'`)
       throw error
     }
   }

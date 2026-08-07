@@ -1,4 +1,3 @@
-import { spawnSync } from 'child_process'
 import { defineConfig, type Plugin } from 'vite'
 import { viteStaticCopy } from 'vite-plugin-static-copy'
 
@@ -25,35 +24,15 @@ const serverBuild = (): Plugin => ({
       resolve: {
         alias: {
           '@govuk-one-login/frontend-language-toggle/styles': path.resolve(
-            __dirname,
+            import.meta.dirname,
             'node_modules/@govuk-one-login/frontend-language-toggle/build/stylesheet/styles.css'
           ),
-          '@src': path.resolve(__dirname, 'src')
+          '@src': path.resolve(import.meta.dirname, 'src')
         }
       }
     })
   }
 })
-
-const dockerCompose = (): Plugin => {
-  return {
-    apply: 'serve',
-    configureServer() {
-      const { stdout } = spawnSync('docker', [
-        'compose',
-        'ps',
-        '-q',
-        '--status',
-        'running',
-        'dynamodb-local'
-      ])
-      if (!stdout?.toString().trim()) {
-        spawnSync('docker', ['compose', 'up', '-d', '--wait'], { stdio: 'inherit' })
-      }
-    },
-    name: 'docker-compose'
-  }
-}
 
 export default defineConfig({
   build: {
@@ -86,7 +65,6 @@ export default defineConfig({
   },
   plugins: [
     serverBuild(),
-    dockerCompose(),
     viteStaticCopy({
       targets: [
         {
@@ -123,18 +101,18 @@ export default defineConfig({
       {
         find: /^@govuk-one-login\/frontend-language-toggle$/,
         replacement: path.resolve(
-          __dirname,
+          import.meta.dirname,
           'node_modules/@govuk-one-login/frontend-language-toggle/build/stylesheet/styles.css'
         )
       },
       {
         find: /^@govuk-one-login\/frontend-ui$/,
         replacement: path.resolve(
-          __dirname,
+          import.meta.dirname,
           'node_modules/@govuk-one-login/frontend-ui/build/all.css'
         )
       },
-      { find: '@src', replacement: path.resolve(__dirname, 'src') }
+      { find: '@src', replacement: path.resolve(import.meta.dirname, 'src') }
     ]
   }
 })

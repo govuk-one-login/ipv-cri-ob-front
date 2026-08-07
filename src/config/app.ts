@@ -1,7 +1,4 @@
-import { config as loadDotenv } from 'dotenv'
 import { z } from 'zod'
-
-loadDotenv({ quiet: true })
 
 const NodeEnvSchema = z.enum(['development', 'production', 'test'])
 const DeploymentEnvSchema = z.enum([
