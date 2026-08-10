@@ -84,7 +84,7 @@ Mappings:
       logLevel: "warn"
       dynatraceSecretArn: arn:aws:secretsmanager:eu-west-2:216552277552:secret:DynatraceNonProductionVariables
       sessionStoreSecretArn: arn:aws:secretsmanager:eu-west-2:490364002485:secret:ob-fe/session-store-secret-HAlBvE # pragma: allowlist secret
-      csrfSecretArn: "" # pragma: allowlist secret
+      csrfSecretArn: arn:aws:secretsmanager:eu-west-2:490364002485:secret:ob-fe/csrf-secret-XHOmEK # pragma: allowlist secret
       fargateCPUsize: "256"
       fargateRAMsize: "512"
       minECSCount: 2
