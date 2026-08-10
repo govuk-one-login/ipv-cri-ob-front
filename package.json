@@ -19,7 +19,7 @@
   "scripts": {
     "build": "vite build",
     "check-translation": "node node_modules/@govuk-one-login/di-ipv-cri-common-express/scripts/checkTranslations.js '../../../../src/locales'",
-    "dev": "NODE_ENV=development tsx watch src/index.ts | pino-pretty",
+    "dev": "docker compose up -d --wait && NODE_ENV=development tsx watch --env-file-if-exists=.env src/index.ts | pino-pretty",
     "format": "oxfmt --check",
     "format:fix": "oxfmt --write",
     "lint": "oxlint",
@@ -70,7 +70,6 @@
     "@govuk-one-login/frontend-ui": "5.3.1",
     "@govuk-one-login/frontend-vital-signs": "0.1.4",
     "connect-dynamodb": "3.0.5",
-    "dotenv": "17.4.2",
     "express": "4.22.2",
     "express-session": "1.19.0",
     "govuk-frontend": "5.14.0",

@@ -1,10 +1,7 @@
-// appConfig must be first: its module body calls loadDotenv(), which must run before common-express libs are evaluated
 import appConfig from '@src/config/app'
-
+import { createApp } from '@src/app-bootstrap'
 import { registerShutdownHandler } from '@src/utils/shutdown-handler'
-import { config as loadDotenv } from 'dotenv'
 
-const { parsed } = loadDotenv({ quiet: true })
 const { arch, platform, version } = process
 const BIND_HOST = appConfig.APP.BIND_HOST
 const PORT = appConfig.APP.PORT
@@ -25,11 +22,9 @@ PLATFORM: ${platform}/${arch}
 NODE_ENV: ${appConfig.APP.NODE_ENV}, ${version}
 DEPLOYMENT_ENV: ${appConfig.APP.DEPLOYMENT_ENV}
 HOST/PORT: ${BIND_HOST}:${PORT}
-.ENV: ${parsed ? `loaded (${Object.keys(parsed).length} vars)` : 'not found'}
 ==============================================`
 console.log(banner)
 
-const { createApp } = await import('./app-bootstrap')
 const { app } = await createApp()
 
 const server = app.listen(PORT, BIND_HOST)

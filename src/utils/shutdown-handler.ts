@@ -22,7 +22,7 @@ export const registerShutdownHandler = (server: Server) => {
 
       server.close((err) => {
         if (err) {
-          LOGGER.error('Error closing HTTP server:', err.message)
+          LOGGER.error({ err }, `problem closing HTTP server`)
           exitCode = 1
         } else {
           LOGGER.info('HTTP server closed')

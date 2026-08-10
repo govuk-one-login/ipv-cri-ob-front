@@ -121,8 +121,8 @@ describe('session', () => {
     await initSessionStore()
 
     expect(mockLogger.error).toHaveBeenCalledWith(
-      '[local DynamoDB] problem creating table:',
-      expectedError
+      { err: expectedError },
+      '[local DynamoDB] problem creating table'
     )
   })
 })

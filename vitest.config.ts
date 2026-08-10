@@ -13,7 +13,7 @@ export default defineConfig({
       {
         resolve: {
           alias: {
-            '@src': path.resolve(__dirname, 'src')
+            '@src': path.resolve(import.meta.dirname, 'src')
           }
         },
         test: {
@@ -24,8 +24,7 @@ export default defineConfig({
             USE_PINO_LOGGER: 'true' // this shouldn't be needed once common-express defaults to pino, prevents the 'config as early as possible' warning when running unit tests
           },
           include: ['test/unit/**/*.test.ts'],
-          name: 'unit',
-          setupFiles: ['test/unit/setup.ts']
+          name: 'unit'
         }
       },
       {
@@ -37,7 +36,7 @@ export default defineConfig({
       {
         resolve: {
           alias: {
-            '@src': path.resolve(__dirname, 'src')
+            '@src': path.resolve(import.meta.dirname, 'src')
           }
         },
         test: {

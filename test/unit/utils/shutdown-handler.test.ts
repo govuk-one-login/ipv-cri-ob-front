@@ -47,11 +47,15 @@ describe('registerShutdownHandler', () => {
   })
 
   it('exits with code 1 if server.close() errors', () => {
-    server.close.mockImplementation((cb: (err: Error) => void) => cb(new Error('gremlins')))
+    const expectedError = new Error('gremlins')
+    server.close.mockImplementation((cb: (err: Error) => void) => cb(expectedError))
     process.emit('SIGTERM')
     vi.runAllTimers()
     expect(exitSpy).toHaveBeenCalledWith(1)
-    expect(mockLogger.error).toHaveBeenCalledWith('Error closing HTTP server:', 'gremlins')
+    expect(mockLogger.error).toHaveBeenCalledWith(
+      { err: expectedError },
+      'problem closing HTTP server'
+    )
   })
 
   it('logs that close was already called if SIGTERM fires multiple times', () => {
