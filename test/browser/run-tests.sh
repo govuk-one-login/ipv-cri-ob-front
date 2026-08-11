@@ -21,7 +21,7 @@ get_stack_output() {
   printf '%s' "${value}"
 }
 
-APP_URL=$(get_stack_output "${STACK_NAME}" "APP_URL")
+APP_URL=$(get_stack_output "${STACK_NAME}" "FrontendURL")
 CORE_STUB_URL=$(get_stack_output "test-resources" "TestHarnessExecuteUrl")
 
 export APP_URL
