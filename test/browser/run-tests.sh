@@ -4,7 +4,7 @@
 
 set -euo pipefail
 
-STACK_NAME="${SAM_STACK_NAME:-local}}"
+STACK_NAME="${SAM_STACK_NAME:-local}"
 AWS_REGION="${AWS_REGION:-eu-west-2}"
 
 echo "STACK_NAME: ${STACK_NAME}"
