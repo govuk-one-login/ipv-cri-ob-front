@@ -1149,6 +1149,9 @@ Resources:
           Unit: Count
 
 Outputs:
+  FrontendURL:
+    Description: Public URL for the Open Banking CRI frontend
+    Value: !Sub "https://review-ob.${Environment}.account.gov.uk"
   URL:
     Description: >-
       The API Gateway URL which Open Banking Front can be invoked on.

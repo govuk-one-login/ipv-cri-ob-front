@@ -33,7 +33,7 @@ const signer = new SignatureV4({
 export const getSessionJwt = async (
   sharedClaims?: Record<string, unknown>
 ): Promise<{ client_id: string; request: string }> => {
-  const url = new URL(`${getCoreStubUrl()}/start`)
+  const url = new URL('start', getCoreStubUrl())
   const body = JSON.stringify(sharedClaims ? { shared_claims: sharedClaims } : {})
 
   const signed = await signer.sign({

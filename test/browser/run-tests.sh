@@ -4,7 +4,7 @@
 
 set -euo pipefail
 
-STACK_NAME="${SAM_STACK_NAME:-local}}"
+STACK_NAME="${SAM_STACK_NAME:-local}"
 AWS_REGION="${AWS_REGION:-eu-west-2}"
 
 echo "STACK_NAME: ${STACK_NAME}"
@@ -21,7 +21,7 @@ get_stack_output() {
   printf '%s' "${value}"
 }
 
-APP_URL=$(get_stack_output "${STACK_NAME}" "APP_URL")
+APP_URL=$(get_stack_output "${STACK_NAME}" "FrontendURL")
 CORE_STUB_URL=$(get_stack_output "test-resources" "TestHarnessExecuteUrl")
 
 export APP_URL
