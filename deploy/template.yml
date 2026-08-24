@@ -94,7 +94,7 @@ Mappings:
       logLevel: "warn"
       dynatraceSecretArn: arn:aws:secretsmanager:eu-west-2:216552277552:secret:DynatraceNonProductionVariables
       sessionStoreSecretArn: arn:aws:secretsmanager:eu-west-2:196177110550:secret:ob-fe/session-store-secret-R8ZhBa # pragma: allowlist secret
-      csrfSecretArn: "" # pragma: allowlist secret
+      csrfSecretArn: arn:aws:secretsmanager:eu-west-2:196177110550:secret:ob-fe/csrf-secret-pZUUh2 # pragma: allowlist secret
       fargateCPUsize: "512"
       fargateRAMsize: "1024"
       minECSCount: 2
@@ -104,7 +104,7 @@ Mappings:
       logLevel: "warn"
       dynatraceSecretArn: arn:aws:secretsmanager:eu-west-2:216552277552:secret:DynatraceProductionVariables
       sessionStoreSecretArn: arn:aws:secretsmanager:eu-west-2:327860191376:secret:ob-fe/session-store-secret-Au0Mov # pragma: allowlist secret
-      csrfSecretArn: "" # pragma: allowlist secret
+      csrfSecretArn: arn:aws:secretsmanager:eu-west-2:327860191376:secret:ob-fe/csrf-secret-EIRzTP # pragma: allowlist secret
       fargateCPUsize: "2048"
       fargateRAMsize: "4096"
       minECSCount: 4
@@ -166,7 +166,6 @@ Resources:
               ArnLike:
                 "kms:EncryptionContext:aws:logs:arn": !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:*"
 
-  # Security Groups for the ECS service and load balancer
   LoadBalancerSG:
     Type: "AWS::EC2::SecurityGroup"
     Properties:
@@ -361,7 +360,12 @@ Resources:
       ResourceArn: !Ref LoadBalancer
       WebACLArn: !ImportValue cfront-origin-distrib-CloakingOriginWebACLArn
 
-  # ECS cluster, service and task definition
+  ####################################################################
+  #                                                                  #
+  # ECS & API GW                                                     #
+  #                                                                  #
+  ####################################################################
+
   EcsCluster:
     Type: "AWS::ECS::Cluster"
     Properties:

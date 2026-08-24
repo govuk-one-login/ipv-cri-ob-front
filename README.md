@@ -87,7 +87,7 @@ Tests are organised in the `test` directory and further categorised as follows:
 - `test`/`integration`/`path`/`to`/`code.integration.test.ts`
     - if you don't postfix your test file name with `integration.test.ts` it won't be automatically picked up by the test runner
     - integration tests are focussed on maximising realism
-      - `undici.MockAgent` for wire calls
+      - `nock` for wire calls
       - `testcontainers` for providing realistic backing infra
       - `supertest` for driving the app over HTTP in-process
     - this makes them slower to run than unit tests, use when unit tests are not deep enough and browser tests are overkill
