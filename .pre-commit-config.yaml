@@ -36,13 +36,18 @@ repos:
     hooks:
       - id: oxlint
         name: oxlint
-        entry: npx oxlint
+        entry: npm run lint:fix --
         language: system
         pass_filenames: true
         types_or: [javascript, ts]
       - id: oxfmt
         name: oxfmt
-        entry: npx oxfmt --check
+        entry: npm run format:fix --
         language: system
         pass_filenames: true
         types_or: [javascript, ts, json, css, scss]
+      - id: type-check
+        name: type check
+        entry: npm run type-check
+        language: system
+        pass_filenames: false

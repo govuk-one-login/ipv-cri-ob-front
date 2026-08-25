@@ -43,8 +43,6 @@ jobs:
         uses: govuk-one-login/github-actions/node/install-dependencies@4c76410195b5fcb1804fc7c183ed20704252830f
         with:
           node-version-file: '.nvmrc'
-      - name: Type check
-        run: npm run type-check
       - name: i18n check
         run: npm run check-translation
       - name: SAM lint
