@@ -35,7 +35,7 @@
   "devDependencies": {
     "@aws-sdk/credential-provider-node": "3.972.74",
     "@axe-core/playwright": "4.12.1",
-    "@playwright/test": "1.62.0",
+    "@playwright/test": "1.62.1",
     "@smithy/signature-v4": "5.6.11",
     "@types/express": "4.17.25",
     "@types/express-session": "1.19.0",
