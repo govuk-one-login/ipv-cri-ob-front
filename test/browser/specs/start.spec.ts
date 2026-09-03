@@ -11,12 +11,22 @@ const COPY = {
   en: {
     heading: 'Finish proving your identity by signing in to your online banking',
     primaryButton: 'Continue',
-    title: /Finish proving your identity by signing in to your online banking/
+    title: /Finish proving your identity by signing in to your online banking/,
+    detailsSummary: 'How does online banking prove my identity?',
+    detailsContent: /Banks have very strong security/,
+    privacyNoticeLink: 'Our privacy notice (opens in new tab)',
+    fcaLink: 'Financial Conduct Authority (opens in a new tab)',
+    secondaryLink: 'Prove your identity another way'
   },
   cy: {
-    heading: 'Lorem ipsum dolor sit amet consectetur adipiscing elit sed do',
-    primaryButton: 'Lorem ipsum',
-    title: /Lorem ipsum dolor sit amet consectetur adipiscing elit sed do/
+    heading: "Gorffen profi eich hunaniaeth trwy fewngofnodi i'ch bancio ar-lein",
+    primaryButton: 'Parhau',
+    title: /Gorffen profi eich hunaniaeth trwy fewngofnodi i'ch bancio ar-lein/,
+    detailsSummary: 'Sut mae bancio ar-lein yn profi fy hunaniaeth?',
+    detailsContent: /Mae gan fanciau ddiogelwch cryf iawn/,
+    privacyNoticeLink: 'Mae gan ein hysbysiad preifatrwydd (agor mewn tab newydd)',
+    fcaLink: 'Awdurdod Ymddygiad Ariannol (agor mewn tab newydd)',
+    secondaryLink: 'Profi eich hunaniaeth mewn ffordd arall'
   }
 }
 
@@ -34,12 +44,15 @@ const registerStartPageTests = (lang: Language) => {
     startPage = await navigate(page, lang)
   })
 
-  test('renders the expected page elements', async ({ page }) => {
+  test('renders the expected page elements in English and Welsh', async ({ page }) => {
     await expect(startPage.heading()).toContainText(COPY[lang].heading)
     await expect(page).toHaveTitle(COPY[lang].title)
     await expect(startPage.continueButton()).toHaveText(COPY[lang].primaryButton)
     await expect(startPage.detailsToggle()).toBeVisible()
-    await expect(startPage.proveAnotherWayLink()).toBeVisible()
+    await expect(startPage.detailsToggle()).toContainText(COPY[lang].detailsSummary)
+    await startPage.openDetails()
+    await expect(startPage.detailsBody()).toContainText(COPY[lang].detailsContent)
+    await expect(startPage.proveAnotherWayLink()).toContainText(COPY[lang].secondaryLink)
   })
 }
 

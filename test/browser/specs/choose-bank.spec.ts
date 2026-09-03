@@ -18,12 +18,16 @@ const COPY = {
   en: {
     heading: 'Choose your bank or building society',
     errorMessage: 'Select a bank or building society',
-    title: /Choose your bank or building society/
+    title: /Choose your bank or building society/,
+    primaryButton: 'Continue',
+    notListedLinkText: 'My bank is not listed'
   },
   cy: {
-    heading: 'Lorem ipsum dolor sit amet consectetur',
-    errorMessage: 'Adipiscing elit sed do eiusmod',
-    title: /Lorem ipsum dolor sit amet consectetur/
+    heading: 'Dewiswch eich banc neu gymdeithas adeiladu',
+    errorMessage: 'Dewiswch fanc neu gymdeithas adeiladu',
+    title: /Dewiswch eich banc neu gymdeithas adeiladu/,
+    primaryButton: 'Parhau',
+    notListedLinkText: "Nid yw fy manc wedi'i restru"
   }
 }
 
@@ -45,17 +49,14 @@ const registerChooseBankTests = (lang: Language) => {
     chooseBankPage = await navigate(page, lang)
   })
 
-  test('renders the expected page elements', async ({ page }) => {
+  test('renders the expected page elements in English and Welsh', async ({ page }) => {
     await expect(chooseBankPage.heading()).toContainText(COPY[lang].heading)
     await expect(page).toHaveTitle(COPY[lang].title)
     await expect(chooseBankPage.bankSelect()).toBeVisible()
-    await expect(chooseBankPage.continueButton()).toBeVisible()
+    await expect(chooseBankPage.continueButton()).toHaveText(COPY[lang].primaryButton)
     await expect(chooseBankPage.bankSelectOption(BANK_VALUE)).toHaveText(BANK_LABEL)
     await expect(chooseBankPage.bankSelectOption(OFFLINE_BANK_VALUE)).toHaveText(OFFLINE_BANK_LABEL)
-    await expect(chooseBankPage.bankNotListedLink()).toHaveAttribute(
-      'href',
-      paths.steps.proveAnotherWay
-    )
+    await expect(chooseBankPage.bankNotListedLink()).toContainText(COPY[lang].notListedLinkText)
     await expect(chooseBankPage.backLink()).toHaveAttribute('href', paths.steps.start)
   })
 
