@@ -75,7 +75,7 @@
     "govuk-frontend": "5.14.0",
     "nunjucks": "3.2.4",
     "ua-parser-js": "1.0.41",
-    "zod": "4.4.3"
+    "zod": "4.5.4"
   },
   "overrides": {
     "hmpo-components": "8.0.6",
