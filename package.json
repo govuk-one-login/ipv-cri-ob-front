@@ -36,7 +36,7 @@
     "@aws-sdk/credential-provider-node": "3.972.74",
     "@axe-core/playwright": "4.12.1",
     "@playwright/test": "1.62.0",
-    "@smithy/signature-v4": "5.6.11",
+    "@smithy/signature-v4": "5.7.3",
     "@types/express": "4.17.25",
     "@types/express-session": "1.19.0",
     "@types/govuk-frontend": "5.11.0",
