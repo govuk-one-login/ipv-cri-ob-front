@@ -36,14 +36,17 @@ describe('open banking front', () => {
     nock('http://api.ob.cri.gov.uk:1337')
       .get('/banks')
       .times(2)
-      .reply(200, [
-        {
-          bank_id: 'iron-bank',
-          friendly_name: 'Iron Bank',
-          is_sandbox: false,
-          service_status: true
-        }
-      ])
+      .reply(200, {
+        banks: [
+          {
+            bankId: 'iron-bank',
+            friendlyName: 'Iron Bank',
+            serviceStatus: true
+          }
+        ],
+        profile: 'STUB',
+        refreshedAtSeconds: 1757882345
+      })
 
     const testAgent = request.agent(app)
     await testAgent.get(paths.steps.start)
