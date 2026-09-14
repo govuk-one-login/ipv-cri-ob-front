@@ -52,7 +52,7 @@
         "method": "GET",
         "urlPath": "/banks",
         "headers": {
-          "session_id": {
+          "session-id": {
             "equalTo": "CAFEBABE"
           }
         }
@@ -62,32 +62,32 @@
         "headers": {
           "Content-Type": "application/json"
         },
-        "jsonBody": [
-          {
-            "bank_id": "ironforge-vault",
-            "friendly_name": "Vault of Ironforge",
-            "is_sandbox": false,
-            "service_status": true
-          },
-          {
-            "bank_id": "org-counting-house",
-            "friendly_name": "Orgrimmar Counting House",
-            "is_sandbox": false,
-            "service_status": true
-          },
-          {
-            "bank_id": "royal-bank-sw",
-            "friendly_name": "Royal Bank of Stormwind",
-            "is_sandbox": false,
-            "service_status": true
-          },
-          {
-            "bank_id": "forgotten-uldaman-vault",
-            "friendly_name": "Forgotten Vault of Uldaman",
-            "is_sandbox": false,
-            "service_status": false
-          }
-        ]
+        "jsonBody": {
+          "banks": [
+            {
+              "bankId": "ironforge-vault",
+              "friendlyName": "Vault of Ironforge",
+              "serviceStatus": true
+            },
+            {
+              "bankId": "org-counting-house",
+              "friendlyName": "Orgrimmar Counting House",
+              "serviceStatus": true
+            },
+            {
+              "bankId": "royal-bank-sw",
+              "friendlyName": "Royal Bank of Stormwind",
+              "serviceStatus": true
+            },
+            {
+              "bankId": "forgotten-uldaman-vault",
+              "friendlyName": "Forgotten Vault of Uldaman",
+              "serviceStatus": false
+            }
+          ],
+          "profile": "STUB",
+          "refreshedAtSeconds": 690768000
+        }
       }
     },
     {
@@ -96,7 +96,7 @@
         "method": "POST",
         "urlPath": "/consent",
         "headers": {
-          "session_id": {
+          "session-id": {
             "equalTo": "CAFEBABE"
           }
         }

@@ -109,8 +109,8 @@ test.describe('Start page extras', { tag: '@desktop' }, () => {
     })
   })
 
-  test('user can tab to the Continue link and activate it with Enter', async ({ page }) => {
-    await tabToElement(page, 'a.govuk-button')
+  test('user can tab to the Continue button and activate it with Enter', async ({ page }) => {
+    await tabToElement(page, 'main .govuk-button-group .govuk-button')
     await page.keyboard.press('Enter')
     await expect(page).not.toHaveURL(/\/finish-proving-identity-online-banking/)
   })

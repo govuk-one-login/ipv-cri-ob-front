@@ -45,7 +45,7 @@ describe('open banking front', () => {
           }
         ],
         profile: 'STUB',
-        refreshedAtSeconds: 1757882345
+        refreshedAtSeconds: 690768000
       })
 
     const testAgent = request.agent(app)

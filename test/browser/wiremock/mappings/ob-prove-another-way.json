@@ -26,7 +26,7 @@
         "method": "GET",
         "urlPath": "/banks",
         "headers": {
-          "session_id": {
+          "session-id": {
             "equalTo": "ABAD1DEA"
           }
         }
@@ -36,14 +36,17 @@
         "headers": {
           "Content-Type": "application/json"
         },
-        "jsonBody": [
-          {
-            "bank_id": "ironforge-vault",
-            "friendly_name": "Vault of Ironforge",
-            "is_sandbox": false,
-            "service_status": true
-          }
-        ]
+        "jsonBody": {
+          "banks": [
+            {
+              "bankId": "ironforge-vault",
+              "friendlyName": "Vault of Ironforge",
+              "serviceStatus": true
+            }
+          ],
+          "profile": "STUB",
+          "refreshedAtSeconds": 690768000
+        }
       }
     },
     {
