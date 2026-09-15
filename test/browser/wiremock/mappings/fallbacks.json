@@ -1,13 +1,13 @@
 {
   "mappings": [
     {
-      "name": "missing session_id fallback",
+      "name": "missing session-id fallback",
       "priority": 10,
       "request": {
         "method": "ANY",
         "urlPathPattern": ".*",
         "headers": {
-          "session_id": { "absent": true }
+          "session-id": { "absent": true }
         }
       },
       "response": {
@@ -17,7 +17,7 @@
         },
         "jsonBody": {
           "error": "unauthorized",
-          "message": "missing session_id"
+          "message": "missing session-id"
         }
       }
     }

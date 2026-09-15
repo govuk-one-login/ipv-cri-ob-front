@@ -1,7 +1,7 @@
 import type { Request } from 'express'
 
 const createBaseClient = (req: Request) => {
-  const sessionHeader = req.session.tokenId ? { session_id: req.session.tokenId } : {}
+  const sessionHeader = req.session.tokenId ? { ['session-id']: req.session.tokenId } : {}
 
   return {
     get: (path: string, headers: Record<string, string> = {}): Promise<Response> =>

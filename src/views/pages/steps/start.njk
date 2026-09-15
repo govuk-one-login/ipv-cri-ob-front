@@ -22,14 +22,11 @@
   {% for item in translate("pages.start.contentB") %}
     {{ item | safe }}
   {% endfor %}
-  <div class="govuk-button-group">
-    {{
-      govukButton({
-        text: translate("pages.start.primaryButton"),
-        href: nextStep
-      })
-    }}
-  </div>
+  <form action="{{ nextStep }}" method="get">
+    <div class="govuk-button-group">
+      {% include "includes/progress-button.njk" %}
+    </div>
+  </form>
   <p class="govuk-body">
     <a href="{{ proveAnotherWay }}" class="govuk-link govuk-link--no-visited-state"
       >{{ translate("pages.start.secondaryLink") }}</a

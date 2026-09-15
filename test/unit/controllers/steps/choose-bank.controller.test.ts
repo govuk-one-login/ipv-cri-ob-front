@@ -6,17 +6,15 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import paths from '@src/config/paths'
 
 const onlineBank = Bank.fromData({
-  bank_id: 'test-online-bank',
-  friendly_name: 'Test Online Bank',
-  is_sandbox: false,
-  service_status: true
+  bankId: 'test-online-bank',
+  friendlyName: 'Test Online Bank',
+  serviceStatus: true
 })
 
 const offlineBank = Bank.fromData({
-  bank_id: 'test-offline-bank',
-  friendly_name: 'Test Offline Bank',
-  is_sandbox: false,
-  service_status: false
+  bankId: 'test-offline-bank',
+  friendlyName: 'Test Offline Bank',
+  serviceStatus: false
 })
 
 const mockGetBanks = vi.fn()
@@ -79,10 +77,9 @@ describe('choose-bank controller', () => {
 
       it('redirects to prove-another-way when all banks are offline', async () => {
         const anotherOfflineBank = Bank.fromData({
-          bank_id: 'another-offline-bank',
-          friendly_name: 'Another Test Offline Bank',
-          is_sandbox: false,
-          service_status: false
+          bankId: 'another-offline-bank',
+          friendlyName: 'Another Test Offline Bank',
+          serviceStatus: false
         })
         mockGetBanks.mockResolvedValue([offlineBank, anotherOfflineBank])
         await get(req, { redirect, render } as unknown as Response)

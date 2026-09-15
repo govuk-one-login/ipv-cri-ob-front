@@ -48,7 +48,7 @@
         "method": "GET",
         "urlPath": "/banks",
         "headers": {
-          "session_id": {
+          "session-id": {
             "equalTo": "DEADBA4D"
           }
         }
@@ -58,20 +58,22 @@
         "headers": {
           "Content-Type": "application/json"
         },
-        "jsonBody": [
-          {
-            "bank_id": "ironforge-vault",
-            "friendly_name": "Vault of Ironforge",
-            "is_sandbox": false,
-            "service_status": false
-          },
-          {
-            "bank_id": "org-counting-house",
-            "friendly_name": "Orgrimmar Counting House",
-            "is_sandbox": false,
-            "service_status": false
-          }
-        ]
+        "jsonBody": {
+          "banks": [
+            {
+              "bankId": "ironforge-vault",
+              "friendlyName": "Vault of Ironforge",
+              "serviceStatus": false
+            },
+            {
+              "bankId": "org-counting-house",
+              "friendlyName": "Orgrimmar Counting House",
+              "serviceStatus": false
+            }
+          ],
+          "profile": "STUB",
+          "refreshedAtSeconds": 690768000
+        }
       }
     }
   ]
