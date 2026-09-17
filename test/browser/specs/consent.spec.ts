@@ -17,14 +17,21 @@ const COPY = {
   en: {
     heading: 'Agree to share information from your bank or building society account with Ecospend',
     errorMessage: 'You must agree to share your bank account information to continue',
-    mobileButton: /Continue to your bank.s app or website/,
-    title: /Agree to share information from your bank or building society account with Ecospend/
+    primaryButton: 'Continue',
+    primaryButtonAlt: /Continue to your bank.s app or website/,
+    title: /Agree to share information from your bank or building society account with Ecospend/,
+    insetText: 'Ecospend will securely delete your information after the check is complete.',
+    secondaryLink: 'Prove your identity another way'
   },
   cy: {
-    heading: 'Lorem ipsum dolor sit amet consectetur adipiscing elit sed do eiusmod',
-    errorMessage: 'Ut labore et dolore magna aliqua ut enim ad minim veniam',
-    mobileButton: /Maecenas dignissim tempus est/,
-    title: /Lorem ipsum dolor sit amet consectetur adipiscing elit sed do eiusmod/
+    heading: "Cytuno i rannu gwybodaeth o'ch cyfrif banc neu gymdeithas adeiladu gydag Ecospend",
+    errorMessage: 'Rhaid i chi gytuno i rannu gwybodaeth eich cyfrif banc i barhau',
+    primaryButton: 'Parhau',
+    primaryButtonAlt: /Parhau i ap neu wefan eich banc/,
+    title: /Cytuno i rannu gwybodaeth o'ch cyfrif banc neu gymdeithas adeiladu gydag Ecospend/,
+    insetText:
+      "Bydd Ecospend yn dileu'n ddiogel eich gwybodaeth ar ôl i'r gwiriad gael ei gwblhau.",
+    secondaryLink: 'Profi eich hunaniaeth mewn ffordd arall'
   }
 }
 
@@ -49,14 +56,15 @@ const registerConsentTests = (lang: Language) => {
     consentPage = await navigate(page, lang)
   })
 
-  test('renders the expected page elements', async ({ page }) => {
+  test('renders the expected page elements in English and Welsh', async ({ page }) => {
     await expect(consentPage.heading()).toContainText(COPY[lang].heading)
     await expect(page).toHaveTitle(COPY[lang].title)
     await expect(consentPage.mainContent()).toContainText(BANK_LABEL)
     await expect(consentPage.consentCheckbox()).toBeVisible()
-    await expect(consentPage.continueButton()).toBeVisible()
-    await expect(consentPage.proveAnotherWayLink()).toBeVisible()
+    await expect(consentPage.continueButton()).toHaveText(COPY[lang].primaryButton)
+    await expect(consentPage.proveAnotherWayLink()).toContainText(COPY[lang].secondaryLink)
     await expect(consentPage.backLink()).toHaveAttribute('href', paths.steps.chooseBank)
+    await expect(consentPage.insetText()).toContainText(COPY[lang].insetText)
   })
 
   test('renders form validation errors and links error summary items to inputs', async ({
@@ -80,7 +88,7 @@ const registerConsentTests = (lang: Language) => {
 const registerConsentMobileTests = (lang: Language) => {
   test('Continue button displays alt copy on mobile', async ({ page }) => {
     const consentPage = await navigate(page, lang)
-    await expect(consentPage.continueButton()).toContainText(COPY[lang].mobileButton)
+    await expect(consentPage.continueButton()).toContainText(COPY[lang].primaryButtonAlt)
   })
 }
 
