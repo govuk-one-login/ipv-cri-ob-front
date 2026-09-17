@@ -20,32 +20,35 @@ start:
   secondaryLink: Profi eich hunaniaeth mewn ffordd arall
 
 consent:
-  title: Lorem ipsum dolor sit amet consectetur adipiscing elit sed do eiusmod
+  title: Cytuno i rannu gwybodaeth o'ch cyfrif banc neu gymdeithas adeiladu gydag Ecospend
   contentA:
-    - <p class="govuk-body">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor <strong>{{ selectedBankName }}</strong> ut labore et dolore.</p>
-    - <p class="govuk-body">Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.</p>
-    - <h2 class="govuk-heading-m">Lorem ipsum dolor sit amet </h2>
-    - <p class="govuk-body">Duis aute irure dolor in reprehenderit:</p>
+    - <p class="govuk-body">I brofi eich hunaniaeth drwy ddefnyddio eich bancio ar-lein, rhaid i chi rannu rhywfaint o wybodaeth o'ch cyfrif <strong>{{ selectedBankName }}</strong> gydag Ecospend.</p>
+    - <p class="govuk-body">Mae hyn er mwyn gwirio bod eich cyfrif yn un go iawn ac i ddiogelu
+      yn erbyn twyll.</p>
+    - <h2 class="govuk-heading-m">Gwybodaeth sy'n cael ei rhannu </h2>
+    - <p class="govuk-body">Bydd Ecospend yn cael mynediad untro i wirio:</p>
     - <ul class="govuk-list govuk-list--bullet">
-    - <li>voluptate velit esse cillum dolore</li>
-    - <li>eu fugiat nulla pariatur (excepteur sint occaecat cupidatat non proident - sunt in culpa qui officia)</li>
+    - <li>rhif eich cyfrif a chod didoli </li>
+    - <li>bod eich cyfrif yn weithredol (drwy gadarnhau bod trafodion diweddar – ni fyddant yn
+      rhannu manylion y trafodion)</li>
     - </ul>
-  insetText: Lorem ipsum dolor sit amet consectetur adipiscing elit sed do eiusmod tempor.
+  insetText: Bydd Ecospend yn dileu'n ddiogel eich gwybodaeth ar ôl i'r gwiriad gael ei gwblhau.
   contentB:
-    - <h2 class="govuk-heading-m">Lorem ipsum dolor sit amet</h2>
-    - <p class="govuk-body">Ut enim ad minim veniam:</p>
+    - <h2 class="govuk-heading-m">Gwybodaeth nad yw'n cael ei rhannu</h2>
+    - <p class="govuk-body">Ni fydd Ecospend yn:</p>
     - <ul class="govuk-list govuk-list--bullet">
-    - <li>quis nostrud exercitation ullamco</li>
-    - <li>laboris nisi ut aliquip ex ea</li>
+    - <li>gweld eich manylion mewngofnodi bancio ar-lein</li>
+    - <li>defnyddio eich gwybodaeth i gymryd taliadau</li>
     - </ul>
-    - <p class="govuk-body">Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat.</p>
+    - <p class="govuk-body">Ni fydd unrhyw wybodaeth am eich cyfrif banc yn cael ei rhannu
+      gyda'r gwasanaeth llywodraeth rydych yn ei ddefnyddio.</p>
   checkbox:
-    legendText: Lorem ipsum dolor sit amet consectetur
-    itemText: Adipiscing elit sed do eiusmod tempor incididunt
-    errorMessage: Ut labore et dolore magna aliqua ut enim ad minim veniam
-  primaryButton: Lorem ipsum
-  primaryButtonAlt: Maecenas dignissim tempus est
-  secondaryLink: Dolor sit amet consectetur
+    legendText: Rhoi caniatâd i wybodaeth eich cyfrif banc gael ei rannu
+    itemText: Rwy'n cytuno i wybodaeth fy nghyfrif banc gael ei rannu gyda Ecospend
+    errorMessage: Rhaid i chi gytuno i rannu gwybodaeth eich cyfrif banc i barhau
+  primaryButton: Parhau
+  primaryButtonAlt: Parhau i ap neu wefan eich banc
+  secondaryLink: Profi eich hunaniaeth mewn ffordd arall
 
 chooseBank:
   title: Dewiswch eich banc neu gymdeithas adeiladu
