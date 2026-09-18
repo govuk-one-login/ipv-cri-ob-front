@@ -59,18 +59,18 @@
     "typescript": "7.0.2",
     "vite": "8.2.0",
     "vite-plugin-static-copy": "4.1.1",
-    "vitest": "4.1.10"
+    "vitest": "5.0.1"
   },
   "dependencies": {
     "@aws-sdk/client-dynamodb": "3.1097.0",
-    "@govuk-one-login/di-ipv-cri-common-express": "16.2.3",
+    "@govuk-one-login/di-ipv-cri-common-express": "16.2.5",
     "@govuk-one-login/frontend-analytics": "4.2.0",
     "@govuk-one-login/frontend-device-intelligence": "1.2.0",
     "@govuk-one-login/frontend-language-toggle": "2.2.2",
     "@govuk-one-login/frontend-ui": "5.3.1",
     "@govuk-one-login/frontend-vital-signs": "0.1.4",
     "connect-dynamodb": "3.0.5",
-    "express": "4.22.2",
+    "express": "4.22.3",
     "express-session": "1.19.0",
     "govuk-frontend": "5.14.0",
     "nunjucks": "3.2.4",
