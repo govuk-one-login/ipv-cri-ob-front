@@ -6,13 +6,18 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import paths from '@src/config/paths'
 
 const BANK_CONSENT_URL = 'https://bank.example/consent/abc'
+const URL_EXPIRES_AT_SECONDS = 2500000000 // 2049-05-20, far future for test purposes
+const URL_EXPIRED_AT_SECONDS = 1000000000 // 2001-09-09, far past for test purposes
 
 const mockRender = vi.fn()
 
-const buildReq = (body: { selectSignInMethod: string }): Request =>
+const buildReq = (body: { selectSignInMethod: string }, urlExpiresAtSeconds: number): Request =>
   ({
     body,
-    session: { bankConsentURL: BANK_CONSENT_URL } satisfies Partial<SessionData>
+    session: {
+      bankConsentURL: BANK_CONSENT_URL,
+      urlExpiresAtSeconds
+    } satisfies Partial<SessionData>
   }) as Request
 
 const buildRes = (): Response =>
@@ -41,7 +46,7 @@ describe('select-sign-in-method controller', () => {
   describe('post', () => {
     it('redirects appropriately when "use-different-device" is selected', () => {
       const redirect = vi.fn()
-      const req = buildReq({ selectSignInMethod: 'use-different-device' })
+      const req = buildReq({ selectSignInMethod: 'use-different-device' }, URL_EXPIRES_AT_SECONDS)
 
       post(req, { redirect } as unknown as Response)
 
@@ -50,14 +55,34 @@ describe('select-sign-in-method controller', () => {
 
     it('redirects appropriately when "stay-on-current-device" is selected', () => {
       const redirect = vi.fn()
-      const req = buildReq({ selectSignInMethod: 'stay-on-current-device' })
+      const req = buildReq({ selectSignInMethod: 'stay-on-current-device' }, URL_EXPIRES_AT_SECONDS)
       post(req, { redirect } as unknown as Response)
 
       expect(redirect).toHaveBeenCalledWith(BANK_CONSENT_URL)
     })
 
+    it('redirects to consent when urlExpiresAtSeconds is missing', () => {
+      const redirect = vi.fn()
+      const req = {
+        body: { selectSignInMethod: 'stay-on-current-device' },
+        session: { bankConsentURL: BANK_CONSENT_URL } satisfies Partial<SessionData>
+      } as Request
+
+      post(req, { redirect } as unknown as Response)
+
+      expect(redirect).toHaveBeenCalledWith(paths.steps.consent)
+    })
+
+    it('redirects to consent when url has expired', () => {
+      const redirect = vi.fn()
+      post(buildReq({ selectSignInMethod: 'stay-on-current-device' }, URL_EXPIRED_AT_SECONDS), {
+        redirect
+      } as unknown as Response)
+      expect(redirect).toHaveBeenCalledWith(paths.steps.consent)
+    })
+
     it('re-renders with errors when no option is selected', () => {
-      const req = buildReq({ selectSignInMethod: '' })
+      const req = buildReq({ selectSignInMethod: '' }, URL_EXPIRES_AT_SECONDS)
       const res = buildRes()
 
       post(req, res)
@@ -74,7 +99,7 @@ describe('select-sign-in-method controller', () => {
     })
 
     it('re-renders with errors when a tampered value is submitted', () => {
-      const req = buildReq({ selectSignInMethod: 'tampered-radio-value' })
+      const req = buildReq({ selectSignInMethod: 'tampered-radio-value' }, URL_EXPIRES_AT_SECONDS)
       const res = buildRes()
 
       post(req, res)
