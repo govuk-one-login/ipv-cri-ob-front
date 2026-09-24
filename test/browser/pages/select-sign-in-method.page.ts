@@ -17,8 +17,16 @@ export class SelectSignInMethodPage extends BasePage {
     return this.page.locator('main .govuk-button-group .govuk-button')
   }
 
+  stayOnThisDeviceHint() {
+    return this.page.locator('#select-sign-in-method-2-item-hint')
+  }
+
   stayOnThisDeviceRadio() {
     return this.page.locator('input[type="radio"][value="stay-on-current-device"]')
+  }
+
+  useDifferentDeviceHint() {
+    return this.page.locator('#select-sign-in-method-item-hint')
   }
 
   useDifferentDeviceRadio() {
