@@ -37,6 +37,7 @@ const post = async (req: Request, res: Response) => {
   )
   req.session.consentID = consentResponse.consentID
   req.session.bankConsentURL = consentResponse.bankConsentURL.toString()
+  req.session.urlExpirySeconds = consentResponse.urlExpirySeconds
 
   if (req.session.isMobile) {
     res.redirect(req.session.bankConsentURL)

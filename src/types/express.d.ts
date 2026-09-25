@@ -17,6 +17,7 @@ interface AppSessionData {
     type: 'error' | 'info' | 'success'
   }[]
   isMobile?: boolean
+  urlExpirySeconds?: number
   webhooksSent?: Record<string, { accountAssessment?: string; consent?: string }>
   wizard: Record<string, { history: string[] }>
 }
