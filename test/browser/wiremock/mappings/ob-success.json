@@ -111,7 +111,7 @@
           "bank_id": "ironforge-vault",
           "id": "CONSENT-SUCCESS-UUID",
           "redirect_url": "http://{{systemValue type='ENVIRONMENT' key='CRI_BIND_HOST'}}:{{systemValue type='ENVIRONMENT' key='CRI_PORT'}}/confirm-details-bank",
-          "url_expiry_seconds": 300
+          "url_expiry_seconds": "{{now offset='1 hours' unit='seconds'}}"
         },
         "transformers": ["response-template"]
       }

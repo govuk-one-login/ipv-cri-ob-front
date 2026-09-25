@@ -18,7 +18,7 @@ beforeEach(() => {
     bankConsentURL: BANK_CONSENT_URL,
     bankID: '1337-bank-id',
     consentID: '0451-consent-id',
-    urlExpirySeconds: 300
+    urlExpirySeconds: 1748000000
   } satisfies Partial<ConsentResponse>)
 })
 
@@ -51,7 +51,7 @@ describe('consent controller', () => {
   })
 
   describe('post', () => {
-    it('stores the consentID, bankConsentURL and consentExpiresAt from the API response on the session', async () => {
+    it('stores the consentID, bankConsentURL and urlExpirySeconds from the API response on the session', async () => {
       const req = buildReq()
       const res = { redirect: vi.fn() } as unknown as Response
 
@@ -59,8 +59,7 @@ describe('consent controller', () => {
 
       expect(req.session.consentID).toBe('0451-consent-id')
       expect(req.session.bankConsentURL).toBe(BANK_CONSENT_URL.toString())
-      expect(req.session.consentExpiresAt).toBeGreaterThanOrEqual(Date.now() + 300_000)
-      expect(req.session.consentExpiresAt).toBeLessThanOrEqual(Date.now() + 300_000)
+      expect(req.session.urlExpirySeconds).toBe(1748000000)
     })
 
     it('re-renders with errors when consent is not given', async () => {

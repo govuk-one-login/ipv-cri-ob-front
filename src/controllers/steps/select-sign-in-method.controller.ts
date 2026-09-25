@@ -1,5 +1,6 @@
 import type { Request, Response } from 'express'
 
+import { LOGGER } from '@src/utils/logger'
 import { zodErrorsForView } from '@src/utils/zod-form-errors'
 import { z } from 'zod'
 
@@ -24,7 +25,11 @@ const selectSignInMethodSchema = () =>
   })
 
 const post = (req: Request, res: Response) => {
-  if (!req.session.consentExpiresAt || Date.now() > req.session.consentExpiresAt!) {
+  if (
+    !req.session.urlExpirySeconds ||
+    Math.floor(Date.now() / 1000) > req.session.urlExpirySeconds
+  ) {
+    LOGGER.warn('consent url expired or missing, redirecting to consent')
     res.redirect(paths.steps.consent)
     return
   }

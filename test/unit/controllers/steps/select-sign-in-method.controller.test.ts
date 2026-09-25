@@ -6,15 +6,15 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import paths from '@src/config/paths'
 
 const BANK_CONSENT_URL = 'https://bank.example/consent/abc'
-const URL_EXPIRES_AT = Date.now() + 60_000
-const URL_EXPIRED_AT = Date.now() - 60_000
+const URL_EXPIRES_AT = 9999999999
+const URL_EXPIRED_AT = 1000000000
 
 const mockRender = vi.fn()
 
-const buildReq = (body: { selectSignInMethod: string }, consentExpiresAt: number): Request =>
+const buildReq = (body: { selectSignInMethod: string }, urlExpirySeconds: number): Request =>
   ({
     body,
-    session: { bankConsentURL: BANK_CONSENT_URL, consentExpiresAt } satisfies Partial<SessionData>
+    session: { bankConsentURL: BANK_CONSENT_URL, urlExpirySeconds } satisfies Partial<SessionData>
   }) as Request
 
 const buildRes = (): Response =>
@@ -58,7 +58,7 @@ describe('select-sign-in-method controller', () => {
       expect(redirect).toHaveBeenCalledWith(BANK_CONSENT_URL)
     })
 
-    it('redirects to consent when consentExpiresAt is missing', () => {
+    it('redirects to consent when urlExpirySeconds is missing', () => {
       const redirect = vi.fn()
       const req = {
         body: { selectSignInMethod: 'stay-on-current-device' },
@@ -70,7 +70,7 @@ describe('select-sign-in-method controller', () => {
       expect(redirect).toHaveBeenCalledWith(paths.steps.consent)
     })
 
-    it('redirects to consent when consentExpiresAt is in the past', () => {
+    it('redirects to consent when urlExpirySeconds is in the past', () => {
       const redirect = vi.fn()
       post(buildReq({ selectSignInMethod: 'stay-on-current-device' }, URL_EXPIRED_AT), {
         redirect

@@ -8,7 +8,6 @@ interface AppSessionData {
   bankConsentURL?: string
   bankID?: string
   bankName?: string
-  consentExpiresAt?: number
   consentID?: string
   flash?: {
     message: {
@@ -18,6 +17,7 @@ interface AppSessionData {
     type: 'error' | 'info' | 'success'
   }[]
   isMobile?: boolean
+  urlExpirySeconds?: number
   webhooksSent?: Record<string, { accountAssessment?: string; consent?: string }>
   wizard: Record<string, { history: string[] }>
 }
