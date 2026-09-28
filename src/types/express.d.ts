@@ -17,6 +17,7 @@ interface AppSessionData {
     type: 'error' | 'info' | 'success'
   }[]
   isMobile?: boolean
+  urlExpiresAtSeconds?: number // Epoch seconds at which the consent URL stops being valid
   webhooksSent?: Record<string, { accountAssessment?: string; consent?: string }>
   wizard: Record<string, { history: string[] }>
 }
