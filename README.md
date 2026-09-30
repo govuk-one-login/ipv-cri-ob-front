@@ -117,6 +117,7 @@ Run `pre-commit install` after cloning to enable these checks.
 |---------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------|------------------------------|
 | `PORT`                                | Port the app listens on. Default: `5090`                                                                                                | No                           |
 | `BIND_HOST`                           | Network interface to bind to. Default: `127.0.0.1`                                                                                      | No                           |
+| `EXTERNAL_WEBSITE_HOST`               | Public base URL this app is served on, e.g. `https://review-ob.dev.account.gov.uk`. Default: `http://${BIND_HOST}:${PORT}`              | Yes (deployed environments)  |
 | `CSRF_SECRET`                         | Client secret provided to the CSRF middleware (string, or string[] if rotating)                                                         | Yes                          |
 | `NODE_ENV`                            | Node runtime environment (`development`, `production`, `test`). Affects Helmet CSP and other security settings, enables Vite dev server | No                           |
 | `DEPLOYMENT_ENV`                      | Deployment environment (`local`, `dev`, `build`, `staging`, `integration`, `production`). Default.                                      | No                           |

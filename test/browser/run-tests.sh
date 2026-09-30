@@ -22,10 +22,10 @@ get_stack_output() {
 }
 
 APP_URL=$(get_stack_output "${STACK_NAME}" "FrontendURL")
-CORE_STUB_URL=$(get_stack_output "test-resources" "TestHarnessExecuteUrl")
+TEST_HARNESS_URL=$(get_stack_output "test-resources" "TestHarnessExecuteUrl")
 
 export APP_URL
-export CORE_STUB_URL
+export TEST_HARNESS_URL
 
 cd /app/test/browser
 npx playwright test --config playwright.smoke.config.ts

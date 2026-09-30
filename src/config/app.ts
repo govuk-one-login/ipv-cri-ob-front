@@ -17,7 +17,7 @@ const AppConfigSchema = z
       PATHS: z.object({
         AUTHORIZATION: z.string().nonempty(),
         BANKS: z.string().nonempty(),
-        CONSENT: z.string().nonempty(),
+        CONSENTS: z.string().nonempty(),
         SESSION: z.string().nonempty(),
         WEBHOOK: z.string().nonempty()
       })
@@ -43,6 +43,7 @@ const AppConfigSchema = z
       NODE_ENV: NodeEnvSchema,
       PATHS: z.object({ OPEN_BANKING: z.string().nonempty() }),
       PORT: z.number().int().positive(),
+      PUBLIC_ORIGIN: z.url().nonempty(),
       SESSION: z.object({
         COOKIE_NAME: z.string().nonempty(),
         SECRET: z.string().nonempty(),
@@ -65,19 +66,22 @@ const AppConfigSchema = z
 
 export type AppConfig = z.infer<typeof AppConfigSchema>
 
+const bindHost = process.env['BIND_HOST'] || 'localhost'
+const port = Number(process.env['PORT']) || 5090
+
 export const appConfig = AppConfigSchema.parse({
   API: {
     BASE_URL: process.env['API_BASE_URL']!,
     PATHS: {
       AUTHORIZATION: '/authorization',
       BANKS: '/banks',
-      CONSENT: '/consent',
+      CONSENTS: '/consents',
       SESSION: '/session',
       WEBHOOK: '/webhook'
     }
   },
   APP: {
-    BIND_HOST: process.env['BIND_HOST'] || 'localhost',
+    BIND_HOST: bindHost,
     CSRF_SECRET: process.env['CSRF_SECRET']!,
     DEPLOYMENT_ENV: (process.env['DEPLOYMENT_ENV'] || 'production') as z.infer<
       typeof DeploymentEnvSchema
@@ -100,7 +104,8 @@ export const appConfig = AppConfigSchema.parse({
     PATHS: {
       OPEN_BANKING: '/'
     },
-    PORT: Number(process.env['PORT']) || 5090,
+    PORT: port,
+    PUBLIC_ORIGIN: process.env['EXTERNAL_WEBSITE_HOST'] || `http://${bindHost}:${port}`,
     SESSION: {
       COOKIE_NAME: 'ob_session',
       SECRET: process.env['SESSION_SECRET']!,

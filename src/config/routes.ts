@@ -34,7 +34,7 @@ const openBankingJourney = createWizard<SessionData>(
       prereq: { keys: ['bankID'], redirectTo: paths.steps.chooseBank },
       middleware: [detectDevice.middleware],
       exit: true, // step can redirect the user straight to the bank consent url if they are on a mobile device
-      controller: steps.consentController
+      controller: steps.consentsController
     },
     [paths.steps.selectSignInMethod]: {
       next: [paths.steps.scanQuickResponseCode, paths.steps.consent], // controller redirects to consent when consent URL expired

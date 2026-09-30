@@ -1,4 +1,4 @@
-import type { ConsentResponse } from '@src/models/consent.class'
+import type { ConsentsResponse } from '@src/models/consents'
 import type { NextFunction, Request, Response } from 'express'
 
 import { beforeEach, describe, expect, it, vi } from 'vitest'
@@ -15,14 +15,13 @@ vi.mock('@src/clients/consents.client', () => ({
 
 beforeEach(() => {
   createConsent.mockReset().mockResolvedValue({
-    bankConsentURL: BANK_CONSENT_URL,
-    bankID: '1337-bank-id',
-    consentID: '0451-consent-id',
+    id: '1337-consent-id',
+    url: BANK_CONSENT_URL.href,
     urlExpiresAtSeconds: 2500000000 // 2049-05-20, far future
-  } satisfies Partial<ConsentResponse>)
+  } satisfies Partial<ConsentsResponse>)
 })
 
-const { get, post } = await import('@src/controllers/steps/consent.controller')
+const { get, post } = await import('@src/controllers/steps/consents.controller')
 
 const buildReq = (
   overrides: { body?: Record<string, unknown>; session?: Partial<Request['session']> } = {}
@@ -57,8 +56,8 @@ describe('consent controller', () => {
 
       await post(req, res)
 
-      expect(req.session.consentID).toBe('0451-consent-id')
-      expect(req.session.bankConsentURL).toBe(BANK_CONSENT_URL.toString())
+      expect(req.session.consentID).toBe('1337-consent-id')
+      expect(req.session.bankConsentURL).toBe(BANK_CONSENT_URL.href)
       expect(req.session.urlExpiresAtSeconds).toBe(2500000000)
     })
 
@@ -90,7 +89,7 @@ describe('consent controller', () => {
 
       await post(req, res)
 
-      expect(redirect).toHaveBeenCalledWith(BANK_CONSENT_URL.toString())
+      expect(redirect).toHaveBeenCalledWith(BANK_CONSENT_URL.href)
     })
 
     it('redirects to the select sign-in method step when the session is not flagged as mobile', async () => {

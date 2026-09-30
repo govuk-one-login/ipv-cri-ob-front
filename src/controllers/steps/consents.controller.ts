@@ -1,11 +1,13 @@
 import type { NextFunction, Request, Response } from 'express'
 
 import { consentsClient } from '@src/clients/consents.client'
-import { ConsentRequest } from '@src/models/consent.class'
 import { zodErrorsForView } from '@src/utils/zod-form-errors'
 import { z } from 'zod'
 
+import appConfig from '@src/config/app'
 import paths from '@src/config/paths'
+
+const RETURN_URL = new URL(paths.steps.checkDetailsHolding, appConfig.APP.PUBLIC_ORIGIN).href // must match a return URL registered with the ecospend client for this environment
 
 const renderPage = (req: Request, res: Response, context: Record<string, unknown> = {}) => {
   res.locals['selectedBankName'] = req.session.bankName
@@ -20,24 +22,25 @@ const get = (req: Request, res: Response, _next: NextFunction) => {
   renderPage(req, res)
 }
 
-const consentSchema = () =>
+const consentsSchema = () =>
   z.object({
     consent: z.literal('consent', 'pages.consent.checkbox.errorMessage')
   })
 
 const post = async (req: Request, res: Response) => {
-  const result = consentSchema().safeParse(req.body)
+  const result = consentsSchema().safeParse(req.body)
   if (!result.success) {
     renderPage(req, res, zodErrorsForView(result.error, res.locals.translate))
     return
   }
   const bankID = req.session.bankID!
-  const consentResponse = await consentsClient(req).createConsent(
-    new ConsentRequest(req.sessionID, bankID).toData()
-  )
-  req.session.consentID = consentResponse.consentID
-  req.session.bankConsentURL = consentResponse.bankConsentURL.toString()
-  req.session.urlExpiresAtSeconds = consentResponse.urlExpiresAtSeconds
+  const consentsResponse = await consentsClient(req).createConsent({
+    bank_id: bankID,
+    return_url: RETURN_URL
+  })
+  req.session.consentID = consentsResponse.id
+  req.session.bankConsentURL = consentsResponse.url
+  req.session.urlExpiresAtSeconds = consentsResponse.urlExpiresAtSeconds
 
   if (req.session.isMobile) {
     res.redirect(req.session.bankConsentURL)
