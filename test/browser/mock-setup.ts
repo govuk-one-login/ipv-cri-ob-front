@@ -21,13 +21,13 @@ const appReady = async (exited: { value: boolean }, attempts = 40) => {
 }
 
 const initWiremockContainer = async () => {
-  console.log('[SYSTEM] starting Wiremock container...')
+  console.log('[SYSTEM] starting WireMock container...')
   const wiremockContainer = await new GenericContainer('wiremock/wiremock:3.13.1')
     .withCommand(['--local-response-templating', '--permitted-system-keys=CRI_.*'])
     .withEnvironment({ CRI_BIND_HOST: APP_URL.hostname, CRI_PORT: APP_URL.port })
     .withExposedPorts(8080)
     .withWaitStrategy(Wait.forHttp('/__admin/mappings', 8080).forStatusCode(200))
-    .withStartupTimeout(60_000) // 60 second timeout
+    .withStartupTimeout(60_000)
     .withCopyDirectoriesToContainer([
       {
         source: path.resolve(import.meta.dirname, 'wiremock/mappings'),
@@ -72,7 +72,8 @@ export default async function mockSetup() {
       SESSION_SECRET: 'hunter2', // pragma: allowlist secret
       CSRF_SECRET: 'Tr0ub4dor&3', // pragma: allowlist secret
       STUBS_ENABLED: 'true',
-      USE_PINO_LOGGER: 'true'
+      USE_PINO_LOGGER: 'true',
+      MAY_2025_REBRAND_ENABLED: 'true'
     }
   })
 

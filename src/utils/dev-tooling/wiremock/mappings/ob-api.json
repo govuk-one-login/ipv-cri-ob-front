@@ -109,7 +109,7 @@
       "name": "create consent",
       "request": {
         "method": "POST",
-        "urlPath": "/consent",
+        "urlPath": "/consents",
         "headers": {
           "session-id": {
             "matches": ".+"
@@ -121,13 +121,7 @@
         "headers": {
           "Content-Type": "application/json"
         },
-        "jsonBody": {
-          "bank_consent_url": "http://{{systemValue type='ENVIRONMENT' key='CRI_BIND_HOST'}}:{{systemValue type='ENVIRONMENT' key='CRI_PORT'}}/stubs/webhook",
-          "bank_id": "{{jsonPath request.body '$.bank_id'}}",
-          "id": "{{randomValue type='UUID'}}",
-          "redirect_url": "http://{{systemValue type='ENVIRONMENT' key='CRI_BIND_HOST'}}:{{systemValue type='ENVIRONMENT' key='CRI_PORT'}}/confirm-details-bank",
-          "url_expires_at_seconds": 2500000000
-        },
+        "body": "{\"cached\": false, \"id\": \"{{randomValue type='UUID'}}\", \"url\": \"http://{{systemValue type='ENVIRONMENT' key='CRI_BIND_HOST'}}:{{systemValue type='ENVIRONMENT' key='CRI_PORT'}}/stubs/webhook\", \"urlExpiresAtSeconds\": {{now offset='240 seconds' format='unix'}} }",
         "transformers": ["response-template"],
         "delayDistribution": {
           "type": "uniform",
@@ -141,7 +135,7 @@
       "priority": 10,
       "request": {
         "method": "ANY",
-        "urlPathPattern": "/(authorization|banks|consent)"
+        "urlPathPattern": "/(authorization|banks|consents)"
       },
       "response": {
         "status": 401,

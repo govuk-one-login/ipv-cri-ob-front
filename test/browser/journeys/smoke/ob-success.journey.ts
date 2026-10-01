@@ -1,5 +1,5 @@
 import { expect, smokeTest as test } from '../../fixtures'
-import { getSessionJwt } from '../../helpers/core-stub'
+import { getSessionJwt } from '../../helpers/test-harness'
 import { AuthorisePage } from '../../pages/authorise.page'
 import { StartPage } from '../../pages/start.page'
 

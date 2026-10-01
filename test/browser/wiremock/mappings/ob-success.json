@@ -94,25 +94,20 @@
       "name": "create consent",
       "request": {
         "method": "POST",
-        "urlPath": "/consent",
+        "urlPath": "/consents",
         "headers": {
           "session-id": {
             "equalTo": "CAFEBABE"
           }
-        }
+        },
+        "bodyPatterns": [{ "matchesJsonPath": "$.bank_id" }, { "matchesJsonPath": "$.return_url" }]
       },
       "response": {
         "status": 201,
         "headers": {
           "Content-Type": "application/json"
         },
-        "jsonBody": {
-          "bank_consent_url": "http://{{systemValue type='ENVIRONMENT' key='CRI_BIND_HOST'}}:{{systemValue type='ENVIRONMENT' key='CRI_PORT'}}/stubs/webhook",
-          "bank_id": "ironforge-vault",
-          "id": "CONSENT-SUCCESS-UUID",
-          "redirect_url": "http://{{systemValue type='ENVIRONMENT' key='CRI_BIND_HOST'}}:{{systemValue type='ENVIRONMENT' key='CRI_PORT'}}/confirm-details-bank",
-          "url_expires_at_seconds": 2500000000
-        },
+        "body": "{\"cached\": false, \"id\": \"CONSENT-SUCCESS-UUID\", \"url\": \"http://{{systemValue type='ENVIRONMENT' key='CRI_BIND_HOST'}}:{{systemValue type='ENVIRONMENT' key='CRI_PORT'}}/stubs/webhook\", \"urlExpiresAtSeconds\": {{now offset='240 seconds' format='unix'}} }",
         "transformers": ["response-template"]
       }
     },

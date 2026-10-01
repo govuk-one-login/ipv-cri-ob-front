@@ -502,6 +502,13 @@ Resources:
               Value: "true"
             - Name: BIND_HOST
               Value: "0.0.0.0"
+            - Name: EXTERNAL_WEBSITE_HOST
+              Value:
+                !If [
+                  IsProduction,
+                  "https://review-ob.account.gov.uk",
+                  !Sub "https://review-ob.${Environment}.account.gov.uk"
+                ]
           Secrets:
             - Name: SESSION_SECRET
               ValueFrom: !FindInMap [ EnvironmentConfiguration, !Ref Environment, sessionStoreSecretArn ]
