@@ -15,6 +15,10 @@ export class ChooseBankPage extends BasePage {
     return this.bankSelect().locator(`option[value="${value}"]`)
   }
 
+  bankSelectOptions() {
+    return this.bankSelect().locator('option:not([value=""])')
+  }
+
   continue() {
     return this.continueButton().click()
   }
@@ -29,5 +33,13 @@ export class ChooseBankPage extends BasePage {
 
   selectBankByLabel(label: string) {
     return this.bankSelect().selectOption({ label })
+  }
+
+  async selectFirstAvailableBank() {
+    await this.bankSelect().click()
+    const firstBank = this.bankSelectOptions().first()
+    const bankName = (await firstBank.innerText()).trim()
+    await this.bankSelect().selectOption(await firstBank.getAttribute('value'))
+    return bankName
   }
 }
