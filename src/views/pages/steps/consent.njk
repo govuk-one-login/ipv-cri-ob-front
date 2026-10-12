@@ -4,6 +4,10 @@
 {% from "govuk/components/checkboxes/macro.njk" import govukCheckboxes %}
 
 {% set pageTitle = translate("pages.consent.title") %}
+{% set isPageDataSensitive = true %}
+{% set taxLevel1 = "web cri" %}
+{% set taxLevel2 = "open banking" %}
+{% set contentID = "c6054d22-9de5-4f3f-a65c-3aca495047ac" %}
 
 {% block mainContent %}
   <h1 class="govuk-heading-l">{{ pageTitle }}</h1>
