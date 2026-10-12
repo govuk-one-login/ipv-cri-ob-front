@@ -3,6 +3,10 @@
 {% from "govuk/components/button/macro.njk" import govukButton %}
 
 {% set pageTitle = translate("pages.chooseBank.title") %}
+{% set isPageDataSensitive = true %}
+{% set taxLevel1 = "web cri" %}
+{% set taxLevel2 = "open banking" %}
+{% set contentID = "151abf8e-d652-4469-a2ce-e8e5e0d1b084" %}
 
 {% block mainContent %}
   <form method="post">
