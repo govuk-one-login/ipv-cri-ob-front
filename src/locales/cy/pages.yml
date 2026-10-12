@@ -70,17 +70,17 @@ bankProblem:
   primaryButton: Lorem ipsum
 
 selectSignInMethod:
-  title: Lorem ipsum dolor sit amet consectetur adipiscing?
+  title: Sut ydych chi eisiau mewngofnodi i'ch bancio ar-lein?
   radio:
-    legend: Lorem ipsum dolor sit amet consectetur adipiscing?
-    errorMessage: Sed do eiusmod tempor incididunt ut labore et dolore
+    legend: Sut ydych chi eisiau mewngofnodi i'ch bancio ar-lein?
+    errorMessage: Dewiswch sut ydych chi eisiau mewngofnodi i'ch bancio ar-lein
     one:
-      title: Lorem ipsum dolor sit amet consectetur adipiscing elit
-      hint: Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+      title: Defnyddiwch eich ffôn neu dabled a sganiwch y cod QR
+      hint: Gallwch ddefnyddio ap eich banc neu wefan symudol i brofi eich hunaniaeth.
     two:
-      title: Ut enim ad minim veniam quis nostrud exercitation
-      hint: Ullamco laboris nisi ut aliquip ex ea commodo consequat.
-  primaryButton: Lorem ipsum
+      title: Aros ar y ddyfais hon a defnyddio gwefan eich banc
+      hint: Pan fyddwch yn parhau, cewch eich anfon at wefan eich banc.
+  primaryButton: Parhau
 
 checkDetails:
   title: Lorem ipsum dolor sit amet consectetur

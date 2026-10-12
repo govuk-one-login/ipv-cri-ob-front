@@ -19,16 +19,20 @@ const COPY = {
     title: /How do you want to sign in to your online banking\?/,
     errorMessage: 'Select how you want to sign in to your online banking',
     primaryButton: 'Continue',
+    radioOne: 'Use your phone or tablet and scan a QR code',
     hintOne: 'You can use your bank’s app or mobile website to prove your identity.',
+    radioTwo: 'Stay on this device and use your bank’s website',
     hintTwo: 'When you continue, you’ll be sent to your bank’s website.'
   },
   cy: {
-    heading: 'Lorem ipsum dolor sit amet consectetur adipiscing?',
-    title: /Lorem ipsum dolor sit amet consectetur adipiscing\?/,
-    errorMessage: 'Sed do eiusmod tempor incididunt ut labore et dolore',
-    primaryButton: 'Lorem ipsum',
-    hintOne: 'Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
-    hintTwo: 'Ullamco laboris nisi ut aliquip ex ea commodo consequat.'
+    heading: "Sut ydych chi eisiau mewngofnodi i'ch bancio ar-lein?",
+    title: /Sut ydych chi eisiau mewngofnodi i'ch bancio ar-lein\?/,
+    errorMessage: "Dewiswch sut ydych chi eisiau mewngofnodi i'ch bancio ar-lein",
+    primaryButton: 'Parhau',
+    radioOne: 'Defnyddiwch eich ffôn neu dabled a sganiwch y cod QR',
+    hintOne: 'Gallwch ddefnyddio ap eich banc neu wefan symudol i brofi eich hunaniaeth.',
+    radioTwo: 'Aros ar y ddyfais hon a defnyddio gwefan eich banc',
+    hintTwo: 'Pan fyddwch yn parhau, cewch eich anfon at wefan eich banc.'
   }
 }
 
@@ -49,7 +53,7 @@ const navigate = async (page: Page, lang: Language) => {
   return new SelectSignInMethodPage(page)
 }
 
-const registerSelectSignInTests = (lang: Language) => {
+const registerSelectSignInMethodTests = (lang: Language) => {
   let selectSignInPage: SelectSignInMethodPage
 
   test.beforeEach(async ({ page }) => {
@@ -60,9 +64,17 @@ const registerSelectSignInTests = (lang: Language) => {
     await expect(selectSignInPage.heading()).toContainText(COPY[lang].heading)
     await expect(page).toHaveTitle(COPY[lang].title)
     await expect(selectSignInPage.useDifferentDeviceRadio()).toBeVisible()
+    await expect(selectSignInPage.useDifferentDeviceRadio()).toHaveAccessibleName(
+      COPY[lang].radioOne
+    )
+    await expect(selectSignInPage.useDifferentDeviceRadio()).toHaveAccessibleDescription(
+      COPY[lang].hintOne
+    )
     await expect(selectSignInPage.stayOnThisDeviceRadio()).toBeVisible()
-    await expect(selectSignInPage.useDifferentDeviceHint()).toContainText(COPY[lang].hintOne)
-    await expect(selectSignInPage.stayOnThisDeviceHint()).toContainText(COPY[lang].hintTwo)
+    await expect(selectSignInPage.stayOnThisDeviceRadio()).toHaveAccessibleName(COPY[lang].radioTwo)
+    await expect(selectSignInPage.stayOnThisDeviceRadio()).toHaveAccessibleDescription(
+      COPY[lang].hintTwo
+    )
     await expect(selectSignInPage.continueButton()).toHaveText(COPY[lang].primaryButton)
     await expect(selectSignInPage.backLink()).toHaveAttribute('href', paths.steps.consent)
   })
@@ -83,11 +95,11 @@ const registerSelectSignInTests = (lang: Language) => {
 }
 
 test.describe('Select sign in method (English)', { tag: '@desktop' }, () => {
-  registerSelectSignInTests('en')
+  registerSelectSignInMethodTests('en')
 })
 
 test.describe('Select sign in method (Welsh)', { tag: '@desktop' }, () => {
-  registerSelectSignInTests('cy')
+  registerSelectSignInMethodTests('cy')
 })
 
 test.describe('Select sign in method extras', { tag: '@desktop' }, () => {

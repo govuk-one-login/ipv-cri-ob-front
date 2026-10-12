@@ -78,7 +78,10 @@ export default async function mockSetup() {
   })
 
   const exited = { value: false }
-  const prettyStream = PinoPretty({ messageKey: 'message' })
+  const prettyStream = PinoPretty({
+    messageKey: 'message',
+    messageFormat: (log, messageKey) => String(log[messageKey])
+  })
   appProcess.stdout?.pipe(prettyStream)
   appProcess.stderr?.on('data', (d: Buffer) => process.stderr.write(d.toString()))
   appProcess.on('exit', (code) => {
