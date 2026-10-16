@@ -15,22 +15,43 @@ const BANK_VALUE = 'ironforge-vault'
 
 const COPY = {
   en: {
-    heading: 'Agree to share information from your bank or building society account with Ecospend',
+    heading:
+      'Agree to share information from your bank or building society account with GOV.UK One Login and Ecospend',
     errorMessage: 'You must agree to share your bank account information to continue',
+    content: {
+      ecospendWill: 'Ecospend will have one-off access to check:',
+      seeAccountDetails: 'your account number and sort code',
+      seeAccountActive:
+        'that your account is active (by confirming there are recent transactions - they will not share details of the transactions)',
+      ecospendWillNot: 'Ecospend will not:',
+      seeSignIn: 'see your online banking sign-in details',
+      takePayments: 'use your information to take payments',
+      shareTransactions: 'share details of your transactions'
+    },
     primaryButton: 'Continue',
     primaryButtonAlt: /Continue to your bank.s app or website/,
-    title: /Agree to share information from your bank or building society account with Ecospend/,
-    insetText: 'Ecospend will securely delete your information after the check is complete.',
+    title:
+      /Agree to share information from your bank or building society account with GOV.UK One Login and Ecospend/,
     secondaryLink: 'Prove your identity another way'
   },
   cy: {
-    heading: "Cytuno i rannu gwybodaeth o'ch cyfrif banc neu gymdeithas adeiladu gydag Ecospend",
+    heading:
+      "Cytuno i rannu gwybodaeth o'ch cyfrif banc neu gymdeithas adeiladu gyda GOV.UK One Login ac Ecospend",
     errorMessage: 'Rhaid i chi gytuno i rannu gwybodaeth eich cyfrif banc i barhau',
+    content: {
+      ecospendWill: 'Bydd Ecospend yn cael mynediad untro i wirio:',
+      seeAccountDetails: 'rhif eich cyfrif a chod didoli',
+      seeAccountActive:
+        'bod eich cyfrif yn weithredol (drwy gadarnhau bod trafodion diweddar – ni fyddant yn rhannu manylion y trafodion)',
+      ecospendWillNot: 'Ni fydd Ecospend yn:',
+      seeSignIn: 'gweld eich manylion mewngofnodi bancio ar-lein',
+      takePayments: 'defnyddio eich gwybodaeth i gymryd taliadau',
+      shareTransactions: 'rhannu manylion eich trafodion'
+    },
     primaryButton: 'Parhau',
     primaryButtonAlt: /Parhau i ap neu wefan eich banc/,
-    title: /Cytuno i rannu gwybodaeth o'ch cyfrif banc neu gymdeithas adeiladu gydag Ecospend/,
-    insetText:
-      "Bydd Ecospend yn dileu'n ddiogel eich gwybodaeth ar ôl i'r gwiriad gael ei gwblhau.",
+    title:
+      /Cytuno i rannu gwybodaeth o'ch cyfrif banc neu gymdeithas adeiladu gyda GOV.UK One Login ac Ecospend/,
     secondaryLink: 'Profi eich hunaniaeth mewn ffordd arall'
   }
 }
@@ -60,11 +81,17 @@ const registerConsentTests = (lang: Language) => {
     await expect(consentPage.heading()).toContainText(COPY[lang].heading)
     await expect(page).toHaveTitle(COPY[lang].title)
     await expect(consentPage.mainContent()).toContainText(BANK_LABEL)
+    await expect(consentPage.mainContent()).toContainText(COPY[lang].content.ecospendWill)
+    await expect(consentPage.mainContent()).toContainText(COPY[lang].content.seeAccountDetails)
+    await expect(consentPage.mainContent()).toContainText(COPY[lang].content.seeAccountActive)
+    await expect(consentPage.mainContent()).toContainText(COPY[lang].content.ecospendWillNot)
+    await expect(consentPage.mainContent()).toContainText(COPY[lang].content.seeSignIn)
+    await expect(consentPage.mainContent()).toContainText(COPY[lang].content.takePayments)
+    await expect(consentPage.mainContent()).toContainText(COPY[lang].content.shareTransactions)
     await expect(consentPage.consentCheckbox()).toBeVisible()
     await expect(consentPage.continueButton()).toHaveText(COPY[lang].primaryButton)
     await expect(consentPage.proveAnotherWayLink()).toContainText(COPY[lang].secondaryLink)
     await expect(consentPage.backLink()).toHaveAttribute('href', paths.steps.chooseBank)
-    await expect(consentPage.insetText()).toContainText(COPY[lang].insetText)
   })
 
   test('renders form validation errors and links error summary items to inputs', async ({

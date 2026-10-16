@@ -1,6 +1,5 @@
 {% extends "layouts/base.njk" %}
 {% from "govuk/components/button/macro.njk" import govukButton %}
-{% from "govuk/components/inset-text/macro.njk" import govukInsetText %}
 {% from "govuk/components/checkboxes/macro.njk" import govukCheckboxes %}
 
 {% set pageTitle = translate("pages.consent.title") %}
@@ -11,15 +10,7 @@
 
 {% block mainContent %}
   <h1 class="govuk-heading-l">{{ pageTitle }}</h1>
-  {% for item in translate("pages.consent.contentA") %}
-    {{ item | safe }}
-  {% endfor %}
-  {{
-    govukInsetText({
-      text: translate("pages.consent.insetText")
-    })
-  }}
-  {% for item in translate("pages.consent.contentB") %}
+  {% for item in translate("pages.consent.content") %}
     {{ item | safe }}
   {% endfor %}
   <form method="post">
