@@ -12,8 +12,8 @@ start:
     content: Mae gan fanciau ddiogelwch cryf iawn, felly pan fyddwch yn mewngofnodi, maent yn gwybod mai chi sydd yno mewn gwirionedd.<br><br> Yna gall y banc gadarnhau'r manylion a roddwyd gennych i ni, i'n helpu i fod yn siŵr mae chi yw pwy rydych yn dweud ydych chi.
   contentB:
     - <h2 class="govuk-heading-m">Cyn i chi fewngofnodi</h2>
-    - <p class="govuk-body">Byddwn yn gofyn am eich caniatâd i rannu gwybodaeth o'ch cyfrif gyda chwmni o'r enw Ecospend.</p>
-    - <p class="govuk-body">Mae hyn er mwyn i ni allu cysylltu'n ddiogel â'ch banc a chadarnhau eich hunaniaeth. Byddwch yn gweld pa wybodaeth fydd yn cael ei rhannu gydag Ecospend cyn i chi gytuno iddi.</p>
+    - <p class="govuk-body">Byddwn yn gofyn am eich caniatâd i rannu gwybodaeth o'ch cyfrif gyda GOV.UK One Login a chwmni o'r enw Ecospend.</p>
+    - <p class="govuk-body">Mae GOV.UK One Login yn defnyddio Ecospend i gysylltu'n ddiogel â'ch banc neu fanc neu gymdeithas adeiladu. Bydd Ecospend yn gwirio rhai manylion i ni, ac yn rhannu'r wybodaeth rydym ei hangen i gadarnhau eich hunaniaeth. Byddwch yn gweld pa wybodaeth fydd yn cael ei rhannu cyn i chi gytuno iddo.</p>
     - <p class="govuk-body"><a class="govuk-link govuk-link--no-visited-state" target="_blank" href="https://www.gov.uk/government/publications/govuk-one-login-privacy-notice">Mae gan ein hysbysiad preifatrwydd (agor mewn tab newydd)</a> fwy o fanylion am sut y bydd eich gwybodaeth yn cael ei defnyddio.</p>
     - <p class="govuk-body">Mae Ecospend yn cael ei reoleiddio gan yr <a class="govuk-link govuk-link--no-visited-state" target="_blank" href="https://register.fca.org.uk/s/firm?id=0010X00004KSo9HQAT">Awdurdod Ymddygiad Ariannol (agor mewn tab newydd)</a>.</p>
   primaryButton: Parhau
