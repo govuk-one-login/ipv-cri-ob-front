@@ -20,9 +20,9 @@ start:
   secondaryLink: Prove your identity another way
 
 consent:
-  title: Agree to share information from your bank or building society account with Ecospend
-  contentA:
-    - <p class="govuk-body">To prove your identity using online banking, you need to share some information from your <strong>{{ selectedBankName }}</strong> account with Ecospend.</p>
+  title: Agree to share information from your bank or building society account with GOV.UK One Login and Ecospend
+  content:
+    - <p class="govuk-body">To prove your identity using online banking, you need to share some information from your <strong>{{ selectedBankName }}</strong> account with GOV.UK One Login and Ecospend.</p>
     - <p class="govuk-body">This is to check your account is real and protect against fraud.</p>
     - <h2 class="govuk-heading-m">Information that’s shared </h2>
     - <p class="govuk-body">Ecospend will have one-off access to check:</p>
@@ -30,18 +30,21 @@ consent:
     - <li>your account number and sort code</li>
     - <li>that your account is active (by confirming there are recent transactions - they will not share details of the transactions)</li>
     - </ul>
-  insetText: Ecospend will securely delete your information after the check is complete.
-  contentB:
+    - <p class="govuk-body">They’ll share this information with GOV.UK One Login so that we can confirm your identity.</p>
     - <h2 class="govuk-heading-m">Information that’s not shared</h2>
     - <p class="govuk-body">Ecospend will not:</p>
     - <ul class="govuk-list govuk-list--bullet">
     - <li>see your online banking sign-in details</li>
     - <li>use your information to take payments</li>
+    - <li>share details of your transactions</li>
     - </ul>
+    - <h2 class="govuk-heading-m">What happens to your information after the identity check</h2>
+    - <p class="govuk-body">Ecospend will securely delete your bank account information after the check is complete.</p>
+    - <p class="govuk-body">GOV.UK One Login will save some information to help protect against fraud. <a class="govuk-link govuk-link--no-visited-state" target="_blank" href="https://www.gov.uk/government/publications/govuk-one-login-privacy-notice">Our privacy notice (opens in new tab)</a> has more detail about how your information will be used.</p>
     - <p class="govuk-body">None of your bank account information will be shared with the government service you’re using.</p>
   checkbox:
     legendText: Give approval for your bank account information to be shared
-    itemText: I agree to my bank account information being shared with Ecospend
+    itemText: I agree to my bank account information being shared with GOV.UK One Login and Ecospend
     errorMessage: You must agree to share your bank account information to continue
   primaryButton: Continue
   primaryButtonAlt: Continue to your bank’s app or website

@@ -19,10 +19,6 @@ export class ConsentPage extends BasePage {
     return this.page.locator('.govuk-button--progress')
   }
 
-  insetText() {
-    return this.page.locator('.govuk-inset-text')
-  }
-
   proveAnotherWayLink() {
     return this.page.locator(`main a[href="${paths.steps.proveAnotherWay}"]`)
   }
