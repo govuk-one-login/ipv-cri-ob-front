@@ -36,7 +36,7 @@
     "@aws-crypto/sha256-js": "5.2.0",
     "@aws-sdk/credential-provider-node": "3.972.84",
     "@axe-core/playwright": "4.13.0",
-    "@playwright/test": "1.64.0",
+    "@playwright/test": "1.64.1",
     "@smithy/signature-v4": "5.7.4",
     "@types/express": "4.17.25",
     "@types/express-session": "1.19.0",
