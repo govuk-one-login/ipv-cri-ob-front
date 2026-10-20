@@ -12,39 +12,41 @@ start:
     content: Mae gan fanciau ddiogelwch cryf iawn, felly pan fyddwch yn mewngofnodi, maent yn gwybod mai chi sydd yno mewn gwirionedd.<br><br> Yna gall y banc gadarnhau'r manylion a roddwyd gennych i ni, i'n helpu i fod yn siŵr mae chi yw pwy rydych yn dweud ydych chi.
   contentB:
     - <h2 class="govuk-heading-m">Cyn i chi fewngofnodi</h2>
-    - <p class="govuk-body">Byddwn yn gofyn am eich caniatâd i rannu gwybodaeth o'ch cyfrif gyda chwmni o'r enw Ecospend.</p>
-    - <p class="govuk-body">Mae hyn er mwyn i ni allu cysylltu'n ddiogel â'ch banc a chadarnhau eich hunaniaeth. Byddwch yn gweld pa wybodaeth fydd yn cael ei rhannu gydag Ecospend cyn i chi gytuno iddi.</p>
+    - <p class="govuk-body">Byddwn yn gofyn am eich caniatâd i rannu gwybodaeth o'ch cyfrif gyda GOV.UK One Login a chwmni o'r enw Ecospend.</p>
+    - <p class="govuk-body">Mae GOV.UK One Login yn defnyddio Ecospend i gysylltu'n ddiogel â'ch banc neu fanc neu gymdeithas adeiladu. Bydd Ecospend yn gwirio rhai manylion i ni, ac yn rhannu'r wybodaeth rydym ei hangen i gadarnhau eich hunaniaeth. Byddwch yn gweld pa wybodaeth fydd yn cael ei rhannu cyn i chi gytuno iddo.</p>
     - <p class="govuk-body"><a class="govuk-link govuk-link--no-visited-state" target="_blank" href="https://www.gov.uk/government/publications/govuk-one-login-privacy-notice">Mae gan ein hysbysiad preifatrwydd (agor mewn tab newydd)</a> fwy o fanylion am sut y bydd eich gwybodaeth yn cael ei defnyddio.</p>
     - <p class="govuk-body">Mae Ecospend yn cael ei reoleiddio gan yr <a class="govuk-link govuk-link--no-visited-state" target="_blank" href="https://register.fca.org.uk/s/firm?id=0010X00004KSo9HQAT">Awdurdod Ymddygiad Ariannol (agor mewn tab newydd)</a>.</p>
   primaryButton: Parhau
   secondaryLink: Profi eich hunaniaeth mewn ffordd arall
 
 consent:
-  title: Cytuno i rannu gwybodaeth o'ch cyfrif banc neu gymdeithas adeiladu gydag Ecospend
-  contentA:
-    - <p class="govuk-body">I brofi eich hunaniaeth drwy ddefnyddio eich bancio ar-lein, rhaid i chi rannu rhywfaint o wybodaeth o'ch cyfrif <strong>{{ selectedBankName }}</strong> gydag Ecospend.</p>
+  title: Cytuno i rannu gwybodaeth o'ch cyfrif banc neu gymdeithas adeiladu gyda GOV.UK One Login ac Ecospend
+  content:
+    - <p class="govuk-body">I brofi eich hunaniaeth drwy ddefnyddio eich bancio ar-lein, mae angen i chi rannu rhywfaint o wybodaeth o'ch cyfrif <strong>{{ selectedBankName }}</strong> gyda GOV.UK One Login ac Ecospend.</p>
     - <p class="govuk-body">Mae hyn er mwyn gwirio bod eich cyfrif yn un go iawn ac i ddiogelu
       yn erbyn twyll.</p>
-    - <h2 class="govuk-heading-m">Gwybodaeth sy'n cael ei rhannu </h2>
+    - <h2 class="govuk-heading-m">Gwybodaeth sy'n cael ei rhannu</h2>
     - <p class="govuk-body">Bydd Ecospend yn cael mynediad untro i wirio:</p>
     - <ul class="govuk-list govuk-list--bullet">
-    - <li>rhif eich cyfrif a chod didoli </li>
+    - <li>rhif eich cyfrif a chod didoli</li>
     - <li>bod eich cyfrif yn weithredol (drwy gadarnhau bod trafodion diweddar – ni fyddant yn
       rhannu manylion y trafodion)</li>
     - </ul>
-  insetText: Bydd Ecospend yn dileu'n ddiogel eich gwybodaeth ar ôl i'r gwiriad gael ei gwblhau.
-  contentB:
+    - <p class="govuk-body">Byddant yn rhannu'r wybodaeth hon gyda GOV.UK One Login fel y gallwn gadarnhau eich hunaniaeth.</p>
     - <h2 class="govuk-heading-m">Gwybodaeth nad yw'n cael ei rhannu</h2>
     - <p class="govuk-body">Ni fydd Ecospend yn:</p>
     - <ul class="govuk-list govuk-list--bullet">
     - <li>gweld eich manylion mewngofnodi bancio ar-lein</li>
     - <li>defnyddio eich gwybodaeth i gymryd taliadau</li>
+    - <li>rhannu manylion eich trafodion</li>
     - </ul>
-    - <p class="govuk-body">Ni fydd unrhyw wybodaeth am eich cyfrif banc yn cael ei rhannu
-      gyda'r gwasanaeth llywodraeth rydych yn ei ddefnyddio.</p>
+    - <h2 class="govuk-heading-m">Beth sy'n digwydd i'ch gwybodaeth ar ôl y gwiriad hunaniaeth</h2>
+    - <p class="govuk-body">Bydd Ecospend yn dileu gwybodaeth eich cyfrif banc yn ddiogel ar ôl i'r gwiriad gael ei gwblhau.</p>
+    - <p class="govuk-body">Bydd GOV.UK One Login yn cadw rhywfaint o wybodaeth i helpu i ddiogelu rhag twyll. <a class="govuk-link govuk-link--no-visited-state" target="_blank" href="https://www.gov.uk/government/publications/govuk-one-login-privacy-notice">Mae gan ein hysbysiad preifatrwydd (agor mewn tab newydd)</a> fwy o fanylion am sut y bydd eich gwybodaeth yn cael ei defnyddio.</p>
+    - <p class="govuk-body">Ni fydd unrhyw wybodaeth eich cyfrif banc yn cael ei rhannu â'r gwasanaeth llywodraeth rydych yn ei ddefnyddio.</p>
   checkbox:
     legendText: Rhoi caniatâd i wybodaeth eich cyfrif banc gael ei rannu
-    itemText: Rwy'n cytuno i wybodaeth fy nghyfrif banc gael ei rannu gyda Ecospend
+    itemText: Rwy'n cytuno i rannu gwybodaeth fy nghyfrif banc gyda GOV.UK One Login ac Ecospend
     errorMessage: Rhaid i chi gytuno i rannu gwybodaeth eich cyfrif banc i barhau
   primaryButton: Parhau
   primaryButtonAlt: Parhau i ap neu wefan eich banc
