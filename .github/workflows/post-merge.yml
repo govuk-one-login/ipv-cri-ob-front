@@ -50,6 +50,8 @@ jobs:
       ecr_repository: ${{ secrets.DEV_ECR_REPOSITORY }}
       ecr_repository_tests: ${{ secrets.DEV_ECR_TESTS_REPOSITORY }}
       dynatrace_paas_token: ${{ secrets.DYNATRACE_PAAS_TOKEN }}
+    with:
+      environment: development
 
   deploy-build:
     uses: ./.github/workflows/_deploy.yml
@@ -63,3 +65,5 @@ jobs:
       ecr_repository: ${{ secrets.BUILD_ECR_REPOSITORY }}
       ecr_repository_tests: ${{ secrets.BUILD_ECR_TESTS_REPOSITORY }}
       dynatrace_paas_token: ${{ secrets.DYNATRACE_PAAS_TOKEN }}
+    with:
+      environment: build
