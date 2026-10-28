@@ -3,3 +3,37 @@ $govuk-assets-path: '/public/';
 @import 'govuk-frontend/dist/govuk';
 @import '@govuk-one-login/frontend-language-toggle';
 @import '@govuk-one-login/frontend-ui';
+@import 'accessible-autocomplete/dist/accessible-autocomplete.min';
+
+.bank-select-autocomplete {
+  .autocomplete__wrapper {
+    isolation: isolate;
+
+    @include govuk-media-query($from: tablet) {
+      width: 66.66%;
+    }
+  }
+
+  .autocomplete__input,
+  .autocomplete__hint,
+  .autocomplete__option {
+    @include govuk-font($size: 19);
+  }
+
+  .autocomplete__input:focus {
+    @include govuk-focused-form-input;
+  }
+
+  .autocomplete__input.govuk-input--error {
+    border-color: $govuk-error-colour;
+
+    &:focus,
+    &.autocomplete__input--focused {
+      border-color: $govuk-input-border-colour;
+    }
+  }
+
+  .autocomplete__dropdown-arrow-down {
+    top: 8px;
+  }
+}

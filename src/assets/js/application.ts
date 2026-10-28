@@ -1,3 +1,4 @@
+import { initialiseBankSelectAutocomplete } from './bank-select-autocomplete'
 import { initialiseProgressButtons } from '@govuk-one-login/frontend-ui/frontend'
 import { initAll } from 'govuk-frontend'
 
@@ -6,3 +7,4 @@ import '../scss/application.scss'
 
 initAll()
 initialiseProgressButtons()
+initialiseBankSelectAutocomplete()

@@ -22,7 +22,17 @@
         },
         errorMessage: { text: formErrors["bankSelect"] } if formErrors["bankSelect"] else false,
         items: banksList,
-        classes: "govuk-!-width-two-thirds"
+        classes: "govuk-!-width-two-thirds",
+        formGroup: { classes: "bank-select-autocomplete" },
+        attributes: {
+          "data-module": "bank-autocomplete",
+          "data-i18n-assistive-hint": translate("pages.chooseBank.autocomplete.assistiveHint"),
+          "data-i18n-no-results": translate("pages.chooseBank.autocomplete.noResults"),
+          "data-i18n-status-no-results": translate("pages.chooseBank.autocomplete.statusNoResults"),
+          "data-i18n-status-results-one": translate("pages.chooseBank.autocomplete.statusResultsOne"),
+          "data-i18n-status-results-other": translate("pages.chooseBank.autocomplete.statusResultsOther"),
+          "data-i18n-status-selected-option": translate("pages.chooseBank.autocomplete.statusSelectedOption")
+        }
       })
     }}
     <p class="govuk-body">

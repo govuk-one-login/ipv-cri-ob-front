@@ -55,6 +55,13 @@ chooseBank:
   errorMessage: Select a bank or building society
   notListedLinkText: My bank is not listed
   primaryButton: Continue
+  autocomplete:
+    assistiveHint: When autocomplete results are available use up and down arrows to review and enter to select. Touch device users, explore by touch or with swipe gestures.
+    noResults: No results found
+    statusNoResults: No search results
+    statusResultsOne: '%count% result is available.'
+    statusResultsOther: '%count% results are available.'
+    statusSelectedOption: '%option% %position% of %total% is highlighted'
 
 bankProblem:
   title: Sorry, there is a problem
