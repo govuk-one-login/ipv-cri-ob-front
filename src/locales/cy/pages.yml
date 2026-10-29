@@ -57,6 +57,13 @@ chooseBank:
   errorMessage: Dewiswch fanc neu gymdeithas adeiladu
   notListedLinkText: Nid yw fy manc wedi'i restru
   primaryButton: Parhau
+  autocomplete:
+    assistiveHint: Lorem ipsum dolor sit amet consectetur adipiscing elit sed do eiusmod tempor.
+    noResults: Lorem ipsum nulla
+    statusNoResults: Lorem ipsum nulla quaestio
+    statusResultsOne: 'Lorem %count% ipsum dolor.'
+    statusResultsOther: 'Lorem %count% ipsum dolores.'
+    statusSelectedOption: '%option% %position% lorem %total% ipsum'
 
 bankProblem:
   title: Lorem ipsum, dolor sit amet

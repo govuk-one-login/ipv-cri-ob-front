@@ -3,12 +3,24 @@ import { BasePage } from './base.page'
 import paths from '../../../src/config/paths'
 
 export class ChooseBankPage extends BasePage {
+  bankInput() {
+    return this.page.locator('input#bank-select')
+  }
+
+  bankListbox() {
+    return this.page.locator('#bank-select__listbox')
+  }
+
+  bankListboxOption(label: string) {
+    return this.bankListbox().getByRole('option', { name: label })
+  }
+
   bankNotListedLink() {
     return this.page.locator(`main a[href="${paths.steps.proveAnotherWay}"]`)
   }
 
   bankSelect() {
-    return this.page.locator('#bank-select')
+    return this.page.locator('select[name="bankSelect"]')
   }
 
   bankSelectOption(value: string) {
@@ -19,6 +31,10 @@ export class ChooseBankPage extends BasePage {
     return this.bankSelect().locator('option:not([value=""])')
   }
 
+  bankStatus() {
+    return this.page.locator('#bank-select__status--A, #bank-select__status--B')
+  }
+
   continue() {
     return this.continueButton().click()
   }
@@ -27,19 +43,19 @@ export class ChooseBankPage extends BasePage {
     return this.page.locator('.govuk-button--progress')
   }
 
-  selectBank(value: string) {
-    return this.bankSelect().selectOption(value)
+  async selectBank(value: string) {
+    const label = await this.bankSelectOption(value).textContent()
+    await this.selectBankByLabel(label!.trim())
   }
 
-  selectBankByLabel(label: string) {
-    return this.bankSelect().selectOption({ label })
+  async selectBankByLabel(label: string) {
+    await this.bankInput().fill(label)
+    await this.bankListboxOption(label).click()
   }
 
   async selectFirstAvailableBank() {
-    await this.bankSelect().click()
-    const firstBank = this.bankSelectOptions().first()
-    const bankName = (await firstBank.innerText()).trim()
-    await this.bankSelect().selectOption(await firstBank.getAttribute('value'))
+    const bankName = (await this.bankSelectOptions().first().textContent())!.trim()
+    await this.selectBankByLabel(bankName)
     return bankName
   }
 }

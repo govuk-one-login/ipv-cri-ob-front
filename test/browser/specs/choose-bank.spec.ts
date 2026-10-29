@@ -20,14 +20,21 @@ const COPY = {
     errorMessage: 'Select a bank or building society',
     title: /Choose your bank or building society/,
     primaryButton: 'Continue',
-    notListedLinkText: 'My bank is not listed'
+    notListedLinkText: 'My bank is not listed',
+    statusResults: /^\d+ results are available\./,
+    statusSelectedOption: /Vault of Ironforge 1 of 1 is highlighted$/,
+    noResults: 'No results found'
   },
   cy: {
     heading: 'Dewiswch eich banc neu gymdeithas adeiladu',
     errorMessage: 'Dewiswch fanc neu gymdeithas adeiladu',
     title: /Dewiswch eich banc neu gymdeithas adeiladu/,
     primaryButton: 'Parhau',
-    notListedLinkText: "Nid yw fy manc wedi'i restru"
+    notListedLinkText: "Nid yw fy manc wedi'i restru",
+    // TODO: replace with real Welsh once translations are supplied
+    statusResults: /^Lorem \d+ ipsum dolores\./,
+    statusSelectedOption: /Vault of Ironforge 1 lorem 1 ipsum$/,
+    noResults: 'Lorem ipsum nulla'
   }
 }
 
@@ -52,7 +59,8 @@ const registerChooseBankTests = (lang: Language) => {
   test('renders the expected page elements in English and Welsh', async ({ page }) => {
     await expect(chooseBankPage.heading()).toContainText(COPY[lang].heading)
     await expect(page).toHaveTitle(COPY[lang].title)
-    await expect(chooseBankPage.bankSelect()).toBeVisible()
+    await expect(chooseBankPage.bankInput()).toBeVisible()
+    await expect(chooseBankPage.bankSelect()).toBeHidden()
     await expect(chooseBankPage.continueButton()).toHaveText(COPY[lang].primaryButton)
     await expect(chooseBankPage.bankSelectOption(BANK_VALUE)).toHaveText(BANK_LABEL)
     await expect(chooseBankPage.bankSelectOption(OFFLINE_BANK_VALUE)).toHaveText(OFFLINE_BANK_LABEL)
@@ -70,9 +78,35 @@ const registerChooseBankTests = (lang: Language) => {
       await expect(chooseBankPage.errorMessage()).toContainText(COPY[lang].errorMessage)
     })
 
-    await test.step('clicking the error summary link focuses the bank select', async () => {
+    await test.step('the autocomplete input is shown in its error state', async () => {
+      await expect(chooseBankPage.bankInput()).toHaveClass(/govuk-input--error/)
+    })
+
+    await test.step('clicking the error summary link focuses the autocomplete input', async () => {
       await chooseBankPage.errorSummaryLink(COPY[lang].errorMessage).click()
-      await expect(chooseBankPage.bankSelect()).toBeFocused()
+      await expect(chooseBankPage.bankInput()).toBeFocused()
+    })
+  })
+
+  test('announces translated status messages to assistive technology', async ({ page }) => {
+    await test.step('opening the menu announces the number of results', async () => {
+      await chooseBankPage.bankInput().click()
+      await expect(
+        chooseBankPage.bankStatus().filter({ hasText: COPY[lang].statusResults })
+      ).toHaveCount(1)
+    })
+
+    await test.step('highlighting an option announces its position', async () => {
+      await chooseBankPage.bankInput().fill(BANK_LABEL)
+      await page.keyboard.press('ArrowDown')
+      await expect(
+        chooseBankPage.bankStatus().filter({ hasText: COPY[lang].statusSelectedOption })
+      ).toHaveCount(1)
+    })
+
+    await test.step('a query with no matches shows the no results message', async () => {
+      await chooseBankPage.bankInput().fill('zzzz')
+      await expect(chooseBankPage.bankListbox()).toContainText(COPY[lang].noResults)
     })
   })
 }
@@ -109,10 +143,13 @@ test.describe('Choose bank extras', { tag: '@desktop' }, () => {
   })
 
   test('user can complete the form using the keyboard only', async ({ page }) => {
-    await test.step('tab to and pick a bank with the keyboard', async () => {
-      await tabToElement(page, '#bank-select')
-      await expect(chooseBankPage.bankSelect()).toBeFocused()
-      await chooseBankPage.selectBankByLabel(BANK_LABEL)
+    await test.step('tab to the autocomplete, type and pick a bank with the arrow keys', async () => {
+      await tabToElement(page, 'input#bank-select')
+      await expect(chooseBankPage.bankInput()).toBeFocused()
+      await page.keyboard.type('Ironforge')
+      await page.keyboard.press('ArrowDown')
+      await page.keyboard.press('Enter')
+      await expect(chooseBankPage.bankInput()).toHaveValue(BANK_LABEL)
       await expect(chooseBankPage.bankSelect()).toHaveValue(BANK_VALUE)
     })
 
@@ -120,5 +157,52 @@ test.describe('Choose bank extras', { tag: '@desktop' }, () => {
       await activateWithKeyboard(page, '.govuk-button--progress')
       await expect(page).toHaveURL(/\/agree-share-bank-information/)
     })
+  })
+
+  test('clicking away from the open menu leaves the field empty', async ({ page }) => {
+    await chooseBankPage.bankInput().click()
+    await expect(chooseBankPage.bankListboxOption(BANK_LABEL)).toBeVisible()
+    await page.locator('.govuk-footer').click({ position: { x: 1, y: 1 } })
+    await expect(chooseBankPage.bankInput()).toHaveValue('')
+    await expect(chooseBankPage.bankSelect()).toHaveValue('')
+  })
+
+  test('clearing the field after choosing a bank clears the submitted value', async ({ page }) => {
+    await chooseBankPage.selectBank(BANK_VALUE)
+    await expect(chooseBankPage.bankSelect()).toHaveValue(BANK_VALUE)
+
+    await chooseBankPage.bankInput().fill('')
+    await expect(chooseBankPage.bankSelect()).toHaveValue('')
+
+    await chooseBankPage.continue()
+    await expect(page).toHaveURL(/\/choose-bank/)
+    await expect(chooseBankPage.errorSummary()).toBeVisible()
+  })
+
+  test('pressing Escape on a highlighted option closes the menu and returns focus to the input', async ({
+    page
+  }) => {
+    await chooseBankPage.bankInput().click()
+    await page.keyboard.press('ArrowDown')
+    await page.keyboard.press('ArrowDown')
+    await expect(chooseBankPage.bankInput()).not.toBeFocused()
+
+    await page.keyboard.press('Escape')
+    await expect(chooseBankPage.bankInput()).toBeFocused()
+    await expect(chooseBankPage.bankListbox()).toHaveClass(/autocomplete__menu--hidden/)
+  })
+})
+
+test.describe('Choose bank without JavaScript', { tag: '@desktop' }, () => {
+  test.use({ javaScriptEnabled: false })
+
+  test('falls back to the native select and can be submitted', async ({ page }) => {
+    const chooseBankPage = await navigate(page, 'en')
+
+    await expect(chooseBankPage.bankInput()).toHaveCount(0)
+    await expect(chooseBankPage.bankSelect()).toBeVisible()
+    await chooseBankPage.bankSelect().selectOption(BANK_VALUE)
+    await chooseBankPage.continue()
+    await expect(page).toHaveURL(/\/agree-share-bank-information/)
   })
 })
