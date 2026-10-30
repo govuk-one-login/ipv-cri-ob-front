@@ -23,10 +23,6 @@ const serverBuild = (): Plugin => ({
       configFile: false,
       resolve: {
         alias: {
-          '@govuk-one-login/frontend-language-toggle/styles': path.resolve(
-            import.meta.dirname,
-            'node_modules/@govuk-one-login/frontend-language-toggle/build/stylesheet/styles.css'
-          ),
           '@src': path.resolve(import.meta.dirname, 'src')
         }
       }
@@ -98,13 +94,6 @@ export default defineConfig({
   publicDir: false,
   resolve: {
     alias: [
-      {
-        find: /^@govuk-one-login\/frontend-language-toggle$/,
-        replacement: path.resolve(
-          import.meta.dirname,
-          'node_modules/@govuk-one-login/frontend-language-toggle/build/stylesheet/styles.css'
-        )
-      },
       {
         find: /^@govuk-one-login\/frontend-ui$/,
         replacement: path.resolve(
