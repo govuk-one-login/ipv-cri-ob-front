@@ -1,0 +1,88 @@
+name: Validate CloudFormation Template (structural)
+
+on:
+  workflow_call:
+    inputs:
+      template-path:
+        description: Relative path to the CFN template
+        required: false
+        default: deploy/template.yml
+        type: string
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+
+      - name: Install dependencies
+        run: npm install --no-save zod js-yaml tsx @types/js-yaml
+
+      - name: Validate template structure
+        env:
+          TEMPLATE_PATH: ${{ inputs.template-path }}
+        run: |
+          cat > /tmp/validate-cfn.ts << 'EOF'
+          import { readFileSync } from 'fs'
+          import yaml from 'js-yaml'
+          import { z } from 'zod'
+
+          const CFN_SCHEMA = yaml.DEFAULT_SCHEMA.extend(
+            ['!And','!Base64','!Cidr','!Condition','!Equals','!FindInMap','!GetAtt',
+             '!GetAZs','!If','!ImportValue','!Join','!Not','!Or','!Ref','!Select',
+             '!Split','!Sub','!Transform','!ValueOf']
+            .flatMap(tag => [
+              new yaml.Type(tag, { construct: (d: unknown) => ({ [tag]: d }), kind: 'scalar' }),
+              new yaml.Type(tag, { construct: (d: unknown) => ({ [tag]: d }), kind: 'sequence' }),
+              new yaml.Type(tag, { construct: (d: unknown) => ({ [tag]: d }), kind: 'mapping' }),
+            ])
+          )
+
+          const templatePath = process.env.TEMPLATE_PATH!
+          const raw = yaml.load(readFileSync(templatePath, 'utf8'), { schema: CFN_SCHEMA }) as Record<string, unknown>
+
+          const CfnParameterSchema = z.object({
+            Type: z.string(),
+            Description: z.string().optional(),
+            Default: z.union([z.string(), z.number()]).optional(),
+            AllowedValues: z.array(z.string()).optional(),
+            AllowedPattern: z.string().optional(),
+          })
+
+          const CfnResourceSchema = z.object({
+            Type: z.string().regex(/^AWS::/),
+            Condition: z.string().optional(),
+            DependsOn: z.union([z.string(), z.array(z.string())]).optional(),
+            Properties: z.record(z.string(), z.unknown()).optional(),
+          })
+
+          const CfnTemplateSchema = z.object({
+            AWSTemplateFormatVersion: z.string(),
+            Description: z.string(),
+            Parameters: z.record(z.string(), CfnParameterSchema),
+            Conditions: z.record(z.string(), z.unknown()),
+            Mappings: z.record(z.string(), z.record(z.string(), z.record(z.string(), z.unknown()))),
+            Resources: z.record(z.string(), CfnResourceSchema),
+            Outputs: z.record(z.string(), z.object({
+              Value: z.unknown(),
+              Description: z.string().optional(),
+              Export: z.object({ Name: z.unknown() }).optional(),
+            })).optional(),
+          })
+
+          const result = CfnTemplateSchema.safeParse(raw)
+          if (!result.success) {
+            console.error('Template validation failed:')
+            console.error(JSON.stringify(result.error.format(), null, 2))
+            process.exit(1)
+          }
+
+          console.log(`✓ ${templatePath} passed structural validation`)
+          EOF
+          npx tsx /tmp/validate-cfn.ts
