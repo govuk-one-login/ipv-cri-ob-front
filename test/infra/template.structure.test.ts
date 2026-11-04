@@ -45,8 +45,8 @@ describe('deploy/template.yml — parameters', () => {
     }
   })
 
-  it('LogGroupRetentionInDays defaults to 30', () => {
-    expect(parameters['LogGroupRetentionInDays']!.Default).toBe('30')
+  it('LogGroupRetentionInDays defaults to 365', () => {
+    expect(parameters['LogGroupRetentionInDays']!.Default).toBe('365')
   })
 
   it("PermissionsBoundary defaults to 'none'", () => {
