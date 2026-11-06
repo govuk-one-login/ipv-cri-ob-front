@@ -1,7 +1,9 @@
 import {
+  type CfnMappings,
   CfnOutputSchema,
   type CfnParameter,
   CfnParameterSchema,
+  type EnvironmentKey,
   ENVIRONMENTS,
   loadTemplate
 } from './helpers'
@@ -9,6 +11,7 @@ import { describe, expect, it } from 'vitest'
 
 const template = loadTemplate('deploy/template.yml') as Record<string, unknown>
 const parameters = template['Parameters'] as Record<string, CfnParameter>
+const mappings = template['Mappings'] as CfnMappings
 
 describe('deploy/template.yml — structure', () => {
   it('has required top-level keys', () => {
@@ -32,8 +35,7 @@ describe('deploy/template.yml — parameters', () => {
     'VpcStackName',
     'PermissionsBoundary',
     'CodeSigningConfigArn',
-    'DeploymentStrategy',
-    'LogGroupRetentionInDays'
+    'DeploymentStrategy'
   ])('has parameter %s conforming to CFN schema', (name) => {
     expect(() => CfnParameterSchema.parse(parameters[name])).not.toThrow()
   })
@@ -45,8 +47,20 @@ describe('deploy/template.yml — parameters', () => {
     }
   })
 
-  it('LogGroupRetentionInDays defaults to 365', () => {
-    expect(parameters['LogGroupRetentionInDays']!.Default).toBe('365')
+  it('EnvironmentConfiguration should set logGroupRetentionInDays to 365 in production and 30 in all other environments', () => {
+    const expected: Record<EnvironmentKey, number> = {
+      dev: 30,
+      build: 30,
+      staging: 30,
+      integration: 30,
+      production: 365
+    }
+    for (const env of ENVIRONMENTS) {
+      expect(
+        mappings.EnvironmentConfiguration[env]['logGroupRetentionInDays'],
+        `logGroupRetentionInDays for '${env}'`
+      ).toBe(expected[env])
+    }
   })
 
   it("PermissionsBoundary defaults to 'none'", () => {

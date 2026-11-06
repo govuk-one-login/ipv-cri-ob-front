@@ -41,10 +41,6 @@ Parameters:
     Description: "Predefined deployment configuration for ECS application"
     Type: String
     Default: "none"
-  LogGroupRetentionInDays:
-    Description: "Retention for all log groups"
-    Type: Number
-    Default: "365"
 
 Conditions:
   IsNotDevelopment: !Not
@@ -70,6 +66,7 @@ Mappings:
       minECSCount: 1
       maxECSCount: 4
       nodeEnv: "production"
+      logGroupRetentionInDays: 30
     build:
       logLevel: "info"
       dynatraceSecretArn: arn:aws:secretsmanager:eu-west-2:216552277552:secret:DynatraceNonProductionVariables
@@ -80,6 +77,7 @@ Mappings:
       minECSCount: 4
       maxECSCount: 60
       nodeEnv: "production"
+      logGroupRetentionInDays: 30
     staging:
       logLevel: "warn"
       dynatraceSecretArn: arn:aws:secretsmanager:eu-west-2:216552277552:secret:DynatraceNonProductionVariables
@@ -90,6 +88,7 @@ Mappings:
       minECSCount: 2
       maxECSCount: 4
       nodeEnv: "production"
+      logGroupRetentionInDays: 30
     integration:
       logLevel: "warn"
       dynatraceSecretArn: arn:aws:secretsmanager:eu-west-2:216552277552:secret:DynatraceNonProductionVariables
@@ -100,6 +99,7 @@ Mappings:
       minECSCount: 2
       maxECSCount: 4
       nodeEnv: "production"
+      logGroupRetentionInDays: 30
     production:
       logLevel: "warn"
       dynatraceSecretArn: arn:aws:secretsmanager:eu-west-2:216552277552:secret:DynatraceProductionVariables
@@ -110,6 +110,7 @@ Mappings:
       minECSCount: 4
       maxECSCount: 60
       nodeEnv: "production"
+      logGroupRetentionInDays: 365
 
   FeatureFlagMapping:
     dev:
@@ -442,7 +443,7 @@ Resources:
     Type: AWS::Logs::LogGroup
     Properties:
       LogGroupName: !Sub /aws/ecs/${AWS::StackName}
-      RetentionInDays: !Ref LogGroupRetentionInDays
+      RetentionInDays: !FindInMap [ EnvironmentConfiguration, !Ref Environment, logGroupRetentionInDays ]
       KmsKeyId: !GetAtt LoggingKmsKey.Arn
 
   ECSServiceTaskDefinition:
@@ -735,7 +736,7 @@ Resources:
     Properties:
       KmsKeyId: !GetAtt LoggingKmsKey.Arn
       LogGroupName: !Sub /aws/apigateway/${AWS::StackName}-AccessLogs
-      RetentionInDays: !Ref LogGroupRetentionInDays
+      RetentionInDays: !FindInMap [ EnvironmentConfiguration, !Ref Environment, logGroupRetentionInDays ]
 
   APIGatewayStageDefault:
     Type: "AWS::ApiGatewayV2::Stage"

@@ -22,8 +22,6 @@ const resources = template['Resources'] as Record<string, unknown>
 const accessLogsBucket = resources['AccessLogsBucket'] as ConditionalResource & S3BucketResource
 const loadBalancer = resources['LoadBalancer'] as LoadBalancerResource
 const ecsTaskDef = resources['ECSServiceTaskDefinition'] as ECSServiceTaskDefinitionResource
-const ecsAccessLogsGroup = resources['ECSAccessLogsGroup'] as LogGroupResource
-const apiGwAccessLogsGroup = resources['APIGatewayAccessLogsGroup'] as LogGroupResource
 const sessionsTable = resources['SessionsTable'] as DynamoDBTableResource
 const loadBalancerSG = resources['LoadBalancerSG'] as SecurityGroupResource
 const ecsSecurityGroupIngress = resources[
@@ -94,12 +92,20 @@ describe('deploy/template.yml — resources', () => {
     expect(portMapping.ContainerPort).toBe(5090)
   })
 
-  it('ECSAccessLogsGroup has RetentionInDays set', () => {
-    expect(ecsAccessLogsGroup.Properties.RetentionInDays).toBeDefined()
-  })
-
-  it('APIGWAccessLogsGroup has RetentionInDays set', () => {
-    expect(apiGwAccessLogsGroup.Properties.RetentionInDays).toBeDefined()
+  it('all AWS::Logs::LogGroup resources should set RetentionInDays from the EnvironmentConfiguration mapping', () => {
+    const logGroups = Object.entries(resources).filter(
+      ([, resource]) => (resource as { Type: string }).Type === 'AWS::Logs::LogGroup'
+    ) as [string, LogGroupResource][]
+    expect(logGroups.length).toBeGreaterThan(0)
+    for (const [name, logGroup] of logGroups) {
+      expect(logGroup.Properties.RetentionInDays, `${name} RetentionInDays`).toEqual({
+        '!FindInMap': [
+          'EnvironmentConfiguration',
+          { '!Ref': 'Environment' },
+          'logGroupRetentionInDays'
+        ]
+      })
+    }
   })
 
   it('SessionsTable uses PAY_PER_REQUEST billing', () => {
