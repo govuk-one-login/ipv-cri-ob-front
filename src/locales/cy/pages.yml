@@ -58,12 +58,12 @@ chooseBank:
   notListedLinkText: Nid yw fy manc wedi'i restru
   primaryButton: Parhau
   autocomplete:
-    assistiveHint: Lorem ipsum dolor sit amet consectetur adipiscing elit sed do eiusmod tempor.
-    noResults: Lorem ipsum nulla
-    statusNoResults: Lorem ipsum nulla quaestio
-    statusResultsOne: 'Lorem %count% ipsum dolor.'
-    statusResultsOther: 'Lorem %count% ipsum dolores.'
-    statusSelectedOption: '%option% %position% lorem %total% ipsum'
+    assistiveHint: Pan fydd canlyniadau cwblhau awtomatig ar gael, defnyddiwch saethau i fyny ac i lawr i adolygu ac 'enter' i ddewis. Dylai defnyddwyr cyffwrdd dyfais, archwilio trwy gyffwrdd neu gydag ystumiau sweip.
+    noResults: Ni ddarganfyddwyd canlyniadau
+    statusNoResults: Dim canlyniadau chwilio
+    statusResultsOne: '%count% canlyniad ar gael.'
+    statusResultsOther: '%count% canlyniad ar gael.'
+    statusSelectedOption: "%option% %position% o %total% wedi'i amlygu"
 
 bankProblem:
   title: Lorem ipsum, dolor sit amet

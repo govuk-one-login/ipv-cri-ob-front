@@ -31,10 +31,9 @@ const COPY = {
     title: /Dewiswch eich banc neu gymdeithas adeiladu/,
     primaryButton: 'Parhau',
     notListedLinkText: "Nid yw fy manc wedi'i restru",
-    // TODO: replace with real Welsh once translations are supplied
-    statusResults: /^Lorem \d+ ipsum dolores\./,
-    statusSelectedOption: /Vault of Ironforge 1 lorem 1 ipsum$/,
-    noResults: 'Lorem ipsum nulla'
+    statusResults: /^\d+ canlyniad ar gael\./,
+    statusSelectedOption: /Vault of Ironforge 1 o 1 wedi'i amlygu$/,
+    noResults: 'Ni ddarganfyddwyd canlyniadau'
   }
 }
 
