@@ -34,7 +34,7 @@
   },
   "devDependencies": {
     "@aws-crypto/sha256-js": "5.2.0",
-    "@aws-sdk/credential-provider-node": "3.972.89",
+    "@aws-sdk/credential-provider-node": "3.972.94",
     "@axe-core/playwright": "4.14.0",
     "@playwright/test": "1.64.1",
     "@smithy/signature-v4": "5.7.4",
