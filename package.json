@@ -65,9 +65,9 @@
   "dependencies": {
     "@aws-sdk/client-dynamodb": "3.1157.0",
     "@govuk-one-login/di-ipv-cri-common-express": "17.0.0",
-    "@govuk-one-login/frontend-analytics": "4.2.3",
+    "@govuk-one-login/frontend-analytics": "4.2.4",
     "@govuk-one-login/frontend-device-intelligence": "1.2.0",
-    "@govuk-one-login/frontend-ui": "5.3.6",
+    "@govuk-one-login/frontend-ui": "5.3.10",
     "@govuk-one-login/frontend-vital-signs": "0.1.4",
     "accessible-autocomplete": "3.0.2",
     "connect-dynamodb": "3.0.5",
