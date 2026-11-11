@@ -6,32 +6,68 @@ updates:
       interval: weekly
       day: monday
       time: '03:00'
+    cooldown:
+      default-days: 3
     target-branch: main
     labels:
       - dependabot
-    open-pull-requests-limit: 20
+    open-pull-requests-limit: 10
     ignore:
-      - dependency-name: 'node'
-        versions: ['26.x']
-      # Exclude major version updates - next major version has incompatible license
+      - dependency-name: '@types/node'
+        update-types: ['version-update:semver-major']
+      # next major ua-parser-js version has incompatible licence
       - dependency-name: 'ua-parser-js'
         update-types: ['version-update:semver-major']
     groups:
+      aws-sdk:
+        patterns:
+          - '@aws-sdk/*'
+          - '@aws-crypto/*'
+          - '@smithy/*'
+      one-login-fe:
+        patterns:
+          - '@govuk-one-login/frontend-*'
+          - 'govuk-frontend'
+          - '@types/govuk-frontend'
+      express:
+        patterns:
+          - 'express'
+          - 'express-session'
+          - '@types/express'
+          - '@types/express-session'
+      supertest:
+        patterns:
+          - 'supertest'
+          - '@types/supertest'
+      playwright:
+        patterns:
+          - '@playwright/test'
+          - '@axe-core/playwright'
       vite:
         patterns:
           - 'vite'
           - 'vite-plugin-*'
       vitest:
         patterns:
-          - '@vitest/*'
           - 'vitest'
-      oxc:
+          - '@vitest/*'
+      # i18next needs to match the version pinned by common-express
+      common-express:
         patterns:
-          - 'oxlint*'
-          - 'oxfmt*'
-      one-login-fe:
+          - '@govuk-one-login/di-ipv-cri-common-express'
+          - 'i18next'
+      lint-format:
         patterns:
-          - '@govuk-one-login/frontend-*'
+          - 'oxfmt'
+          - 'oxlint'
+          - 'oxlint-tsgolint'
+          - 'eslint-plugin-perfectionist'
+      dev-dependencies:
+        dependency-type: development
+        update-types: [minor, patch]
+      production-dependencies:
+        dependency-type: production
+        update-types: [minor, patch]
     commit-message:
       prefix: BAU
   - package-ecosystem: docker
@@ -42,9 +78,18 @@ updates:
       interval: weekly
       day: monday
       time: '03:00'
+    cooldown:
+      default-days: 3
     target-branch: main
     labels:
       - dependabot
+    ignore:
+      - dependency-name: 'node'
+        update-types: ['version-update:semver-major']
+    groups:
+      docker:
+        patterns:
+          - '*'
     commit-message:
       prefix: BAU
   - package-ecosystem: 'github-actions'
@@ -53,8 +98,14 @@ updates:
       interval: 'weekly'
       day: monday
       time: '03:00'
+    cooldown:
+      default-days: 3
     target-branch: main
     labels:
       - dependabot
+    groups:
+      github-actions:
+        patterns:
+          - '*'
     commit-message:
       prefix: BAU
