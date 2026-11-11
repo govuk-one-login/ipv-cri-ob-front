@@ -29,7 +29,7 @@ jobs:
     name: Test image build and push
     runs-on: ubuntu-latest
     steps:
-      - uses: govuk-one-login/devplatform-upload-action-ecr@d839fc3ead8c9d9f18f7a8cceb7ab4a3eab18a58 # v1.7.0
+      - uses: govuk-one-login/devplatform-upload-action-ecr@256c057b61bb6795fccf00a439a895c678525863 # v1.7.1
         with:
           role-to-assume-arn: ${{ secrets.role_arn }}
           build-and-push-image-only: true
@@ -46,7 +46,7 @@ jobs:
     environment: ${{ inputs.environment }}
     steps:
       - name: Push to ECR and upload SAM template to S3
-        uses: govuk-one-login/devplatform-upload-action-ecr@d839fc3ead8c9d9f18f7a8cceb7ab4a3eab18a58 # v1.7.0
+        uses: govuk-one-login/devplatform-upload-action-ecr@256c057b61bb6795fccf00a439a895c678525863 # v1.7.1
         with:
           private-docker-registry: khw46367.live.dynatrace.com
           private-docker-login-username: khw46367
