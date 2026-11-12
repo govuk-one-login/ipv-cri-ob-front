@@ -55,3 +55,9 @@ repos:
         entry: npm run type-check
         language: system
         pass_filenames: false
+      - id: translation-check
+        name: translation check
+        entry: npm run translation-check
+        language: system
+        pass_filenames: false
+        files: ^src/locales/
