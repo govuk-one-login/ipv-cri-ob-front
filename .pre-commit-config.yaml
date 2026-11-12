@@ -55,6 +55,7 @@ repos:
         entry: npm run type-check
         language: system
         pass_filenames: false
+        files: \.ts$|tsconfig\.json$|package-lock\.json$
       - id: translation-check
         name: translation check
         entry: npm run translation-check
