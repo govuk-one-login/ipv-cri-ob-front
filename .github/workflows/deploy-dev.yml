@@ -1,14 +1,16 @@
 name: Deploy branch to dev
-
 on:
   workflow_dispatch:
 
 jobs:
   deploy-dev:
-    uses: ./.github/workflows/_deploy.yml
+    name: Deploy to dev
     permissions:
       id-token: write
       contents: read
+    concurrency:
+      group: deploy-to-dev
+    uses: ./.github/workflows/_secure-pipeline-deploy.yml
     secrets:
       role_arn: ${{ secrets.DEV_GH_ACTIONS_ROLE_ARN }}
       artifact_bucket: ${{ secrets.DEV_ARTIFACT_BUCKET }}
