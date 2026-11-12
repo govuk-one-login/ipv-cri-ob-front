@@ -39,4 +39,4 @@ const viteDevOverrides = (): Partial<HelmetOptions> => {
   } satisfies Partial<HelmetOptions>
 }
 
-export default { ...helmetConfig, ...viteDevOverrides() } as HelmetOptions
+export default getHelmetConfig(viteDevOverrides())

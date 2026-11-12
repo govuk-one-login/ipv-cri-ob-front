@@ -1,8 +1,7 @@
 {
   "extends": "../tsconfig.json",
   "compilerOptions": {
-    "erasableSyntaxOnly": false,
-    "tsBuildInfoFile": "../node_modules/.cache/tsc/test.tsbuildinfo"
+    "erasableSyntaxOnly": false
   },
   "include": ["**/*", "../src/types/*.d.ts"]
 }
