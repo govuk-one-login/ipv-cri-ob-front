@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/playwright:v1.64.1-noble@sha256:47b510dd9230bf0b9bfc9b20102241e577ea7a99334ab4c3ca19f19770e9b8ea
+FROM mcr.microsoft.com/playwright:v1.65.0-noble@sha256:9beb546099e11f52d62e505537914870e01a67e0e6b00ae41da4775324e73dbe
 
 # see https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html
 COPY test/browser/aws-cli.asc /tmp/aws-cli.asc
