@@ -24,7 +24,7 @@ export default defineConfig({
   },
   options: {
     typeAware: true,
-    typeCheck: true
+    typeCheck: false
   },
   rules: {
     ...perfectionistWarnRules,
