@@ -1,6 +1,6 @@
 import type { NextFunction, Request, Response } from 'express'
 
-import { beforeAll, describe, expect, it, vi } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import paths from '@src/config/paths'
 
@@ -9,7 +9,7 @@ const { get } = await import('@src/controllers/steps/start.controller')
 describe('start controller', () => {
   const render = vi.fn()
 
-  beforeAll(() => {
+  beforeEach(() => {
     get({} as Request, { render } as unknown as Response, vi.fn() as NextFunction)
   })
 

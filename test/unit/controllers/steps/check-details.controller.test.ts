@@ -1,13 +1,13 @@
 import type { Request, Response } from 'express'
 
-import { beforeAll, describe, expect, it, vi } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 const { get } = await import('@src/controllers/steps/check-details.controller')
 
 describe('check-details controller', () => {
   const render = vi.fn()
 
-  beforeAll(() => {
+  beforeEach(() => {
     get({} as Request, { render } as unknown as Response)
   })
 
