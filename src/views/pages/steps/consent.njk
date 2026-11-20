@@ -1,5 +1,4 @@
 {% extends "layouts/base.njk" %}
-{% from "govuk/components/button/macro.njk" import govukButton %}
 {% from "govuk/components/checkboxes/macro.njk" import govukCheckboxes %}
 
 {% set pageTitle = translate("pages.consent.title") %}
@@ -14,11 +13,11 @@
     {{ item | safe }}
   {% endfor %}
   <form method="post">
-    <input type="hidden" name="_csrf" value="{{ csrfToken }}" />
+    <input type="hidden" name="_csrf" value="{{ csrfToken }}"/>
     {{
       govukCheckboxes({
         name: "consent",
-        id: "consent",
+        idPrefix: "consent",
         fieldset: {
           legend: {
             text: translate("pages.consent.checkbox.legendText"),

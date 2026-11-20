@@ -6,9 +6,9 @@
 {% block head %}
   {% if devServer %}
     <script type="module" src="/@vite/client"></script>
-    <link rel="stylesheet" href="/src/assets/scss/stubs.scss" />
+    <link rel="stylesheet" href="/src/assets/scss/stubs.scss"/>
   {% else %}
-    <link rel="stylesheet" href="/public/stylesheets/stubs.css" />
+    <link rel="stylesheet" href="/public/stylesheets/stubs.css"/>
   {% endif %}
 {% endblock %}
 
@@ -44,7 +44,9 @@
   {% for f in flash %}
     <div class="stub-flash stub-flash--{{ f.type }}">
       <h3 class="govuk-heading-s govuk-!-margin-bottom-0">{{ f.message.header }}</h3>
-      {% if f.message.content %}<pre>{{ f.message.content }}</pre>{% endif %}
+      {% if f.message.content %}
+        <pre>{{ f.message.content }}</pre>
+      {% endif %}
     </div>
   {% endfor %}
   {% block mainContent %}
