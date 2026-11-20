@@ -15,19 +15,14 @@
   {% endfor %}
 
   <div class="govuk-button-group">
-    <a href="https://www.gov.uk/" class="govuk-button" data-module="govuk-button"
-      >{{ translate("errors.genericError.primaryButton") }}</a
-    >
-    <a
-      href="https://home.account.gov.uk/contact-gov-uk-one-login"
-      class="govuk-link govuk-link--no-visited-state"
-      target="_blank"
-      >{{ translate("errors.genericError.secondaryButton") }}</a
-    >
+    <a href="https://www.gov.uk/" class="govuk-button"
+       data-module="govuk-button">{{ translate("errors.genericError.primaryButton") }}</a>
+    <a href="https://home.account.gov.uk/contact-gov-uk-one-login" class="govuk-link govuk-link--no-visited-state"
+       target="_blank">{{ translate("errors.genericError.secondaryButton") }}</a>
   </div>
 
   {% if showStack %}
-    <hr class="govuk-section-break govuk-section-break--l govuk-section-break--visible" />
+    <hr class="govuk-section-break govuk-section-break--l govuk-section-break--visible"/>
     <p class="govuk-body"><strong>{{ error.message }}</strong></p>
     <pre style="white-space:pre-wrap;word-break:break-word">{{ error.stack }}</pre>
   {% endif %}

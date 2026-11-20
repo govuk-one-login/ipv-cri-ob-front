@@ -1,6 +1,5 @@
 {% extends "layouts/base.njk" %}
 {% from "govuk/components/select/macro.njk" import govukSelect %}
-{% from "govuk/components/button/macro.njk" import govukButton %}
 
 {% set pageTitle = translate("pages.chooseBank.title") %}
 {% set isPageDataSensitive = true %}
@@ -10,7 +9,7 @@
 
 {% block mainContent %}
   <form method="post">
-    <input type="hidden" name="_csrf" value="{{ csrfToken }}" />
+    <input type="hidden" name="_csrf" value="{{ csrfToken }}"/>
     {{
       govukSelect({
         id: "bank-select",
@@ -36,12 +35,8 @@
       })
     }}
     <p class="govuk-body">
-      <a
-        href="{{ bankNotListedLink }}"
-        class="govuk-link govuk-link--no-visited-state"
-        data-module="govuk-button"
-        >{{ translate("pages.chooseBank.notListedLinkText") }}
-      </a>
+      <a href="{{ bankNotListedLink }}" class="govuk-link govuk-link--no-visited-state"
+         data-module="govuk-button">{{ translate("pages.chooseBank.notListedLinkText") }}</a>
     </p>
     <div class="govuk-button-group">{% include "includes/progress-button.njk" %}</div>
   </form>
