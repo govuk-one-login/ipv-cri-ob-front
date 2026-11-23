@@ -65,11 +65,11 @@
     "vitest": "5.1.0"
   },
   "dependencies": {
-    "@aws-sdk/client-dynamodb": "3.1157.0",
+    "@aws-sdk/client-dynamodb": "3.1173.0",
     "@govuk-one-login/di-ipv-cri-common-express": "18.0.0",
     "@govuk-one-login/frontend-analytics": "4.2.4",
     "@govuk-one-login/frontend-device-intelligence": "1.2.0",
-    "@govuk-one-login/frontend-ui": "5.3.10",
+    "@govuk-one-login/frontend-ui": "5.3.11",
     "@govuk-one-login/frontend-vital-signs": "0.1.4",
     "accessible-autocomplete": "3.0.2",
     "connect-dynamodb": "3.0.5",
